@@ -20,9 +20,6 @@ describe('client', () => {
         .spyOn(client, 'isAccessTokenExpired')
         .mockImplementation(() => true);
       const refreshAccessTokenMock = jest.spyOn(client, 'refreshAccessToken');
-      fetchMock.mockResponse('OK', {
-        status: 200,
-      });
       client.setOptions({ baseUrl: BASE_URL });
       await client.fetch('/test');
       expect(isAccessTokenExpiredMock.mock.calls.length).toBe(1);
@@ -33,9 +30,6 @@ describe('client', () => {
         .spyOn(client, 'isAccessTokenExpired')
         .mockImplementation(() => false);
       const refreshAccessTokenMock = jest.spyOn(client, 'refreshAccessToken');
-      fetchMock.mockResponse('OK', {
-        status: 200,
-      });
       client.setOptions({ baseUrl: BASE_URL });
       await client.fetch('/test');
       expect(isAccessTokenExpiredMock.mock.calls.length).toBe(1);
