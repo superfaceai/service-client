@@ -10,12 +10,12 @@ describe('client', () => {
     client = new BrainClient();
   });
   describe(`fetch`, () => {
-    it('throws exception if not initialized', async () => {
+    it('should throw exception if not initialized', async () => {
       await expect(client.fetch('/test')).rejects.toThrow(
         new Error('Client is not initialized, baseUrl not configured')
       );
     });
-    it('calls refreshAccessToken if access token expired', async () => {
+    it('should call refreshAccessToken if access token expired', async () => {
       const isAccessTokenExpiredMock = jest
         .spyOn(client, 'isAccessTokenExpired')
         .mockImplementation(() => true);
@@ -25,7 +25,7 @@ describe('client', () => {
       expect(isAccessTokenExpiredMock.mock.calls.length).toBe(1);
       expect(refreshAccessTokenMock.mock.calls.length).toBe(1);
     });
-    it('does not call refreshAccessToken if access token is valid', async () => {
+    it('should not not call refreshAccessToken if access token is valid', async () => {
       const isAccessTokenExpiredMock = jest
         .spyOn(client, 'isAccessTokenExpired')
         .mockImplementation(() => false);
@@ -35,7 +35,7 @@ describe('client', () => {
       expect(isAccessTokenExpiredMock.mock.calls.length).toBe(1);
       expect(refreshAccessTokenMock.mock.calls.length).toBe(0);
     });
-    it('fetches correct url and passes access token in authorizaton header', async () => {
+    it('should fetch correct url and pass access token in authorizaton header', async () => {
       jest.spyOn(client, 'isAccessTokenExpired').mockImplementation(() => true);
       fetchMock.mockResponse(
         JSON.stringify({
@@ -57,7 +57,7 @@ describe('client', () => {
         },
       });
     });
-    it('calls refreshAccessToken if 401 response received', async () => {
+    it('should call refreshAccessToken if 401 response received', async () => {
       jest.spyOn(client, 'isAccessTokenExpired').mockImplementation(() => true);
       const refreshAccessTokenMock = jest.spyOn(client, 'refreshAccessToken');
       fetchMock.mockResponse('Unauthorized', {
@@ -67,7 +67,7 @@ describe('client', () => {
       await client.fetch('/test');
       expect(refreshAccessTokenMock.mock.calls.length).toBe(2);
     });
-    it('calls refreshAccessToken if 403 response received', async () => {
+    it('should call refreshAccessToken if 403 response received', async () => {
       jest.spyOn(client, 'isAccessTokenExpired').mockImplementation(() => true);
       const refreshAccessTokenMock = jest.spyOn(client, 'refreshAccessToken');
       fetchMock.mockResponse('Unauthorized', {
@@ -85,7 +85,7 @@ describe('client', () => {
     });
   });
   describe(`login`, () => {
-    it('logs in', () => {
+    it('should login', () => {
       client.login({
         access_token: 'AT',
         token_type: 'Bearer',
@@ -93,7 +93,7 @@ describe('client', () => {
       });
       expect(client.isAccessTokenExpired()).toBe(false);
     });
-    it('logs out', () => {
+    it('should logout', () => {
       client.login({
         access_token: 'AT',
         token_type: 'Bearer',
