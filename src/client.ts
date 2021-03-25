@@ -12,7 +12,7 @@ interface ClientStorage {
 
 export class BrainClient {
   private _STORAGE: ClientStorage = {
-    baseUrl: process.env.NEXT_PUBLIC_BRAIN_URL || process.env.BRAIN_URL,
+    baseUrl: 'https://superface.ai',
   };
 
   constructor({ baseUrl, refreshToken }: ClientOptions = {}) {
@@ -48,7 +48,7 @@ export class BrainClient {
     }
 
     const currentTime = this.getCurrentTime();
-    if (!authTokenExpiresAt || currentTime >= authTokenExpiresAt) {
+    if (!!authTokenExpiresAt && currentTime >= authTokenExpiresAt) {
       return true;
     }
 

@@ -11,7 +11,7 @@ describe('client', () => {
   });
   describe(`fetch`, () => {
     it('throws exception if not initialized', async () => {
-      await expect(async () => client.fetch('/test')).rejects.toThrow(
+      await expect(client.fetch('/test')).rejects.toThrow(
         new Error('Client is not initialized, baseUrl not configured')
       );
     });
