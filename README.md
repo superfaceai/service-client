@@ -30,23 +30,6 @@ const response = client.fetch('/providers', {
 });
 ```
 
-## Supported login grants
-
-### Passwordless authentication using "Magic link" grant
-
-User receives e-mail with a link. This link allow users to login directly.
-
-#### Authentication sequence
-
-1. Client (CLI, Air frontend) requests e-mail address from the user
-2. Client initializes `BrainClient` via `setOptions` with Superface backend base address
-3. Client calls passwordless Superface identity API via `BrainClient` method `passwordlessLogin(email)`
-4. Superface identity provider sends e-mail with magic link
-5. Client checks preriodically authentication state via `BrainClient` function `verifyPasswordlessLoginToken(token)`
-6. Once user confirms login request by clicking on received link `verifyPasswordlessLoginToken(token` returns refresh token (one time action)
-7. Client persists refresh token and calls `setOptions` method to hand over refresh token to `BrainClient`
-8. Client can start authenticated communication to Superface backend APIs via `fetch` function provided by `BrainClient`
-
 # Development
 
 ## Install
