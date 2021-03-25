@@ -10,11 +10,6 @@ describe('client', () => {
     client = new BrainClient();
   });
   describe(`fetch`, () => {
-    it('should throw exception if not initialized', async () => {
-      await expect(client.fetch('/test')).rejects.toThrow(
-        new Error('Client is not initialized, baseUrl not configured')
-      );
-    });
     it('should call refreshAccessToken if access token expired', async () => {
       const isAccessTokenExpiredMock = jest
         .spyOn(client, 'isAccessTokenExpired')
@@ -58,24 +53,28 @@ describe('client', () => {
       });
     });
     it('should call refreshAccessToken if 401 response received', async () => {
-      jest.spyOn(client, 'isAccessTokenExpired').mockImplementation(() => true);
+      jest
+        .spyOn(client, 'isAccessTokenExpired')
+        .mockImplementation(() => false);
       const refreshAccessTokenMock = jest.spyOn(client, 'refreshAccessToken');
       fetchMock.mockResponse('Unauthorized', {
         status: 401,
       });
       client.setOptions({ baseUrl: BASE_URL });
       await client.fetch('/test');
-      expect(refreshAccessTokenMock.mock.calls.length).toBe(2);
+      expect(refreshAccessTokenMock.mock.calls.length).toBe(1);
     });
     it('should call refreshAccessToken if 403 response received', async () => {
-      jest.spyOn(client, 'isAccessTokenExpired').mockImplementation(() => true);
+      jest
+        .spyOn(client, 'isAccessTokenExpired')
+        .mockImplementation(() => false);
       const refreshAccessTokenMock = jest.spyOn(client, 'refreshAccessToken');
       fetchMock.mockResponse('Unauthorized', {
         status: 403,
       });
       client.setOptions({ baseUrl: BASE_URL });
       await client.fetch('/test');
-      expect(refreshAccessTokenMock.mock.calls.length).toBe(2);
+      expect(refreshAccessTokenMock.mock.calls.length).toBe(1);
     });
     it('throws on transport layer error', async () => {
       const err = new Error('Transport layer error');
