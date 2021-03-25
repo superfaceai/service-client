@@ -17,10 +17,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.release.json --outDir dist",
     "clean": "rimraf dist/",
-    "test": "jest --coverage",
+    "test": "jest",
     "test:e2e": "jest --config ./test/jest-e2e.config.js --runInBand",
     "lint": "eslint .",
-    "format": "prettier . --write"
+    "format": "prettier . --write",
+    "release": "standard-version"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
