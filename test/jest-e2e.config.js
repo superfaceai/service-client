@@ -1,6 +1,6 @@
 module.exports = {
   preset: 'ts-jest',
+  rootDir: '.',
   testEnvironment: 'node',
-  automock: false,
-  setupFiles: ['./setupJest.js'],
+  testRegex: '.e2e-spec.ts$',
 };

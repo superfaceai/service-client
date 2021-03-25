@@ -1,0 +1,7 @@
+coverage/*
+dist/*
+node_modules/*
+.eslintrc.js
+jest.config.js
+test/jest-e2e.config.js
+setupJest.js

@@ -4,6 +4,7 @@ module.exports = {
   parserOptions: {
     tsconfigRootDir: __dirname,
     project: ['./tsconfig.json'],
+    createDefaultProgram: true,
   },
   plugins: ['@typescript-eslint', 'jest', 'simple-import-sort'],
   extends: [
@@ -25,6 +26,7 @@ module.exports = {
     'import/no-duplicates': 'error',
     'no-multiple-empty-lines': 'error',
     'lines-between-class-members': 'off',
+    '@typescript-eslint/member-ordering': 'error',
     '@typescript-eslint/lines-between-class-members': [
       'error',
       'always',
@@ -32,6 +34,7 @@ module.exports = {
     ],
     '@typescript-eslint/no-empty-function': 'off',
     '@typescript-eslint/require-await': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
   },
   settings: {
     'import/parsers': {
