@@ -76,7 +76,7 @@ describe('client', () => {
       await client.fetch('/test');
       expect(refreshAccessTokenMock.mock.calls.length).toBe(1);
     });
-    it('throws on transport layer error', async () => {
+    it('should pass through transport layer exception', async () => {
       const err = new Error('Transport layer error');
       fetchMock.mockReject(err);
       client.setOptions({ baseUrl: BASE_URL });
