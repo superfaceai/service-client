@@ -39,11 +39,11 @@ jobs:
       # Set version
       - name: Version
         run: |
-          echo Publishing @superfaceai/brain-client version ${GITHUB_REF##*/v}
-          yarn version --new-version ${GITHUB_REF##*/v} --no-git-tag-version
+          echo Publishing @superfaceai/brain-client version ${GITHUB_REF/refs\/tags\/v/}
+          yarn version --new-version ${GITHUB_REF/refs\/tags\/v/} --no-git-tag-version
 
       # Publish version to private repository
       - name: Publish
-        run: yarn publish --new-version ${GITHUB_REF##*/v} --verbose
+        run: yarn publish --new-version ${GITHUB_REF/refs\/tags\/v/} --verbose
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
