@@ -1,6 +1,7 @@
 import fetchMock from 'jest-fetch-mock';
 
 import { BrainClient } from './client';
+import { TokenVerificationStatus } from './interfaces/passwordless_verify_response';
 
 describe('client', () => {
   const BASE_URL = 'http://baseurl';
@@ -100,6 +101,87 @@ describe('client', () => {
       });
       client.logout();
       expect(client.isAccessTokenExpired()).toBe(true);
+    });
+  });
+  describe(`passwordless`, () => {
+    const VERIFY_URL = 'https://superface.test/passwordless/verify';
+    it('should send login email and return verify url', async () => {
+      fetchMock.mockResponse(JSON.stringify({ verify_url: VERIFY_URL }), {
+        status: 200,
+      });
+      const result = await client.passwordlessLogin('mail@mydomain.com');
+      expect(result).toBe(VERIFY_URL);
+    });
+    describe(`verify`, () => {
+      it('should login when token confirmed', async () => {
+        const loginMock = jest.spyOn(client, 'login');
+        const authToken = {
+          access_token: 'AT',
+          token_type: 'Bearer',
+          expires_in: 3600,
+        };
+        fetchMock.mockResponse(JSON.stringify(authToken), {
+          status: 200,
+        });
+        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
+        expect(result.authToken).toEqual(authToken);
+        expect(result.verificationStatus).toBe(
+          TokenVerificationStatus.CONFIRMED
+        );
+        expect(loginMock.mock.calls.length).toBe(1);
+      });
+      it('should return pending status when token confirmation pending', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            title: 'Token is pending confirmation',
+          }),
+          {
+            status: 422,
+          }
+        );
+        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
+        expect(result.authToken).toBeUndefined();
+        expect(result.verificationStatus).toBe(TokenVerificationStatus.PENDING);
+      });
+      it('should return expired status when token expired', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            title: 'Token is expired',
+          }),
+          {
+            status: 422,
+          }
+        );
+        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
+        expect(result.authToken).toBeUndefined();
+        expect(result.verificationStatus).toBe(TokenVerificationStatus.EXPIRED);
+      });
+      it('should return used status when token was already used', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            title: 'Token was already used',
+          }),
+          {
+            status: 422,
+          }
+        );
+        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
+        expect(result.authToken).toBeUndefined();
+        expect(result.verificationStatus).toBe(TokenVerificationStatus.USED);
+      });
+      it('should throw when bad request status received', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            title: 'Bad request',
+          }),
+          {
+            status: 400,
+          }
+        );
+        await expect(
+          client.verifyPasswordlessLogin(VERIFY_URL)
+        ).rejects.toThrow();
+      });
     });
   });
 });
