@@ -1,5 +1,5 @@
 {
-  "name": "brain-client",
+  "name": "@superfaceai/brain-client",
   "version": "0.0.0",
   "main": "dist/index.js",
   "source": "src/index.ts",
@@ -7,7 +7,7 @@
   "repository": "git@github.com:superfaceai/brain-client.git",
   "author": "Superface Team",
   "license": "UNLICENSED",
-  "private": true,
+  "private": false,
   "files": [
     "dist/**/*"
   ],
