@@ -10,7 +10,7 @@ describe('client', () => {
     jest.clearAllMocks();
     client = new BrainClient();
   });
-  describe(`fetch`, () => {
+  describe('fetch', () => {
     it('should call refreshAccessToken if access token expired', async () => {
       const isAccessTokenExpiredMock = jest
         .spyOn(client, 'isAccessTokenExpired')
@@ -84,7 +84,7 @@ describe('client', () => {
       await expect(async () => client.fetch('/test')).rejects.toThrow(err);
     });
   });
-  describe(`login`, () => {
+  describe('login', () => {
     it('should login', () => {
       client.login({
         access_token: 'AT',
@@ -103,7 +103,7 @@ describe('client', () => {
       expect(client.isAccessTokenExpired()).toBe(true);
     });
   });
-  describe(`passwordless`, () => {
+  describe('passwordless', () => {
     const VERIFY_URL = 'https://superface.test/passwordless/verify';
     it('should send login email and return verify url', async () => {
       fetchMock.mockResponse(JSON.stringify({ verify_url: VERIFY_URL }), {
@@ -112,7 +112,7 @@ describe('client', () => {
       const result = await client.passwordlessLogin('mail@mydomain.com');
       expect(result).toBe(VERIFY_URL);
     });
-    describe(`verify`, () => {
+    describe('verify', () => {
       it('should login when token confirmed', async () => {
         const loginMock = jest.spyOn(client, 'login');
         const authToken = {
