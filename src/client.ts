@@ -158,28 +158,27 @@ export class BrainClient {
         verificationStatus: TokenVerificationStatus.CONFIRMED,
         authToken: authToken,
       };
-    } else {
-      if (result.status === 422) {
-        const error = (await result.json()) as PasswordlessVerifyErrorResponse;
-        switch (error.title) {
-          case 'Token is pending confirmation':
-            return {
-              verificationStatus: TokenVerificationStatus.PENDING,
-            };
-          case 'Token is expired':
-            return {
-              verificationStatus: TokenVerificationStatus.EXPIRED,
-            };
-          case 'Token was already used':
-            return {
-              verificationStatus: TokenVerificationStatus.USED,
-            };
-          default:
-            throw Error(`Token verification failed with error: ${error.title}`);
-        }
-      } else {
-        throw Error(`Unexpected status code ${result.status} received`);
+    }
+    if (result.status === 422) {
+      const error = (await result.json()) as PasswordlessVerifyErrorResponse;
+      switch (error.title) {
+        case 'Token is pending confirmation':
+          return {
+            verificationStatus: TokenVerificationStatus.PENDING,
+          };
+        case 'Token is expired':
+          return {
+            verificationStatus: TokenVerificationStatus.EXPIRED,
+          };
+        case 'Token was already used':
+          return {
+            verificationStatus: TokenVerificationStatus.USED,
+          };
+        default:
+          throw Error(`Token verification failed with error: ${error.title}`);
       }
+    } else {
+      throw Error(`Unexpected status code ${result.status} received`);
     }
   }
 
