@@ -147,7 +147,7 @@ export class BrainClient {
   public async verifyPasswordlessLogin(
     verifyUrl: string
   ): Promise<PasswordlessVerifyResponse> {
-    const result: Response = await crossfetch.fetch(verifyUrl, {
+    const result = await crossfetch.fetch(verifyUrl, {
       method: 'GET',
     });
     if (result.status === 200) {
