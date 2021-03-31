@@ -8,6 +8,7 @@ describe('client', () => {
   let client: BrainClient;
   beforeEach(() => {
     jest.clearAllMocks();
+    fetchMock.resetMocks();
     client = new BrainClient();
   });
   describe('fetch', () => {
@@ -105,30 +106,42 @@ describe('client', () => {
   });
   describe('passwordless', () => {
     const VERIFY_URL = 'https://superface.test/passwordless/verify';
-    it('should send login email and return verify url', async () => {
-      fetchMock.mockResponse(JSON.stringify({ verify_url: VERIFY_URL }), {
-        status: 200,
+    describe('login', () => {
+      it('should send login email and return verify url', async () => {
+        fetchMock.mockResponse(JSON.stringify({ verify_url: VERIFY_URL }), {
+          status: 200,
+        });
+        const result = await client.passwordlessLogin('mail@mydomain.com');
+        expect(result).toBe(VERIFY_URL);
       });
-      const result = await client.passwordlessLogin('mail@mydomain.com');
-      expect(result).toBe(VERIFY_URL);
     });
     describe('verify', () => {
-      it('should login when token confirmed', async () => {
-        const loginMock = jest.spyOn(client, 'login');
+      describe('for confirmed token', () => {
         const authToken = {
           access_token: 'AT',
           token_type: 'Bearer',
           expires_in: 3600,
         };
-        fetchMock.mockResponse(JSON.stringify(authToken), {
-          status: 200,
+        beforeEach(() => {
+          fetchMock.mockResponse(JSON.stringify(authToken), {
+            status: 200,
+          });
         });
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.authToken).toEqual(authToken);
-        expect(result.verificationStatus).toBe(
-          TokenVerificationStatus.CONFIRMED
-        );
-        expect(loginMock.mock.calls.length).toBe(1);
+        it('should return authToken', async () => {
+          const result = await client.verifyPasswordlessLogin(VERIFY_URL);
+          expect(result.authToken).toEqual(authToken);
+        });
+        it('should return verificationStatus = CONFIRMED', async () => {
+          const result = await client.verifyPasswordlessLogin(VERIFY_URL);
+          expect(result.verificationStatus).toBe(
+            TokenVerificationStatus.CONFIRMED
+          );
+        });
+        it('should call login mock', async () => {
+          const loginMock = jest.spyOn(client, 'login');
+          await client.verifyPasswordlessLogin(VERIFY_URL);
+          expect(loginMock.mock.calls.length).toBe(1);
+        });
       });
       it('should return pending status when token confirmation pending', async () => {
         fetchMock.mockResponse(
