@@ -159,7 +159,7 @@ export class BrainClient {
         authToken: authToken,
       };
     }
-    if (result.status === 422) {
+    if (result.status === 400) {
       const error = (await result.json()) as PasswordlessVerifyErrorResponse;
       switch (error.title) {
         case 'Token is pending confirmation':

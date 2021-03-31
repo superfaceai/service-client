@@ -149,7 +149,7 @@ describe('client', () => {
             title: 'Token is pending confirmation',
           }),
           {
-            status: 422,
+            status: 400,
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
@@ -161,7 +161,7 @@ describe('client', () => {
             title: 'Token is expired',
           }),
           {
-            status: 422,
+            status: 400,
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
@@ -173,7 +173,7 @@ describe('client', () => {
             title: 'Token was already used',
           }),
           {
-            status: 422,
+            status: 400,
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
