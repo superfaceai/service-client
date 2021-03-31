@@ -153,7 +153,6 @@ describe('client', () => {
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.authToken).toBeUndefined();
         expect(result.verificationStatus).toBe(TokenVerificationStatus.PENDING);
       });
       it('should return expired status when token expired', async () => {
@@ -166,7 +165,6 @@ describe('client', () => {
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.authToken).toBeUndefined();
         expect(result.verificationStatus).toBe(TokenVerificationStatus.EXPIRED);
       });
       it('should return used status when token was already used', async () => {
@@ -179,7 +177,6 @@ describe('client', () => {
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.authToken).toBeUndefined();
         expect(result.verificationStatus).toBe(TokenVerificationStatus.USED);
       });
       it('should throw when bad request status received', async () => {
