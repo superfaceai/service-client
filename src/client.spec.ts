@@ -147,6 +147,7 @@ describe('client', () => {
         fetchMock.mockResponse(
           JSON.stringify({
             title: 'Token is pending confirmation',
+            status: 'PENDING',
           }),
           {
             status: 400,
@@ -159,6 +160,7 @@ describe('client', () => {
         fetchMock.mockResponse(
           JSON.stringify({
             title: 'Token is expired',
+            status: 'EXPIRED',
           }),
           {
             status: 400,
@@ -171,6 +173,7 @@ describe('client', () => {
         fetchMock.mockResponse(
           JSON.stringify({
             title: 'Token was already used',
+            status: 'USED',
           }),
           {
             status: 400,

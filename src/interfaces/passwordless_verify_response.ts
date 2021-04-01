@@ -13,4 +13,5 @@ export interface PasswordlessVerifyResponse {
 
 export interface PasswordlessVerifyErrorResponse {
   title: string;
+  status: TokenVerificationStatus;
 }
