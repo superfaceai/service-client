@@ -41,7 +41,7 @@ Passwordless flow allows user to login by clicking on magic link in e-mail. As r
 
 ### Passwordless authentication sequence
 
-1. Application (CLI, Air frontend) requests e-mail address input from user
+1. Application requests e-mail address input from user
 2. Application initializes `BrainClient` via `setOptions` with Superface backend base address
 3. Application calls Superface passwordless API via `BrainClient` method `passwordlessLogin(email)`
 4. Superface passwordless API sends e-mail with magic link and returns verify url
