@@ -2,6 +2,11 @@ import * as crossfetch from 'cross-fetch';
 import { RequestInit, Response } from 'cross-fetch/lib.fetch';
 
 import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
+import {
+  PasswordlessVerifyErrorResponse,
+  PasswordlessVerifyResponse,
+  TokenVerificationStatus,
+} from './interfaces/passwordless_verify_response';
 
 interface ClientStorage {
   baseUrl?: string;
@@ -110,6 +115,66 @@ export class BrainClient {
     }
 
     return res;
+  }
+
+  public async passwordlessLogin(email: string): Promise<string> {
+    const result: Response = await crossfetch.fetch(
+      `${this._STORAGE.baseUrl}/auth/passwordless`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+        }),
+      }
+    );
+    if (result.status === 200) {
+      const verifyUrl: string | undefined = ((await result.json()) as {
+        verify_url: string;
+      }).verify_url;
+      if (verifyUrl) {
+        return verifyUrl;
+      } else {
+        throw Error('Verify url not found in response');
+      }
+    } else {
+      throw Error(`Unexpected status code ${result.status} received`);
+    }
+  }
+
+  public async verifyPasswordlessLogin(
+    verifyUrl: string
+  ): Promise<PasswordlessVerifyResponse> {
+    const result = await crossfetch.fetch(verifyUrl, {
+      method: 'GET',
+    });
+    if (result.status === 200) {
+      const authToken = (await result.json()) as AuthToken;
+      this.login(authToken);
+
+      return {
+        verificationStatus: TokenVerificationStatus.CONFIRMED,
+        authToken: authToken,
+      };
+    }
+    if (result.status === 400) {
+      const error = (await result.json()) as PasswordlessVerifyErrorResponse;
+      if (
+        error.status === TokenVerificationStatus.PENDING ||
+        error.status === TokenVerificationStatus.USED ||
+        error.status === TokenVerificationStatus.EXPIRED
+      ) {
+        return {
+          verificationStatus: error.status,
+        };
+      } else {
+        throw Error(`Token verification failed with error: ${error.title}`);
+      }
+    } else {
+      throw Error(`Unexpected status code ${result.status} received`);
+    }
   }
 
   private getCurrentTime(): number {
