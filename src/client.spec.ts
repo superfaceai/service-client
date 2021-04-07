@@ -217,9 +217,19 @@ describe('client', () => {
   });
 
   describe('github', () => {
-    it('should return valid github login url', () => {
+    beforeEach(() => {
       client.setOptions({ baseUrl: BASE_URL });
+    });
+
+    it('should return github login url', () => {
       expect(client.getGithubLoginUrl()).toBe(`${BASE_URL}/auth/github`);
+    });
+
+    it('should return github login url with urlencoded returnTo query parameter', () => {
+      const returnTo = 'https://superface.dev/login/callback';
+      expect(client.getGithubLoginUrl(returnTo)).toBe(
+        `${BASE_URL}/auth/github?return_to=${encodeURIComponent(returnTo)}`
+      );
     });
   });
 });

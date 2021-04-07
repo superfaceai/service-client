@@ -177,8 +177,13 @@ export class BrainClient {
     }
   }
 
-  public getGithubLoginUrl(): string {
-    return `${this._STORAGE.baseUrl}/auth/github`;
+  public getGithubLoginUrl(returnTo?: string): string {
+    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
+    if (returnTo) {
+      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
+    }
+
+    return urlWithoutParams;
   }
 
   private getCurrentTime(): number {
