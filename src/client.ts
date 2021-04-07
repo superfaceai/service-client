@@ -3,7 +3,11 @@ import { RequestInit, Response } from 'cross-fetch/lib.fetch';
 import { promisify } from 'util';
 
 import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
-import { PasswordlessVerifyOptions } from './interfaces/passwordless_verify_options';
+import {
+  DEFAULT_POLLING_INTERVAL_SECONDS,
+  DEFAULT_POLLING_TIMEOUT_SECONDS,
+  PasswordlessVerifyOptions,
+} from './interfaces/passwordless_verify_options';
 import {
   PasswordlessVerifyErrorResponse,
   PasswordlessVerifyResponse,
@@ -152,17 +156,20 @@ export class BrainClient {
     verifyUrl: string,
     options?: PasswordlessVerifyOptions
   ): Promise<PasswordlessVerifyResponse> {
-    const defaultPollingTimeout = 60;
     const startPollingTimeStamp = new Date();
     const timeoutMilliseconds =
-      (options?.pollingTimeoutSeconds ?? defaultPollingTimeout) * 1000;
+      (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
+      1000;
+    const pollingIntervalMilliseconds =
+      (options?.pollingIntervalSeconds ?? DEFAULT_POLLING_INTERVAL_SECONDS) *
+      1000;
     while (
       new Date().getTime() - startPollingTimeStamp.getTime() <
       timeoutMilliseconds
     ) {
       const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
       if (result.verificationStatus === TokenVerificationStatus.PENDING) {
-        await sleep(1000);
+        await sleep(pollingIntervalMilliseconds);
         continue;
       }
 
