@@ -1,6 +1,7 @@
 import fetchMock from 'jest-fetch-mock';
 
 import { BrainClient } from './client';
+import { CancellationToken } from './interfaces/passwordless_verify_options';
 import { TokenVerificationStatus } from './interfaces/passwordless_verify_response';
 
 const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
@@ -235,6 +236,44 @@ describe('client', () => {
         expect(new Date().getTime() - testStart.getTime()).toBeGreaterThan(
           pollingTimeoutSeconds * 1000
         );
+      });
+
+      it('should cancel polling', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+          {
+            status: 400,
+          }
+        );
+        const pollingTimeoutSeconds = 10;
+        const pollingCancellationToken = new CancellationToken();
+        const resultPromise = client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingTimeoutSeconds: pollingTimeoutSeconds,
+          cancellationToken: pollingCancellationToken,
+        });
+        pollingCancellationToken.isCancellationRequested = true;
+        expect(await resultPromise).toEqual({
+          verificationStatus: TokenVerificationStatus.POLLING_CANCELLED,
+        });
+      });
+
+      it('should call cancel polling callback', () => {
+        fetchMock.mockResponse(
+          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+          {
+            status: 400,
+          }
+        );
+        const pollingTimeoutSeconds = 2;
+        const pollingCancellationToken = new CancellationToken(() => {
+          expect(true).toBe(true);
+        });
+        pollingCancellationToken.isCancellationRequested = true;
+
+        return client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingTimeoutSeconds: pollingTimeoutSeconds,
+          cancellationToken: pollingCancellationToken,
+        });
       });
     });
   });
