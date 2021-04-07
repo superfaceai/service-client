@@ -5,6 +5,7 @@ export enum TokenVerificationStatus {
   EXPIRED = 'EXPIRED',
   USED = 'USED',
   CONFIRMED = 'CONFIRMED',
+  POLLING_TIMEOUT = 'POLLING_TIMEOUT',
 }
 export interface PasswordlessVerifyResponse {
   verificationStatus: TokenVerificationStatus;

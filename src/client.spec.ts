@@ -158,7 +158,7 @@ describe('client', () => {
         });
       });
 
-      it('should return pending status when token confirmation pending', async () => {
+      it('should return polling timeout status when token confirmation is pending', async () => {
         fetchMock.mockResponse(
           JSON.stringify({
             title: 'Token is pending confirmation',
@@ -168,8 +168,12 @@ describe('client', () => {
             status: 400,
           }
         );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(TokenVerificationStatus.PENDING);
+        const result = await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingTimeoutSeconds: 1,
+        });
+        expect(result.verificationStatus).toBe(
+          TokenVerificationStatus.POLLING_TIMEOUT
+        );
       });
 
       it('should return expired status when token expired', async () => {
@@ -212,6 +216,26 @@ describe('client', () => {
         await expect(
           client.verifyPasswordlessLogin(VERIFY_URL)
         ).rejects.toThrow();
+      });
+
+      it('should return polling timeout after options parameter pollingTimeoutSeconds', async () => {
+        const testStart = new Date();
+        fetchMock.mockResponse(
+          JSON.stringify({
+            title: 'Token is pending confirmation',
+            status: 'PENDING',
+          }),
+          {
+            status: 400,
+          }
+        );
+        const pollingTimeoutSeconds = 2;
+        await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingTimeoutSeconds: pollingTimeoutSeconds,
+        });
+        expect(new Date().getTime() - testStart.getTime()).toBeGreaterThan(
+          pollingTimeoutSeconds * 1000
+        );
       });
     });
   });

@@ -1,12 +1,16 @@
 import * as crossfetch from 'cross-fetch';
 import { RequestInit, Response } from 'cross-fetch/lib.fetch';
+import { promisify } from 'util';
 
 import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
+import { PasswordlessVerifyOptions } from './interfaces/passwordless_verify_options';
 import {
   PasswordlessVerifyErrorResponse,
   PasswordlessVerifyResponse,
   TokenVerificationStatus,
 } from './interfaces/passwordless_verify_response';
+
+const sleep = promisify(setTimeout);
 
 interface ClientStorage {
   baseUrl?: string;
@@ -145,6 +149,41 @@ export class BrainClient {
   }
 
   public async verifyPasswordlessLogin(
+    verifyUrl: string,
+    options?: PasswordlessVerifyOptions
+  ): Promise<PasswordlessVerifyResponse> {
+    const defaultPollingTimeout = 60;
+    const startPollingTimeStamp = new Date();
+    const timeoutMilliseconds =
+      (options?.pollingTimeoutSeconds ?? defaultPollingTimeout) * 1000;
+    while (
+      new Date().getTime() - startPollingTimeStamp.getTime() <
+      timeoutMilliseconds
+    ) {
+      const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
+      if (result.verificationStatus === TokenVerificationStatus.PENDING) {
+        await sleep(1000);
+        continue;
+      }
+
+      return result;
+    }
+
+    return {
+      verificationStatus: TokenVerificationStatus.POLLING_TIMEOUT,
+    };
+  }
+
+  public getGithubLoginUrl(returnTo?: string): string {
+    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
+    if (returnTo) {
+      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
+    }
+
+    return urlWithoutParams;
+  }
+
+  private async fetchVerifyPasswordlessLogin(
     verifyUrl: string
   ): Promise<PasswordlessVerifyResponse> {
     const result = await crossfetch.fetch(verifyUrl, {
@@ -175,15 +214,6 @@ export class BrainClient {
     } else {
       throw Error(`Unexpected status code ${result.status} received`);
     }
-  }
-
-  public getGithubLoginUrl(returnTo?: string): string {
-    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
-    if (returnTo) {
-      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
-    }
-
-    return urlWithoutParams;
   }
 
   private getCurrentTime(): number {
