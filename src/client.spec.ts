@@ -3,6 +3,11 @@ import fetchMock from 'jest-fetch-mock';
 import { BrainClient } from './client';
 import { TokenVerificationStatus } from './interfaces/passwordless_verify_response';
 
+const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
+  title: 'Token is pending confirmation',
+  status: 'PENDING',
+};
+
 describe('client', () => {
   const BASE_URL = 'http://baseurl';
   let client: BrainClient;
@@ -160,10 +165,7 @@ describe('client', () => {
 
       it('should return polling timeout status when token confirmation is pending', async () => {
         fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Token is pending confirmation',
-            status: 'PENDING',
-          }),
+          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
           {
             status: 400,
           }
@@ -221,10 +223,7 @@ describe('client', () => {
       it('should return polling timeout after options parameter pollingTimeoutSeconds', async () => {
         const testStart = new Date();
         fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Token is pending confirmation',
-            status: 'PENDING',
-          }),
+          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
           {
             status: 400,
           }
