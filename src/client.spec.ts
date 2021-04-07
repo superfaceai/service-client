@@ -199,7 +199,7 @@ describe('client', () => {
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
         expect(result.verificationStatus).toBe(TokenVerificationStatus.USED);
       });
-      
+
       it('should throw when bad request status received', async () => {
         fetchMock.mockResponse(
           JSON.stringify({
@@ -213,6 +213,13 @@ describe('client', () => {
           client.verifyPasswordlessLogin(VERIFY_URL)
         ).rejects.toThrow();
       });
+    });
+  });
+
+  describe('github', () => {
+    it('should return valid github login url', () => {
+      client.setOptions({ baseUrl: BASE_URL });
+      expect(client.getGithubLoginUrl()).toBe(`${BASE_URL}/auth/github`);
     });
   });
 });

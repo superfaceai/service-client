@@ -177,6 +177,10 @@ export class BrainClient {
     }
   }
 
+  public getGithubLoginUrl(): string {
+    return `${this._STORAGE.baseUrl}/auth/github`;
+  }
+
   private getCurrentTime(): number {
     return Math.floor(Date.now() / 1000);
   }
