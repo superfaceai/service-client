@@ -1,12 +1,20 @@
 import * as crossfetch from 'cross-fetch';
 import { RequestInit, Response } from 'cross-fetch/lib.fetch';
+import { promisify } from 'util';
 
 import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
 import {
+  DEFAULT_POLLING_INTERVAL_SECONDS,
+  DEFAULT_POLLING_TIMEOUT_SECONDS,
+  PasswordlessVerifyOptions,
+} from './interfaces/passwordless_verify_options';
+import {
   PasswordlessVerifyErrorResponse,
   PasswordlessVerifyResponse,
-  TokenVerificationStatus,
+  VerificationStatus,
 } from './interfaces/passwordless_verify_response';
+
+const sleep = promisify(setTimeout);
 
 interface ClientStorage {
   baseUrl?: string;
@@ -145,6 +153,52 @@ export class BrainClient {
   }
 
   public async verifyPasswordlessLogin(
+    verifyUrl: string,
+    options?: PasswordlessVerifyOptions
+  ): Promise<PasswordlessVerifyResponse> {
+    const startPollingTimeStamp = new Date();
+    const timeoutMilliseconds =
+      (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
+      1000;
+    const pollingIntervalMilliseconds =
+      (options?.pollingIntervalSeconds ?? DEFAULT_POLLING_INTERVAL_SECONDS) *
+      1000;
+    while (
+      new Date().getTime() - startPollingTimeStamp.getTime() <
+      timeoutMilliseconds
+    ) {
+      const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
+
+      if (result.verificationStatus !== VerificationStatus.PENDING) {
+        return result;
+      }
+
+      if (options?.cancellationToken?.isCancellationRequested) {
+        options.cancellationToken.cancellationFinished();
+
+        return {
+          verificationStatus: VerificationStatus.POLLING_CANCELLED,
+        };
+      }
+
+      await sleep(pollingIntervalMilliseconds);
+    }
+
+    return {
+      verificationStatus: VerificationStatus.POLLING_TIMEOUT,
+    };
+  }
+
+  public getGithubLoginUrl(returnTo?: string): string {
+    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
+    if (returnTo) {
+      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
+    }
+
+    return urlWithoutParams;
+  }
+
+  private async fetchVerifyPasswordlessLogin(
     verifyUrl: string
   ): Promise<PasswordlessVerifyResponse> {
     const result = await crossfetch.fetch(verifyUrl, {
@@ -155,16 +209,16 @@ export class BrainClient {
       this.login(authToken);
 
       return {
-        verificationStatus: TokenVerificationStatus.CONFIRMED,
+        verificationStatus: VerificationStatus.CONFIRMED,
         authToken: authToken,
       };
     }
     if (result.status === 400) {
       const error = (await result.json()) as PasswordlessVerifyErrorResponse;
       if (
-        error.status === TokenVerificationStatus.PENDING ||
-        error.status === TokenVerificationStatus.USED ||
-        error.status === TokenVerificationStatus.EXPIRED
+        error.status === VerificationStatus.PENDING ||
+        error.status === VerificationStatus.USED ||
+        error.status === VerificationStatus.EXPIRED
       ) {
         return {
           verificationStatus: error.status,
@@ -175,15 +229,6 @@ export class BrainClient {
     } else {
       throw Error(`Unexpected status code ${result.status} received`);
     }
-  }
-
-  public getGithubLoginUrl(returnTo?: string): string {
-    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
-    if (returnTo) {
-      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
-    }
-
-    return urlWithoutParams;
   }
 
   private getCurrentTime(): number {

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `verifyPasswordlessLogin` method takes argument polling options and polls verify endpoint if token verification status is `PENDING`
+
+### Changed
+
+- **BREAKING CHANGE:** renamed `TokenVerificationStatus` to `VerificationStatus`
+
 ## [0.0.2] - 2021-04-08
 
 ### Added

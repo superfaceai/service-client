@@ -3,4 +3,5 @@ module.exports = {
   testEnvironment: 'node',
   automock: false,
   setupFiles: ['./setupJest.js'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
 };
