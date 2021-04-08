@@ -219,7 +219,7 @@ describe('client', () => {
         ).rejects.toThrow();
       });
 
-      it('should return polling timeout after options parameter pollingTimeoutSeconds', async () => {
+      it('should poll verfication endpoint for pollingTimeoutSeconds', async () => {
         const testStart = new Date();
         fetchMock.mockResponse(
           JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
