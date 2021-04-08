@@ -257,24 +257,26 @@ describe('client', () => {
         });
       });
 
-      it('should call cancel polling callback', () => {
+    it('should call cancel polling callback', async () => {
         fetchMock.mockResponse(
           JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
           {
             status: 400,
           }
         );
-        const pollingTimeoutSeconds = 2;
-        const pollingCancellationToken = new CancellationToken(() => {
-          expect(true).toBe(true);
-        });
-        pollingCancellationToken.isCancellationRequested = true;
 
-        return client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: pollingTimeoutSeconds,
-          cancellationToken: pollingCancellationToken,
+        const cancelCallback = jest.fn();
+        const cancellationToken = new CancellationToken(cancelCallback);
+        cancellationToken.isCancellationRequested = true;
+
+        await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingTimeoutSeconds: 2,
+          cancellationToken,
         });
+
+        expect(cancelCallback).toBeCalled();
       });
+    });
     });
   });
 
