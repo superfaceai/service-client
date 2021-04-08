@@ -11,7 +11,7 @@ import {
 import {
   PasswordlessVerifyErrorResponse,
   PasswordlessVerifyResponse,
-  TokenVerificationStatus,
+  VerificationStatus,
 } from './interfaces/passwordless_verify_response';
 
 const sleep = promisify(setTimeout);
@@ -169,7 +169,7 @@ export class BrainClient {
     ) {
       const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
 
-      if (result.verificationStatus !== TokenVerificationStatus.PENDING) {
+      if (result.verificationStatus !== VerificationStatus.PENDING) {
         return result;
       }
 
@@ -177,15 +177,15 @@ export class BrainClient {
         options.cancellationToken.cancellationFinished();
 
         return {
-          verificationStatus: TokenVerificationStatus.POLLING_CANCELLED,
+          verificationStatus: VerificationStatus.POLLING_CANCELLED,
         };
       }
-      
+
       await sleep(pollingIntervalMilliseconds);
     }
 
     return {
-      verificationStatus: TokenVerificationStatus.POLLING_TIMEOUT,
+      verificationStatus: VerificationStatus.POLLING_TIMEOUT,
     };
   }
 
@@ -209,16 +209,16 @@ export class BrainClient {
       this.login(authToken);
 
       return {
-        verificationStatus: TokenVerificationStatus.CONFIRMED,
+        verificationStatus: VerificationStatus.CONFIRMED,
         authToken: authToken,
       };
     }
     if (result.status === 400) {
       const error = (await result.json()) as PasswordlessVerifyErrorResponse;
       if (
-        error.status === TokenVerificationStatus.PENDING ||
-        error.status === TokenVerificationStatus.USED ||
-        error.status === TokenVerificationStatus.EXPIRED
+        error.status === VerificationStatus.PENDING ||
+        error.status === VerificationStatus.USED ||
+        error.status === VerificationStatus.EXPIRED
       ) {
         return {
           verificationStatus: error.status,

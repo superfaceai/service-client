@@ -2,7 +2,7 @@ import fetchMock from 'jest-fetch-mock';
 
 import { BrainClient } from './client';
 import { CancellationToken } from './interfaces/passwordless_verify_options';
-import { TokenVerificationStatus } from './interfaces/passwordless_verify_response';
+import { VerificationStatus } from './interfaces/passwordless_verify_response';
 
 const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
   title: 'Token is pending confirmation',
@@ -152,9 +152,7 @@ describe('client', () => {
 
         it('should return verificationStatus = CONFIRMED', async () => {
           const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(result.verificationStatus).toBe(
-            TokenVerificationStatus.CONFIRMED
-          );
+          expect(result.verificationStatus).toBe(VerificationStatus.CONFIRMED);
         });
 
         it('should call login mock', async () => {
@@ -175,7 +173,7 @@ describe('client', () => {
           pollingTimeoutSeconds: 1,
         });
         expect(result.verificationStatus).toBe(
-          TokenVerificationStatus.POLLING_TIMEOUT
+          VerificationStatus.POLLING_TIMEOUT
         );
       });
 
@@ -190,7 +188,7 @@ describe('client', () => {
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(TokenVerificationStatus.EXPIRED);
+        expect(result.verificationStatus).toBe(VerificationStatus.EXPIRED);
       });
 
       it('should return used status when token was already used', async () => {
@@ -204,7 +202,7 @@ describe('client', () => {
           }
         );
         const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(TokenVerificationStatus.USED);
+        expect(result.verificationStatus).toBe(VerificationStatus.USED);
       });
 
       it('should throw when bad request status received', async () => {
@@ -253,7 +251,7 @@ describe('client', () => {
         });
         pollingCancellationToken.isCancellationRequested = true;
         expect(await resultPromise).toEqual({
-          verificationStatus: TokenVerificationStatus.POLLING_CANCELLED,
+          verificationStatus: VerificationStatus.POLLING_CANCELLED,
         });
       });
 
