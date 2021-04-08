@@ -5,10 +5,12 @@ import { BrainClient } from '../src';
 
 describe('client', () => {
   let identityServer: http.Server;
+
   describe('fetch', () => {
     const IDENTITY_PROVIDER_PORT = 3031;
     const IDENTITY_PROVIDER_BASE_URL = `http://localhost:${IDENTITY_PROVIDER_PORT}`;
     let brainClient: BrainClient;
+
     beforeAll(() => {
       const identity = express();
       identity.post(
@@ -37,14 +39,17 @@ describe('client', () => {
         refreshToken: 'RT',
       });
     });
+
     afterAll(() => {
       identityServer.close();
     });
+
     it('refreshAccessToken returns access token', async () => {
       expect(await brainClient.refreshAccessToken()).toEqual({
         access_token: 'AT',
       });
     });
+
     it('fetch passes access token in authorization header', async () => {
       expect((await brainClient.fetch('/test')).status).toBe(200);
     });
