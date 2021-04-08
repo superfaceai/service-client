@@ -1,6 +1,5 @@
 import * as crossfetch from 'cross-fetch';
 import { RequestInit, Response } from 'cross-fetch/lib.fetch';
-import { promisify } from 'util';
 
 import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
 import {
@@ -14,7 +13,7 @@ import {
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
 
-const sleep = promisify(setTimeout);
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 interface ClientStorage {
   baseUrl?: string;
