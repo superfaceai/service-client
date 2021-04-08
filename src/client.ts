@@ -177,6 +177,15 @@ export class BrainClient {
     }
   }
 
+  public getGithubLoginUrl(returnTo?: string): string {
+    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
+    if (returnTo) {
+      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
+    }
+
+    return urlWithoutParams;
+  }
+
   private getCurrentTime(): number {
     return Math.floor(Date.now() / 1000);
   }

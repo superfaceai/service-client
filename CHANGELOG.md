@@ -11,3 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `passwordlessLogin` method to `BrainClient` which starts passworldess login flow by sending confirmation e-mail
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
+- `getGithubLoginUrl` method to `BrainClient`
