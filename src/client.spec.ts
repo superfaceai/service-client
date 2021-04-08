@@ -257,7 +257,7 @@ describe('client', () => {
         });
       });
 
-    it('should call cancel polling callback', async () => {
+      it('should call cancel polling callback', async () => {
         fetchMock.mockResponse(
           JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
           {
@@ -276,7 +276,6 @@ describe('client', () => {
 
         expect(cancelCallback).toBeCalled();
       });
-    });
     });
   });
 
