@@ -168,19 +168,20 @@ export class BrainClient {
       timeoutMilliseconds
     ) {
       const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
-      if (result.verificationStatus === TokenVerificationStatus.PENDING) {
-        if (options?.cancellationToken?.isCancellationRequested) {
-          options.cancellationToken.cancellationFinished();
 
-          return {
-            verificationStatus: TokenVerificationStatus.POLLING_CANCELLED,
-          };
-        }
-        await sleep(pollingIntervalMilliseconds);
-        continue;
+      if (result.verificationStatus !== TokenVerificationStatus.PENDING) {
+        return result;
       }
 
-      return result;
+      if (options?.cancellationToken?.isCancellationRequested) {
+        options.cancellationToken.cancellationFinished();
+
+        return {
+          verificationStatus: TokenVerificationStatus.POLLING_CANCELLED,
+        };
+      }
+      
+      await sleep(pollingIntervalMilliseconds);
     }
 
     return {
