@@ -124,7 +124,9 @@ export class BrainClient {
     return res;
   }
 
-  public async passwordlessLogin(email: string): Promise<string> {
+  public async passwordlessLogin(
+    email: string
+  ): Promise<{ verifyUrl: string; expiresAt: Date }> {
     const result: Response = await crossfetch.fetch(
       `${this._STORAGE.baseUrl}/auth/passwordless`,
       {
@@ -138,13 +140,16 @@ export class BrainClient {
       }
     );
     if (result.status === 200) {
-      const verifyUrl: string | undefined = ((await result.json()) as {
+      const apiResponse = (await result.json()) as {
         verify_url: string;
-      }).verify_url;
-      if (verifyUrl) {
-        return verifyUrl;
+        expires_at: string;
+      };
+      const { verify_url, expires_at } = apiResponse || {};
+
+      if (verify_url && expires_at) {
+        return { verifyUrl: verify_url, expiresAt: new Date(expires_at) };
       } else {
-        throw Error('Verify url not found in response');
+        throw Error('Unexpected API response');
       }
     } else {
       throw Error(`Unexpected status code ${result.status} received`);
