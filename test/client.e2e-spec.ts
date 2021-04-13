@@ -58,6 +58,7 @@ describe('client', () => {
   describe('passwordless flow', () => {
     const identityServerState = {
       mockedTokenVerificationStatus: 'PENDING',
+      verificationTokenExpiresAt: new Date('2021-04-13T12:08:27.103Z'),
     };
 
     beforeAll(() => {
@@ -78,10 +79,10 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with confirmed token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'CONFIRMED';
-      const verificationUrl = await brainClient.passwordlessLogin(
+      const { verifyUrl } = await brainClient.passwordlessLogin(
         'mail@johndoe.com'
       );
-      const result = await brainClient.verifyPasswordlessLogin(verificationUrl);
+      const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('CONFIRMED');
       expect(result.authToken).toEqual({
         access_token: 'AT',
@@ -92,49 +93,43 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with unconfirmed token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'PENDING';
-      const verificationUrl = await brainClient.passwordlessLogin(
+      const { verifyUrl } = await brainClient.passwordlessLogin(
         'mail@johndoe.com'
       );
-      const result = await brainClient.verifyPasswordlessLogin(
-        verificationUrl,
-        {
-          pollingTimeoutSeconds: 1,
-        }
-      );
+      const result = await brainClient.verifyPasswordlessLogin(verifyUrl, {
+        pollingTimeoutSeconds: 1,
+      });
       expect(result.verificationStatus).toBe('POLLING_TIMEOUT');
     });
 
     test('call verifyPasswordlessLogin with expired token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'EXPIRED';
-      const verificationUrl = await brainClient.passwordlessLogin(
+      const { verifyUrl } = await brainClient.passwordlessLogin(
         'mail@johndoe.com'
       );
-      const result = await brainClient.verifyPasswordlessLogin(verificationUrl);
+      const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('EXPIRED');
     });
 
     test('call verifyPasswordlessLogin with used token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'USED';
-      const verificationUrl = await brainClient.passwordlessLogin(
+      const { verifyUrl } = await brainClient.passwordlessLogin(
         'mail@johndoe.com'
       );
-      const result = await brainClient.verifyPasswordlessLogin(verificationUrl);
+      const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('USED');
     });
 
     test('cancel verifyPasswordlessLogin polling', async () => {
       identityServerState.mockedTokenVerificationStatus = 'PENDING';
-      const verificationUrl = await brainClient.passwordlessLogin(
+      const { verifyUrl } = await brainClient.passwordlessLogin(
         'mail@johndoe.com'
       );
       const cancellationToken = new CancellationToken();
-      const verifyPromise = brainClient.verifyPasswordlessLogin(
-        verificationUrl,
-        {
-          pollingTimeoutSeconds: 10,
-          cancellationToken,
-        }
-      );
+      const verifyPromise = brainClient.verifyPasswordlessLogin(verifyUrl, {
+        pollingTimeoutSeconds: 10,
+        cancellationToken,
+      });
       cancellationToken.isCancellationRequested = true;
       const verifyResult = await verifyPromise;
       expect(verifyResult.verificationStatus).toBe('POLLING_CANCELLED');
@@ -147,6 +142,7 @@ function runMockedPasswordlessIdentityServer(
   port: number,
   identityServerState: {
     mockedTokenVerificationStatus: string;
+    verificationTokenExpiresAt: Date;
   }
 ) {
   const identity = express();
@@ -162,6 +158,7 @@ function runMockedPasswordlessIdentityServer(
           verify_url: `${baseUrl}/auth/passwordless/verify?email=${encodeURIComponent(
             email
           )}&token=${TOKEN_VALUE}`,
+          expires_at: identityServerState.verificationTokenExpiresAt.toISOString(),
         });
       } else {
         res.status(400);
