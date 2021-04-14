@@ -121,14 +121,19 @@ describe('client', () => {
 
   describe('passwordless', () => {
     const VERIFY_URL = 'https://superface.test/passwordless/verify';
+    const EXPIRES_AT = new Date('2021-04-13T12:08:27.103Z');
 
     describe('login', () => {
-      it('should send login email and return verify url', async () => {
-        fetchMock.mockResponse(JSON.stringify({ verify_url: VERIFY_URL }), {
-          status: 200,
-        });
+      it('should send login email and return verify url with code expiration date', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({ verify_url: VERIFY_URL, expires_at: EXPIRES_AT }),
+          { status: 200 }
+        );
         const result = await client.passwordlessLogin('mail@mydomain.com');
-        expect(result).toBe(VERIFY_URL);
+        expect(result).toStrictEqual({
+          verifyUrl: VERIFY_URL,
+          expiresAt: EXPIRES_AT,
+        });
       });
     });
 
