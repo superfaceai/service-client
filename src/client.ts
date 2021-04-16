@@ -125,10 +125,11 @@ export class BrainClient {
   }
 
   public async passwordlessLogin(
-    email: string
+    email: string,
+    mode: 'login' | 'register' = 'login'
   ): Promise<{ verifyUrl: string; expiresAt: Date }> {
     const result: Response = await crossfetch.fetch(
-      `${this._STORAGE.baseUrl}/auth/passwordless`,
+      `${this._STORAGE.baseUrl}/auth/passwordless?mode=${mode}`,
       {
         method: 'POST',
         headers: {
