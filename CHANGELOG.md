@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `passwordlessLogin` method takes optional login mode (`login` or `register`)
 
+### Fixed
+
+- removed `RequestInit` and `Response` import from `cross-fetch`
+
 ## [0.0.5] - 2021-04-14
 
 ### Changed

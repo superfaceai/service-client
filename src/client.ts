@@ -1,5 +1,4 @@
 import * as crossfetch from 'cross-fetch';
-import { RequestInit, Response } from 'cross-fetch/lib.fetch';
 
 import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
 import {
