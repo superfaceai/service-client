@@ -1,6 +1,21 @@
 import * as crossfetch from 'cross-fetch';
 
-import { AuthToken, ClientOptions, RefreshAccessTokenOptions } from '.';
+import {
+  MEDIA_TYPE_JSON,
+  MEDIA_TYPE_MAP,
+  MEDIA_TYPE_MAP_AST,
+  MEDIA_TYPE_PROFILE,
+  MEDIA_TYPE_PROFILE_AST,
+} from './constants';
+import {
+  AuthToken,
+  ClientOptions,
+  MapRevisionResponse,
+  ProfileVersionResponse,
+  ProviderResponse,
+  RefreshAccessTokenOptions,
+  StoreApiErrorResponse,
+} from './interfaces';
 import {
   DEFAULT_POLLING_INTERVAL_SECONDS,
   DEFAULT_POLLING_TIMEOUT_SECONDS,
@@ -98,6 +113,7 @@ export class BrainClient {
     return authToken;
   }
 
+  //TODO: make fetch private??
   public async fetch(url: string, init: RequestInit = {}): Promise<Response> {
     if (this.isAccessTokenExpired()) {
       // Try to get access token
@@ -121,6 +137,205 @@ export class BrainClient {
     }
 
     return res;
+  }
+
+  async createProvider(payload: string): Promise<void> {
+    const response: Response = await this.fetch('/providers', {
+      method: 'POST',
+      body: payload,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    await this.unwrap(response);
+  }
+
+  async findAllProviders(): Promise<ProviderResponse[]> {
+    const response: Response = await this.fetch('/providers', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    await this.unwrap(response);
+
+    return (await response.json()) as ProviderResponse[];
+  }
+
+  async findOneProvider(name: string): Promise<ProviderResponse> {
+    const response: Response = await this.fetch(`/providers/${name}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    await this.unwrap(response);
+
+    return (await response.json()) as ProviderResponse;
+  }
+
+  async createProfile(payload: string): Promise<void> {
+    const response: Response = await this.fetch('/profiles', {
+      method: 'POST',
+      body: payload,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    await this.unwrap(response);
+  }
+
+  async parseProfile(payload: string): Promise<string> {
+    const response: Response = await this.fetch('/parse', {
+      method: 'POST',
+      body: payload,
+      headers: {
+        'Content-Type': MEDIA_TYPE_PROFILE,
+      },
+    });
+
+    return (await this.unwrap(response)).text();
+  }
+
+  async getProfile(
+    scope: string,
+    version: string,
+    name: string
+  ): Promise<ProfileVersionResponse> {
+    const response: Response = await this.fetch(
+      `/${scope}/${name}@${version}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_JSON,
+        },
+      }
+    );
+    await this.unwrap(response);
+
+    return (await response.json()) as ProfileVersionResponse;
+  }
+
+  async getProfileSource(
+    scope: string,
+    version: string,
+    name: string
+  ): Promise<string> {
+    const response: Response = await this.fetch(
+      `/${scope}/${name}@${version}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE,
+        },
+      }
+    );
+
+    return (await this.unwrap(response)).text();
+  }
+
+  async getProfileAST(
+    scope: string,
+    version: string,
+    name: string
+  ): Promise<string> {
+    const response: Response = await this.fetch(
+      `/${scope}/${name}@${version}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE_AST,
+        },
+      }
+    );
+
+    return (await this.unwrap(response)).text();
+  }
+
+  async createMap(payload: string): Promise<void> {
+    const response: Response = await this.fetch('/maps', {
+      method: 'POST',
+      body: payload,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    await this.unwrap(response);
+  }
+
+  async parseMap(payload: string): Promise<string> {
+    const response: Response = await this.fetch('/parse', {
+      method: 'POST',
+      body: payload,
+      headers: {
+        'Content-Type': MEDIA_TYPE_MAP,
+      },
+    });
+
+    return (await this.unwrap(response)).text();
+  }
+
+  async getMap(
+    scope: string,
+    version: string,
+    name: string,
+    provider: string,
+    variant?: string
+  ): Promise<MapRevisionResponse> {
+    const url = variant
+      ? `/${scope}/${name}.${provider}.${variant}@${version}`
+      : `/${scope}/${name}.${provider}@${version}`;
+    const response: Response = await this.fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_JSON,
+      },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as MapRevisionResponse;
+  }
+
+  async getMapSource(
+    scope: string,
+    version: string,
+    name: string,
+    provider: string,
+    variant?: string
+  ): Promise<string> {
+    const url = variant
+      ? `/${scope}/${name}.${provider}.${variant}@${version}`
+      : `/${scope}/${name}.${provider}@${version}`;
+    const response: Response = await this.fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_MAP,
+      },
+    });
+
+    return (await this.unwrap(response)).text();
+  }
+
+  async getMapAST(
+    scope: string,
+    version: string,
+    name: string,
+    provider: string,
+    variant?: string
+  ): Promise<string> {
+    const url = variant
+      ? `/${scope}/${name}.${provider}.${variant}@${version}`
+      : `/${scope}/${name}.${provider}@${version}`;
+    const response: Response = await this.fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_MAP_AST,
+      },
+    });
+
+    return (await this.unwrap(response)).text();
   }
 
   public async passwordlessLogin(
@@ -237,6 +452,17 @@ export class BrainClient {
 
   private getCurrentTime(): number {
     return Math.floor(Date.now() / 1000);
+  }
+
+  private async unwrap(response: Response): Promise<Response> {
+    if (!response.ok) {
+      const error = (await response.json()) as StoreApiErrorResponse;
+      throw new Error(
+        `Store responded with status: ${error.status} on: ${error.instance} ${error.title}: ${error.detail}`
+      );
+    }
+
+    return response;
   }
 
   private getRefreshTokenCookie(options?: RefreshAccessTokenOptions) {
