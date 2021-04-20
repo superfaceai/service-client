@@ -440,7 +440,7 @@ function createExpressMock(): express.Application {
     }
   );
 
-  return identity
+  return identity;
 }
 
 function runMockedPasswordlessIdentityServer(

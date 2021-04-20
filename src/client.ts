@@ -407,6 +407,34 @@ export class BrainClient {
     };
   }
 
+  public async signOut(
+    {
+      fromAllDevices,
+    }: {
+      fromAllDevices: boolean;
+    } = { fromAllDevices: false }
+  ): Promise<null> {
+    const result: Response = await crossfetch.fetch(
+      `${this._STORAGE.baseUrl}/auth/signout`,
+      {
+        method: 'DELETE',
+        body: JSON.stringify({
+          all: fromAllDevices,
+        }),
+      }
+    );
+
+    if (result.ok) {
+      this.logout();
+
+      return null;
+    } else if ([401, 403].includes(result.status)) {
+      throw new Error("No session found, couldn't log out");
+    } else {
+      throw new Error("Couldn't log out due to unknown reasons");
+    }
+  }
+
   public getGithubLoginUrl(returnTo?: string): string {
     const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
     if (returnTo) {
