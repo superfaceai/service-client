@@ -321,6 +321,7 @@ describe('client', () => {
         method: 'DELETE',
       });
     });
+
     it('when server responds with 204 • should return null & call internal `logout` method', async () => {
       fetchMock.mockResponse('', { status: 204 });
       const logoutSpy = jest.spyOn(client, 'logout');
