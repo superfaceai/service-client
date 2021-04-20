@@ -23,19 +23,7 @@ describe('client', () => {
 
   describe('fetch', () => {
     beforeAll(() => {
-      const identity = express();
-      identity.post(
-        '/auth/token',
-        (req: express.Request, res: express.Response) => {
-          if (req.headers?.cookie === 'user_session=RT') {
-            res.status(201).send({
-              access_token: 'AT',
-            });
-          } else {
-            res.sendStatus(401);
-          }
-        }
-      );
+      const identity = createExpressMock();
       identity.get('/test', (req: express.Request, res: express.Response) => {
         if (req.headers?.authorization === 'Bearer AT') {
           res.sendStatus(200);
@@ -155,19 +143,7 @@ describe('client', () => {
       security: [],
     };
     beforeAll(() => {
-      const identity = express();
-      identity.post(
-        '/auth/token',
-        (req: express.Request, res: express.Response) => {
-          if (req.headers?.cookie === 'user_session=RT') {
-            res.status(201).send({
-              access_token: 'AT',
-            });
-          } else {
-            res.sendStatus(401);
-          }
-        }
-      );
+      const identity = createExpressMock();
       identity.post(
         '/providers',
         (req: express.Request, res: express.Response) => {
@@ -247,19 +223,7 @@ describe('client', () => {
     };
 
     beforeAll(() => {
-      const identity = express();
-      identity.post(
-        '/auth/token',
-        (req: express.Request, res: express.Response) => {
-          if (req.headers?.cookie === 'user_session=RT') {
-            res.status(201).send({
-              access_token: 'AT',
-            });
-          } else {
-            res.sendStatus(401);
-          }
-        }
-      );
+      const identity = createExpressMock();
       identity.post(
         '/profiles',
         (req: express.Request, res: express.Response) => {
@@ -374,19 +338,7 @@ describe('client', () => {
     };
 
     beforeAll(() => {
-      const identity = express();
-      identity.post(
-        '/auth/token',
-        (req: express.Request, res: express.Response) => {
-          if (req.headers?.cookie === 'user_session=RT') {
-            res.status(201).send({
-              access_token: 'AT',
-            });
-          } else {
-            res.sendStatus(401);
-          }
-        }
-      );
+      const identity = createExpressMock();
       identity.post('/maps', (req: express.Request, res: express.Response) => {
         if (req.headers?.authorization === 'Bearer AT') {
           res.sendStatus(200);
@@ -472,6 +424,24 @@ describe('client', () => {
     });
   });
 });
+
+function createExpressMock(): express.Application {
+  const identity = express();
+  identity.post(
+    '/auth/token',
+    (req: express.Request, res: express.Response) => {
+      if (req.headers?.cookie === 'user_session=RT') {
+        res.status(201).send({
+          access_token: 'AT',
+        });
+      } else {
+        res.sendStatus(401);
+      }
+    }
+  );
+
+  return identity
+}
 
 function runMockedPasswordlessIdentityServer(
   baseUrl: string,
