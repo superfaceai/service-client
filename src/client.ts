@@ -113,7 +113,6 @@ export class BrainClient {
     return authToken;
   }
 
-  //TODO: make fetch private??
   public async fetch(url: string, init: RequestInit = {}): Promise<Response> {
     if (this.isAccessTokenExpired()) {
       // Try to get access token
