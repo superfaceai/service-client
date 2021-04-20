@@ -7,6 +7,7 @@ import {
   MEDIA_TYPE_MAP_AST,
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
+  MEDIA_TYPE_TEXT,
 } from './constants';
 import {
   MapRevisionResponse,
@@ -482,7 +483,7 @@ describe('client', () => {
         method: 'POST',
         body: 'test',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': MEDIA_TYPE_TEXT,
         },
       });
     });
@@ -510,7 +511,7 @@ describe('client', () => {
         method: 'POST',
         body: 'test',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': MEDIA_TYPE_TEXT,
         },
       });
     });
@@ -742,7 +743,7 @@ describe('client', () => {
         method: 'POST',
         body: 'test',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': MEDIA_TYPE_TEXT,
         },
       });
     });
@@ -770,7 +771,7 @@ describe('client', () => {
         method: 'POST',
         body: 'test',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': MEDIA_TYPE_TEXT,
         },
       });
     });
