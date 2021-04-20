@@ -298,4 +298,76 @@ describe('client', () => {
       );
     });
   });
+
+  describe('signout', () => {
+    it('signing out from all devices • should set `all` option in API call', async () => {
+      const client = new BrainClient({ baseUrl: BASE_URL });
+      const mock = fetchMock.mockResponse('', { status: 204 });
+      await client.signOut({ fromAllDevices: true });
+
+      expect(mock).toHaveBeenCalledWith(`${BASE_URL}/auth/signout`, {
+        body: '{"all":true}',
+        method: 'DELETE',
+      });
+    });
+
+    it('signing out from current session • should unset `all` option in API call', async () => {
+      const client = new BrainClient({ baseUrl: BASE_URL });
+      const mock = fetchMock.mockResponse('', { status: 204 });
+      await client.signOut();
+
+      expect(mock).toHaveBeenCalledWith(`${BASE_URL}/auth/signout`, {
+        body: '{"all":false}',
+        method: 'DELETE',
+      });
+    });
+
+    it('when server responds with 204 • should return null & call internal `logout` method', async () => {
+      fetchMock.mockResponse('', { status: 204 });
+      const logoutSpy = jest.spyOn(client, 'logout');
+      const result = await client.signOut();
+
+      expect(logoutSpy).toHaveBeenCalledTimes(1);
+      expect(result).toBe(null);
+    });
+
+    const errorCodes = [401, 403];
+    for (const errorCode of errorCodes) {
+      it(`when server responds with ${errorCode} • throws`, async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            status: errorCode,
+            title: 'Forbidden',
+            detail: 'Forbidden resource',
+            instance: '/auth/signout',
+          }),
+          { status: errorCode }
+        );
+        const logoutSpy = jest.spyOn(client, 'logout');
+
+        expect(logoutSpy).toHaveBeenCalledTimes(0);
+        expect(() => client.signOut()).rejects.toEqual(
+          Error("No session found, couldn't log out")
+        );
+      });
+    }
+
+    it(`when server responds with 500 • throws unknown error`, async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          status: 500,
+          title: 'Something went wrong',
+          detail: 'Unknown error',
+          instance: '/auth/signout',
+        }),
+        { status: 500 }
+      );
+      const logoutSpy = jest.spyOn(client, 'logout');
+
+      expect(logoutSpy).toHaveBeenCalledTimes(0);
+      expect(() => client.signOut()).rejects.toEqual(
+        Error("Couldn't log out due to unknown reasons")
+      );
+    });
+  });
 });
