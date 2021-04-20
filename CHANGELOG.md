@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `signOut` method for facilitating session sign out with Brain
+
 ## [0.0.6] - 2021-04-19
 
 ### Added
