@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `createProvider` method creates provider in store
+- `findAllProviders` method returns all providers in store
+- `findOneProvider` method returns one provider from store
+- `createProfile` method creates profile in store
+- `parseProfile` method parses profile using store api
+- `getProfile` method return profile from store in json
+- `getProfileSource` method return profile from store in suma format
+- `getProfileAST` method return profile from store in ast format
+- `createMap` method creates map in store
+- `parseMap` method parses map using store api
+- `getMap` method return map from store in json
+- `getMapSource` method return map from store in suma format
+- `getMapAST` method return map from store in ast format
 - `signOut` method for facilitating session sign out with Brain
 
 ## [0.0.6] - 2021-04-19

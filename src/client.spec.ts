@@ -1,6 +1,19 @@
 import fetchMock from 'jest-fetch-mock';
 
 import { BrainClient } from './client';
+import {
+  MEDIA_TYPE_JSON,
+  MEDIA_TYPE_MAP,
+  MEDIA_TYPE_MAP_AST,
+  MEDIA_TYPE_PROFILE,
+  MEDIA_TYPE_PROFILE_AST,
+  MEDIA_TYPE_TEXT,
+} from './constants';
+import {
+  MapRevisionResponse,
+  ProfileVersionResponse,
+  ProviderResponse,
+} from './interfaces';
 import { CancellationToken } from './interfaces/passwordless_verify_options';
 import { VerificationStatus } from './interfaces/passwordless_verify_response';
 
@@ -299,6 +312,687 @@ describe('client', () => {
     });
   });
 
+  describe('createProvider', () => {
+    it('should create provider', async () => {
+      const mockResponse = {
+        ok: true,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.createProvider('test')).resolves.toBeUndefined();
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 400,
+          instance: '/providers',
+          title: 'Already exists',
+          detail: 'Provider already exists',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.createProvider('test')).rejects.toEqual(
+        new Error(
+          `Store responded with status: 400 on: /providers Already exists: Provider already exists`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+  });
+
+  describe('findAllProviders', () => {
+    it('should find all providers', async () => {
+      const mockResult: ProviderResponse[] = [
+        {
+          url: 'testUrl',
+          name: 'testName',
+          deployments: [],
+          security: [],
+        },
+      ];
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.findAllProviders()).resolves.toEqual(mockResult);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/providers',
+          title: 'Not Found',
+          detail: 'Provider not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.findAllProviders()).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /providers Not Found: Provider not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+  });
+
+  describe('findOneProvider', () => {
+    it('should get one provider', async () => {
+      const mockResult: ProviderResponse = {
+        url: 'testUrl',
+        name: 'testName',
+        deployments: [],
+        security: [],
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.findOneProvider('test')).resolves.toEqual(mockResult);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers/test', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/providers',
+          title: 'Not Found',
+          detail: 'Provider not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.findOneProvider('test')).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /providers Not Found: Provider not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers/test', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+  });
+
+  describe('createProfile', () => {
+    it('should create profile', async () => {
+      const mockResponse = {
+        ok: true,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.createProfile('test')).resolves.toBeUndefined();
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/profiles', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': MEDIA_TYPE_TEXT,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 400,
+          instance: '/profiles',
+          title: 'Already exists',
+          detail: 'Profile already exists',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.createProfile('test')).rejects.toEqual(
+        new Error(
+          `Store responded with status: 400 on: /profiles Already exists: Profile already exists`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/profiles', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': MEDIA_TYPE_TEXT,
+        },
+      });
+    });
+  });
+  describe('parseProfile', () => {
+    it('should parse profile', async () => {
+      const mockResponse = {
+        ok: true,
+        text: async () => 'profileAst',
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.parseProfile('profileSource')).resolves.toEqual(
+        'profileAst'
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/parse', {
+        method: 'POST',
+        body: 'profileSource',
+        headers: {
+          'Content-Type': MEDIA_TYPE_PROFILE,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 500,
+          instance: '/parse',
+          title: 'Internal Server Exception',
+          detail: 'Unknow parser error',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.parseProfile('profileSource')).rejects.toEqual(
+        new Error(
+          `Store responded with status: 500 on: /parse Internal Server Exception: Unknow parser error`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/parse', {
+        method: 'POST',
+        body: 'profileSource',
+        headers: {
+          'Content-Type': MEDIA_TYPE_PROFILE,
+        },
+      });
+    });
+  });
+  describe('getProfile', () => {
+    it('should get one profile', async () => {
+      const mockResult: ProfileVersionResponse = {
+        profile_id: 'testId',
+        profile_name: 'testName',
+        profile_version: '1.0.0',
+        url: 'testUrl',
+        published_at: new Date(),
+        published_by: 'test',
+        owner: 'testOwner',
+        owner_url: 'testOwnerUrl',
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getProfile('vcs', '1.0.0', 'user-repos')
+      ).resolves.toEqual(mockResult);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_JSON,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/vcs/user-repos@1.0.0',
+          title: 'Not Found',
+          detail: 'Profile not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getProfile('vcs', '1.0.0', 'user-repos')
+      ).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /vcs/user-repos@1.0.0 Not Found: Profile not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_JSON,
+        },
+      });
+    });
+  });
+  describe('getProfileSource', () => {
+    it('should get profile source', async () => {
+      const mockResponse = {
+        ok: true,
+        text: async () => 'profileSource',
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getProfileSource('vcs', '1.0.0', 'user-repos')
+      ).resolves.toEqual('profileSource');
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/vcs/user-repos@1.0.0',
+          title: 'Not Found',
+          detail: 'Profile not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getProfileSource('vcs', '1.0.0', 'user-repos')
+      ).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /vcs/user-repos@1.0.0 Not Found: Profile not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE,
+        },
+      });
+    });
+  });
+
+  describe('getProfileAST', () => {
+    it('should get profile AST', async () => {
+      const mockResponse = {
+        ok: true,
+        text: async () => 'profileAST',
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getProfileAST('vcs', '1.0.0', 'user-repos')
+      ).resolves.toEqual('profileAST');
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE_AST,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/vcs/user-repos@1.0.0',
+          title: 'Not Found',
+          detail: 'Profile not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getProfileAST('vcs', '1.0.0', 'user-repos')
+      ).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /vcs/user-repos@1.0.0 Not Found: Profile not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE_AST,
+        },
+      });
+    });
+  });
+
+  describe('createMap', () => {
+    it('should create map', async () => {
+      const mockResponse = {
+        ok: true,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.createMap('test')).resolves.toBeUndefined();
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': MEDIA_TYPE_TEXT,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 400,
+          instance: '/maps',
+          title: 'Already exists',
+          detail: 'Map already exists',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.createMap('test')).rejects.toEqual(
+        new Error(
+          `Store responded with status: 400 on: /maps Already exists: Map already exists`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': MEDIA_TYPE_TEXT,
+        },
+      });
+    });
+  });
+
+  describe('parseMap', () => {
+    it('should parse map', async () => {
+      const mockResponse = {
+        ok: true,
+        text: async () => 'mapAst',
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.parseMap('mapSource')).resolves.toEqual('mapAst');
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/parse', {
+        method: 'POST',
+        body: 'mapSource',
+        headers: {
+          'Content-Type': MEDIA_TYPE_MAP,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 500,
+          instance: '/parse',
+          title: 'Internal Server Exception',
+          detail: 'Unknow parser error',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.parseMap('mapSource')).rejects.toEqual(
+        new Error(
+          `Store responded with status: 500 on: /parse Internal Server Exception: Unknow parser error`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/parse', {
+        method: 'POST',
+        body: 'mapSource',
+        headers: {
+          'Content-Type': MEDIA_TYPE_MAP,
+        },
+      });
+    });
+  });
+
+  describe('getMap', () => {
+    it('should get one map', async () => {
+      const mockResult: MapRevisionResponse = {
+        map_id: 'testId',
+        profile_name: 'testName',
+        profile_version: '1.0.0',
+        url: 'testUrl',
+        published_at: new Date(),
+        published_by: 'test',
+        owner: 'testOwner',
+        owner_url: 'testOwnerUrl',
+        profile_url: 'testprofileUrl',
+        map_revision: 'testRevision',
+        map_provider: 'testProvider',
+        map_provider_url: 'testProviderUrl',
+        map_variant: 'testMapVariant',
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getMap('vcs', '1.0.0', 'user-repos', 'github')
+      ).resolves.toEqual(mockResult);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_JSON,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/vcs/user-repos.github@1.0.0',
+          title: 'Not Found',
+          detail: 'Map not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getMap('vcs', '1.0.0', 'user-repos', 'github')
+      ).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /vcs/user-repos.github@1.0.0 Not Found: Map not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_JSON,
+        },
+      });
+    });
+  });
+  describe('getMapSource', () => {
+    it('should get map source', async () => {
+      const mockResponse = {
+        ok: true,
+        text: async () => 'mapSource',
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+      ).resolves.toEqual('mapSource');
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_MAP,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/vcs/user-repos.github@1.0.0',
+          title: 'Not Found',
+          detail: 'Map not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+      ).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /vcs/user-repos.github@1.0.0 Not Found: Map not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_MAP,
+        },
+      });
+    });
+  });
+
+  describe('getMapAST', () => {
+    it('should get map AST', async () => {
+      const mockResponse = {
+        ok: true,
+        text: async () => 'mapAST',
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+      ).resolves.toEqual('mapAST');
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_MAP_AST,
+        },
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockResponse = {
+        ok: false,
+        json: async () => ({
+          status: 404,
+          instance: '/vcs/user-repos.github@1.0.0',
+          title: 'Not Found',
+          detail: 'Map not found',
+        }),
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+      ).rejects.toEqual(
+        new Error(
+          `Store responded with status: 404 on: /vcs/user-repos.github@1.0.0 Not Found: Map not found`
+        )
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_MAP_AST,
+        },
+      });
+    });
+  });
   describe('signout', () => {
     it('signing out from all devices • should set `all` option in API call', async () => {
       const client = new BrainClient({ baseUrl: BASE_URL });
@@ -346,7 +1040,7 @@ describe('client', () => {
         const logoutSpy = jest.spyOn(client, 'logout');
 
         expect(logoutSpy).toHaveBeenCalledTimes(0);
-        expect(() => client.signOut()).rejects.toEqual(
+        await expect(() => client.signOut()).rejects.toEqual(
           Error("No session found, couldn't log out")
         );
       });
@@ -365,7 +1059,7 @@ describe('client', () => {
       const logoutSpy = jest.spyOn(client, 'logout');
 
       expect(logoutSpy).toHaveBeenCalledTimes(0);
-      expect(() => client.signOut()).rejects.toEqual(
+      await expect(() => client.signOut()).rejects.toEqual(
         Error("Couldn't log out due to unknown reasons")
       );
     });
