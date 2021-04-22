@@ -12,6 +12,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   ProfileVersionResponse,
   ProviderResponse,
+  SuccessfulLogin,
 } from '../src';
 
 describe('client', () => {
@@ -78,9 +79,9 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with confirmed token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'CONFIRMED';
-      const { verifyUrl } = await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await brainClient.passwordlessLogin(
         'mail@johndoe.com'
-      );
+      )) as SuccessfulLogin;
       const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('CONFIRMED');
       expect(result.authToken).toEqual({
@@ -92,9 +93,9 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with unconfirmed token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'PENDING';
-      const { verifyUrl } = await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await brainClient.passwordlessLogin(
         'mail@johndoe.com'
-      );
+      )) as SuccessfulLogin;
       const result = await brainClient.verifyPasswordlessLogin(verifyUrl, {
         pollingTimeoutSeconds: 1,
       });
@@ -103,27 +104,27 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with expired token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'EXPIRED';
-      const { verifyUrl } = await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await brainClient.passwordlessLogin(
         'mail@johndoe.com'
-      );
+      )) as SuccessfulLogin;
       const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('EXPIRED');
     });
 
     test('call verifyPasswordlessLogin with used token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'USED';
-      const { verifyUrl } = await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await brainClient.passwordlessLogin(
         'mail@johndoe.com'
-      );
+      )) as SuccessfulLogin;
       const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('USED');
     });
 
     test('cancel verifyPasswordlessLogin polling', async () => {
       identityServerState.mockedTokenVerificationStatus = 'PENDING';
-      const { verifyUrl } = await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await brainClient.passwordlessLogin(
         'mail@johndoe.com'
-      );
+      )) as SuccessfulLogin;
       const cancellationToken = new CancellationToken();
       const verifyPromise = brainClient.verifyPasswordlessLogin(verifyUrl, {
         pollingTimeoutSeconds: 10,

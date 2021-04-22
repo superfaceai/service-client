@@ -27,6 +27,7 @@ import {
   PasswordlessVerifyResponse,
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
+import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -341,7 +342,7 @@ export class BrainClient {
   public async passwordlessLogin(
     email: string,
     mode: 'login' | 'register' = 'login'
-  ): Promise<{ verifyUrl: string; expiresAt: Date }> {
+  ): Promise<PasswordlessLoginResponse> {
     const result: Response = await crossfetch.fetch(
       `${this._STORAGE.baseUrl}/auth/passwordless?mode=${mode}`,
       {
@@ -362,7 +363,19 @@ export class BrainClient {
       const { verify_url, expires_at } = apiResponse || {};
 
       if (verify_url && expires_at) {
-        return { verifyUrl: verify_url, expiresAt: new Date(expires_at) };
+        return {
+          success: true,
+          verifyUrl: verify_url,
+          expiresAt: new Date(expires_at),
+        };
+      } else {
+        throw Error('Unexpected API response');
+      }
+    } else if (result.status === 400) {
+      const apiResponse = await result.json();
+      const { title, detail } = apiResponse || {};
+      if (title) {
+        return { success: false, title, detail };
       } else {
         throw Error('Unexpected API response');
       }
