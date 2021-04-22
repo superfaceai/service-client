@@ -369,7 +369,7 @@ export class BrainClient {
           expiresAt: new Date(expires_at),
         };
       } else {
-        throw Error('Unexpected API response');
+        return { success: false, title: 'Unexpected API response' };
       }
     } else if (result.status === 400) {
       const apiResponse = await result.json();
@@ -377,10 +377,13 @@ export class BrainClient {
       if (title) {
         return { success: false, title, detail };
       } else {
-        throw Error('Unexpected API response');
+        return { success: false, title: 'Unexpected API response' };
       }
     } else {
-      throw Error(`Unexpected status code ${result.status} received`);
+      return {
+        success: false,
+        title: `Unexpected status code ${result.status} received`,
+      };
     }
   }
 
