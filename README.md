@@ -1,6 +1,6 @@
-# Brain client
+# Service client
 
-Brain client provides HTTP client for communication with Superface backend services. It encapsulates user authentication.
+Service client provides HTTP client for communication with Superface backend services. It encapsulates user authentication.
 
 # Usage
 
