@@ -1,10 +1,10 @@
 {
-  "name": "@superfaceai/brain-client",
+  "name": "@superfaceai/service-client",
   "version": "0.0.0",
   "main": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
-  "repository": "git@github.com:superfaceai/brain-client.git",
+  "repository": "git@github.com:superfaceai/service-client.git",
   "author": "Superface Team",
   "license": "UNLICENSED",
   "private": false,

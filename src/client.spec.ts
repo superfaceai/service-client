@@ -1,6 +1,6 @@
 import fetchMock from 'jest-fetch-mock';
 
-import { BrainClient } from './client';
+import { ServiceClient } from './client';
 import {
   MEDIA_TYPE_JSON,
   MEDIA_TYPE_MAP,
@@ -24,11 +24,11 @@ const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
 
 describe('client', () => {
   const BASE_URL = 'http://baseurl';
-  let client: BrainClient;
+  let client: ServiceClient;
   beforeEach(() => {
     jest.clearAllMocks();
     fetchMock.resetMocks();
-    client = new BrainClient();
+    client = new ServiceClient();
   });
 
   describe('fetch', () => {
@@ -1014,7 +1014,7 @@ describe('client', () => {
   });
   describe('signout', () => {
     it('signing out from all devices • should set `all` option in API call', async () => {
-      const client = new BrainClient({ baseUrl: BASE_URL });
+      const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
       await client.signOut({ fromAllDevices: true });
 
@@ -1025,7 +1025,7 @@ describe('client', () => {
     });
 
     it('signing out from current session • should unset `all` option in API call', async () => {
-      const client = new BrainClient({ baseUrl: BASE_URL });
+      const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
       await client.signOut();
 

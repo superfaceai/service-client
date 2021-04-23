@@ -2,7 +2,6 @@ import express, { json } from 'express';
 import * as http from 'http';
 
 import {
-  BrainClient,
   CancellationToken,
   MapRevisionResponse,
   MEDIA_TYPE_JSON,
@@ -12,6 +11,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   ProfileVersionResponse,
   ProviderResponse,
+  ServiceClient,
   SuccessfulLogin,
 } from '../src';
 
@@ -20,7 +20,7 @@ describe('client', () => {
   const IDENTITY_PROVIDER_BASE_URL = `http://localhost:${IDENTITY_PROVIDER_PORT}`;
 
   let identityServer: http.Server;
-  let brainClient: BrainClient;
+  let serviceClient: ServiceClient;
 
   describe('fetch', () => {
     beforeAll(() => {
@@ -33,8 +33,8 @@ describe('client', () => {
         }
       });
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
-      brainClient = new BrainClient();
-      brainClient.setOptions({
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
         baseUrl: IDENTITY_PROVIDER_BASE_URL,
         refreshToken: 'RT',
       });
@@ -45,13 +45,13 @@ describe('client', () => {
     });
 
     it('refreshAccessToken returns access token', async () => {
-      expect(await brainClient.refreshAccessToken()).toEqual({
+      expect(await serviceClient.refreshAccessToken()).toEqual({
         access_token: 'AT',
       });
     });
 
     it('fetch passes access token in authorization header', async () => {
-      expect((await brainClient.fetch('/test')).status).toBe(200);
+      expect((await serviceClient.fetch('/test')).status).toBe(200);
     });
   });
 
@@ -62,8 +62,8 @@ describe('client', () => {
     };
 
     beforeAll(() => {
-      brainClient = new BrainClient();
-      brainClient.setOptions({
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
         baseUrl: IDENTITY_PROVIDER_BASE_URL,
       });
       identityServer = runMockedPasswordlessIdentityServer(
@@ -79,10 +79,10 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with confirmed token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'CONFIRMED';
-      const { verifyUrl } = (await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await serviceClient.passwordlessLogin(
         'mail@johndoe.com'
       )) as SuccessfulLogin;
-      const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
+      const result = await serviceClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('CONFIRMED');
       expect(result.authToken).toEqual({
         access_token: 'AT',
@@ -93,10 +93,10 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with unconfirmed token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'PENDING';
-      const { verifyUrl } = (await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await serviceClient.passwordlessLogin(
         'mail@johndoe.com'
       )) as SuccessfulLogin;
-      const result = await brainClient.verifyPasswordlessLogin(verifyUrl, {
+      const result = await serviceClient.verifyPasswordlessLogin(verifyUrl, {
         pollingTimeoutSeconds: 1,
       });
       expect(result.verificationStatus).toBe('POLLING_TIMEOUT');
@@ -104,29 +104,29 @@ describe('client', () => {
 
     test('call verifyPasswordlessLogin with expired token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'EXPIRED';
-      const { verifyUrl } = (await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await serviceClient.passwordlessLogin(
         'mail@johndoe.com'
       )) as SuccessfulLogin;
-      const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
+      const result = await serviceClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('EXPIRED');
     });
 
     test('call verifyPasswordlessLogin with used token', async () => {
       identityServerState.mockedTokenVerificationStatus = 'USED';
-      const { verifyUrl } = (await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await serviceClient.passwordlessLogin(
         'mail@johndoe.com'
       )) as SuccessfulLogin;
-      const result = await brainClient.verifyPasswordlessLogin(verifyUrl);
+      const result = await serviceClient.verifyPasswordlessLogin(verifyUrl);
       expect(result.verificationStatus).toBe('USED');
     });
 
     test('cancel verifyPasswordlessLogin polling', async () => {
       identityServerState.mockedTokenVerificationStatus = 'PENDING';
-      const { verifyUrl } = (await brainClient.passwordlessLogin(
+      const { verifyUrl } = (await serviceClient.passwordlessLogin(
         'mail@johndoe.com'
       )) as SuccessfulLogin;
       const cancellationToken = new CancellationToken();
-      const verifyPromise = brainClient.verifyPasswordlessLogin(verifyUrl, {
+      const verifyPromise = serviceClient.verifyPasswordlessLogin(verifyUrl, {
         pollingTimeoutSeconds: 10,
         cancellationToken,
       });
@@ -176,8 +176,8 @@ describe('client', () => {
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
-      brainClient = new BrainClient();
-      brainClient.setOptions({
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
         baseUrl: IDENTITY_PROVIDER_BASE_URL,
         refreshToken: 'RT',
       });
@@ -189,18 +189,18 @@ describe('client', () => {
 
     test('create provider', async () => {
       await expect(
-        brainClient.createProvider('testPayload')
+        serviceClient.createProvider('testPayload')
       ).resolves.toBeUndefined();
     });
 
     test('find all providers', async () => {
-      await expect(brainClient.findAllProviders()).resolves.toEqual([
+      await expect(serviceClient.findAllProviders()).resolves.toEqual([
         mockResult,
       ]);
     });
 
     test('find one provider', async () => {
-      await expect(brainClient.findOneProvider('test')).resolves.toEqual(
+      await expect(serviceClient.findOneProvider('test')).resolves.toEqual(
         mockResult
       );
     });
@@ -272,8 +272,8 @@ describe('client', () => {
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
-      brainClient = new BrainClient();
-      brainClient.setOptions({
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
         baseUrl: IDENTITY_PROVIDER_BASE_URL,
         refreshToken: 'RT',
       });
@@ -285,19 +285,19 @@ describe('client', () => {
 
     test('create profile', async () => {
       await expect(
-        brainClient.createProfile('testPayload')
+        serviceClient.createProfile('testPayload')
       ).resolves.toBeUndefined();
     });
 
     test('parse profile', async () => {
-      await expect(brainClient.parseProfile('testPayload')).resolves.toEqual(
+      await expect(serviceClient.parseProfile('testPayload')).resolves.toEqual(
         JSON.stringify(mockProfileAST)
       );
     });
 
     test('get profile', async () => {
       await expect(
-        brainClient.getProfile('vcs', '1.0.0', 'user-repos')
+        serviceClient.getProfile('vcs', '1.0.0', 'user-repos')
       ).resolves.toEqual({
         ...mockResult,
         published_at: mockResult.published_at.toJSON(),
@@ -306,12 +306,12 @@ describe('client', () => {
 
     test('get profile source', async () => {
       await expect(
-        brainClient.getProfileSource('vcs', '1.0.0', 'user-repos')
+        serviceClient.getProfileSource('vcs', '1.0.0', 'user-repos')
       ).resolves.toEqual(mockProfileSource);
     });
     test('get profile AST', async () => {
       await expect(
-        brainClient.getProfileAST('vcs', '1.0.0', 'user-repos')
+        serviceClient.getProfileAST('vcs', '1.0.0', 'user-repos')
       ).resolves.toEqual(JSON.stringify(mockProfileAST));
     });
   });
@@ -381,8 +381,8 @@ describe('client', () => {
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
-      brainClient = new BrainClient();
-      brainClient.setOptions({
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
         baseUrl: IDENTITY_PROVIDER_BASE_URL,
         refreshToken: 'RT',
       });
@@ -394,19 +394,19 @@ describe('client', () => {
 
     test('create map', async () => {
       await expect(
-        brainClient.createMap('testPayload')
+        serviceClient.createMap('testPayload')
       ).resolves.toBeUndefined();
     });
 
     test('parse map', async () => {
-      await expect(brainClient.parseMap('testPayload')).resolves.toEqual(
+      await expect(serviceClient.parseMap('testPayload')).resolves.toEqual(
         JSON.stringify(mockMapAST)
       );
     });
 
     test('get map', async () => {
       await expect(
-        brainClient.getMap('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMap('vcs', '1.0.0', 'user-repos', 'github')
       ).resolves.toEqual({
         ...mockResult,
         published_at: mockResult.published_at.toJSON(),
@@ -415,12 +415,12 @@ describe('client', () => {
 
     test('get map source', async () => {
       await expect(
-        brainClient.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
       ).resolves.toEqual(mockMapSource);
     });
     test('get map AST', async () => {
       await expect(
-        brainClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
       ).resolves.toEqual(JSON.stringify(mockMapAST));
     });
   });
