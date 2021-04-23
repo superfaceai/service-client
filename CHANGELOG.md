@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.9] - 2021-04-23
+
 ### Changed
 
 - **BREAKING CHANGE:** `BrainClient` renamed to `ServiceClient`
+- **BREAKING CHANGE:** package renamed to `@superfaceai/service-client`
 
 ## [0.0.8] - 2021-04-23
 
@@ -76,7 +79,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.8...HEAD
+[unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.9...HEAD
+[0.0.9]: https://github.com/superfaceai/service-client/compare/v0.0.8...v0.0.9
 [0.0.8]: https://github.com/superfaceai/service-client/compare/v0.0.7...v0.0.8
 [0.0.7]: https://github.com/superfaceai/service-client/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/superfaceai/service-client/compare/v0.0.5...v0.0.6
