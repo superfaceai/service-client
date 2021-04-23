@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING CHANGE:** `passwordlessLogin` returns error object instead of throwing
+
 ## [0.0.7] - 2021-04-20
 
 ### Added

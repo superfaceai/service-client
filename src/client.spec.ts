@@ -137,15 +137,34 @@ describe('client', () => {
     const EXPIRES_AT = new Date('2021-04-13T12:08:27.103Z');
 
     describe('login', () => {
-      it('should send login email and return verify url with code expiration date', async () => {
+      it('when successful • should send login email and return verify url with code expiration date', async () => {
         fetchMock.mockResponse(
           JSON.stringify({ verify_url: VERIFY_URL, expires_at: EXPIRES_AT }),
           { status: 200 }
         );
         const result = await client.passwordlessLogin('mail@mydomain.com');
         expect(result).toStrictEqual({
+          success: true,
           verifyUrl: VERIFY_URL,
           expiresAt: EXPIRES_AT,
+        });
+      });
+
+      it("when email doesn't exist • should return unsuccess with response title & optionally detail", async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            status: 400,
+            instance: '/auth/passwordless',
+            title: 'Email not found',
+            detail: "user with mail@mydomain.com doesn't exist",
+          }),
+          { status: 400 }
+        );
+        const result = await client.passwordlessLogin('mail@mydomain.com');
+        expect(result).toStrictEqual({
+          success: false,
+          title: 'Email not found',
+          detail: "user with mail@mydomain.com doesn't exist",
         });
       });
     });
