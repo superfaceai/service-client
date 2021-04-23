@@ -38,7 +38,7 @@ interface ClientStorage {
   refreshToken?: string;
 }
 
-export class BrainClient {
+export class ServiceClient {
   private _STORAGE: ClientStorage = {
     baseUrl: 'https://superface.ai',
   };
