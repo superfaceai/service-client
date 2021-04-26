@@ -11,9 +11,6 @@
   "files": [
     "dist/**/*"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.release.json --outDir dist",
     "clean": "rimraf dist/",
