@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "repository": "git@github.com:superfaceai/service-client.git",
   "author": "Superface Team",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": false,
   "files": [
     "dist/**/*"
