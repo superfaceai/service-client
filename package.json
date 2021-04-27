@@ -1,19 +1,17 @@
 {
   "name": "@superfaceai/service-client",
   "version": "0.0.0",
+  "description": "Client to access Superface services. (If you are not from Superface Team, you probably don't need this library)",
   "main": "dist/index.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
   "repository": "git@github.com:superfaceai/service-client.git",
   "author": "Superface Team",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": false,
   "files": [
     "dist/**/*"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.release.json --outDir dist",
     "clean": "rimraf dist/",

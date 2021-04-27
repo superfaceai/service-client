@@ -6,9 +6,7 @@ Service client provides HTTP client for communication with Superface backend ser
 
 ## Installation
 
-`@superfaceai/service-client` library is published on private Superface npm registry. To install private packages from `@superfaceai` GitHub organization follow the [official documentation](https://docs.github.com/en/free-pro-team@latest/packages/guides/configuring-npm-for-use-with-github-packages#authenticating-to-github-packages) to configure the authentication.
-
-Then install library into your project directory:
+Install library into your project directory:
 
 ```bash
 yarn add @superfaceai/service-client

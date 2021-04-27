@@ -13,7 +13,7 @@ jobs:
       - name: Setup Node.js environment
         uses: actions/setup-node@v2
         with:
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: https://registry.npmjs.org/
           # Defaults to the user or organization that owns the workflow file
           scope: '@superfaceai'
           node-version: '14'
@@ -21,8 +21,6 @@ jobs:
       # Install dependencies and run test
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.SUPERFACE_BOT_PAT }}
 
       # Test the project
       - name: Unit tests
@@ -47,4 +45,4 @@ jobs:
       - name: Publish
         run: yarn publish --new-version ${NEW_VERSION} --verbose
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_BOT_PAT }}
