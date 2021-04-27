@@ -41,8 +41,8 @@ jobs:
           echo Publishing @superfaceai/service-client version ${NEW_VERSION}
           yarn version --new-version ${NEW_VERSION} --no-git-tag-version
 
-      # Publish version to private repository
+      # Publish version to public repository
       - name: Publish
-        run: yarn publish --new-version ${NEW_VERSION} --verbose
+        run: yarn publish --new-version ${NEW_VERSION} --verbose --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPMJS_BOT_PAT }}
