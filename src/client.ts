@@ -452,10 +452,17 @@ export class ServiceClient {
     }
   }
 
-  public getGithubLoginUrl(returnTo?: string): string {
+  public getGithubLoginUrl(returnTo?: string, mode?: 'register'): string {
     const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
+    const queryParams = [];
     if (returnTo) {
-      return urlWithoutParams + `?return_to=${encodeURIComponent(returnTo)}`;
+      queryParams.push(`return_to=${encodeURIComponent(returnTo)}`);
+    }
+    if (mode) {
+      queryParams.push(`mode=${mode}`);
+    }
+    if (queryParams.length > 0) {
+      return urlWithoutParams + `?${queryParams.join('&')}`;
     }
 
     return urlWithoutParams;

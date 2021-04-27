@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `getGithubLoginUrl` method parameter `mode` added
+
 ## [0.0.9] - 2021-04-23
 
 ### Changed
