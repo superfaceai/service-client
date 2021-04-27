@@ -329,6 +329,21 @@ describe('client', () => {
         `${BASE_URL}/auth/github?return_to=${encodeURIComponent(returnTo)}`
       );
     });
+
+    it('should return github login url with mode query parameter', () => {
+      expect(client.getGithubLoginUrl(undefined, 'register')).toBe(
+        `${BASE_URL}/auth/github?mode=register`
+      );
+    });
+
+    it('should return github login url with both returnTo and mode query parameters', () => {
+      const returnTo = 'https://superface.dev/login/callback';
+      expect(client.getGithubLoginUrl(returnTo, 'register')).toBe(
+        `${BASE_URL}/auth/github?return_to=${encodeURIComponent(
+          returnTo
+        )}&mode=register`
+      );
+    });
   });
 
   describe('createProvider', () => {
