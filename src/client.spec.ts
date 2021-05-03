@@ -461,6 +461,7 @@ describe('client', () => {
       await expect(client.findAllProviders()).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
+        authenticate: false,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -488,6 +489,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
+        authenticate: false,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -515,6 +517,7 @@ describe('client', () => {
       await expect(client.findOneProvider('test')).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
+        authenticate: false,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -542,6 +545,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
+        authenticate: false,
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -611,6 +615,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
+        authenticate: false,
         method: 'POST',
         body: 'profileSource',
         headers: {
@@ -639,6 +644,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
+        authenticate: false,
         method: 'POST',
         body: 'profileSource',
         headers: {
@@ -672,6 +678,7 @@ describe('client', () => {
       ).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -701,6 +708,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -722,6 +730,7 @@ describe('client', () => {
       ).resolves.toEqual('profileSource');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE,
@@ -751,6 +760,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE,
@@ -773,6 +783,7 @@ describe('client', () => {
       ).resolves.toEqual('profileAST');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE_AST,
@@ -802,6 +813,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE_AST,
@@ -870,6 +882,7 @@ describe('client', () => {
       await expect(client.parseMap('mapSource')).resolves.toEqual('mapAst');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
+        authenticate: false,
         method: 'POST',
         body: 'mapSource',
         headers: {
@@ -898,6 +911,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
+        authenticate: false,
         method: 'POST',
         body: 'mapSource',
         headers: {
@@ -937,6 +951,7 @@ describe('client', () => {
       ).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -966,6 +981,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -987,6 +1003,7 @@ describe('client', () => {
       ).resolves.toEqual('mapSource');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_MAP,
@@ -1016,6 +1033,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_MAP,
@@ -1038,6 +1056,7 @@ describe('client', () => {
       ).resolves.toEqual('mapAST');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_MAP_AST,
@@ -1067,6 +1086,7 @@ describe('client', () => {
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_MAP_AST,

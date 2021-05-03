@@ -166,6 +166,7 @@ export class ServiceClient {
 
   async findAllProviders(): Promise<ProviderResponse[]> {
     const response: Response = await this.fetch('/providers', {
+      authenticate: false,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -178,6 +179,7 @@ export class ServiceClient {
 
   async findOneProvider(name: string): Promise<ProviderResponse> {
     const response: Response = await this.fetch(`/providers/${name}`, {
+      authenticate: false,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -201,6 +203,7 @@ export class ServiceClient {
 
   async parseProfile(payload: string): Promise<string> {
     const response: Response = await this.fetch('/parse', {
+      authenticate: false,
       method: 'POST',
       body: payload,
       headers: {
@@ -219,6 +222,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(
       `/${scope}/${name}@${version}`,
       {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -238,6 +242,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(
       `/${scope}/${name}@${version}`,
       {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE,
@@ -256,6 +261,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(
       `/${scope}/${name}@${version}`,
       {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE_AST,
@@ -280,6 +286,7 @@ export class ServiceClient {
 
   async parseMap(payload: string): Promise<string> {
     const response: Response = await this.fetch('/parse', {
+      authenticate: false,
       method: 'POST',
       body: payload,
       headers: {
@@ -301,6 +308,7 @@ export class ServiceClient {
       ? `/${scope}/${name}.${provider}.${variant}@${version}`
       : `/${scope}/${name}.${provider}@${version}`;
     const response: Response = await this.fetch(url, {
+      authenticate: false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_JSON,
@@ -323,6 +331,7 @@ export class ServiceClient {
       ? `/${scope}/${name}.${provider}.${variant}@${version}`
       : `/${scope}/${name}.${provider}@${version}`;
     const response: Response = await this.fetch(url, {
+      authenticate: false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_MAP,
@@ -343,6 +352,7 @@ export class ServiceClient {
       ? `/${scope}/${name}.${provider}.${variant}@${version}`
       : `/${scope}/${name}.${provider}@${version}`;
     const response: Response = await this.fetch(url, {
+      authenticate: false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_MAP_AST,
