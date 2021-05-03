@@ -163,22 +163,14 @@ describe('client', () => {
       );
       identity.get(
         '/providers',
-        (req: express.Request, res: express.Response) => {
-          if (req.headers?.authorization === 'Bearer AT') {
-            res.json([mockResult]);
-          } else {
-            res.sendStatus(401);
-          }
+        (_req: express.Request, res: express.Response) => {
+          res.json([mockResult]);
         }
       );
       identity.get(
         '/providers/test',
-        (req: express.Request, res: express.Response) => {
-          if (req.headers?.authorization === 'Bearer AT') {
-            res.json(mockResult);
-          } else {
-            res.sendStatus(401);
-          }
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockResult);
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
@@ -242,39 +234,33 @@ describe('client', () => {
         }
       );
       identity.post('/parse', (req: express.Request, res: express.Response) => {
-        if (req.headers?.authorization === 'Bearer AT') {
-          if (req.headers?.['content-type'] === MEDIA_TYPE_PROFILE) {
-            res
-              .status(200)
-              .contentType(MEDIA_TYPE_PROFILE_AST)
-              .json(mockProfileAST);
-          }
+        if (req.headers?.['content-type'] === MEDIA_TYPE_PROFILE) {
+          res
+            .status(200)
+            .contentType(MEDIA_TYPE_PROFILE_AST)
+            .json(mockProfileAST);
         } else {
-          res.sendStatus(401);
+          res.sendStatus(400);
         }
       });
       identity.get(
         '/vcs/user-repos@1.0.0',
         (req: express.Request, res: express.Response) => {
-          if (req.headers?.authorization === 'Bearer AT') {
-            switch (req.headers?.accept) {
-              case MEDIA_TYPE_JSON:
-                res.json(mockResult);
-                break;
-              case MEDIA_TYPE_PROFILE:
-                res.send(mockProfileSource);
-                break;
-              case MEDIA_TYPE_PROFILE_AST:
-                res.send(mockProfileAST);
-                break;
-              default:
-                res.sendStatus(400);
-                break;
-            }
-            res.json(mockResult);
-          } else {
-            res.sendStatus(401);
+          switch (req.headers?.accept) {
+            case MEDIA_TYPE_JSON:
+              res.json(mockResult);
+              break;
+            case MEDIA_TYPE_PROFILE:
+              res.send(mockProfileSource);
+              break;
+            case MEDIA_TYPE_PROFILE_AST:
+              res.send(mockProfileAST);
+              break;
+            default:
+              res.sendStatus(400);
+              break;
           }
+          res.json(mockResult);
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
@@ -354,36 +340,30 @@ describe('client', () => {
         }
       });
       identity.post('/parse', (req: express.Request, res: express.Response) => {
-        if (req.headers?.authorization === 'Bearer AT') {
-          if (req.headers?.['content-type'] === MEDIA_TYPE_MAP) {
-            res.status(200).contentType(MEDIA_TYPE_MAP_AST).json(mockMapAST);
-          }
+        if (req.headers?.['content-type'] === MEDIA_TYPE_MAP) {
+          res.status(200).contentType(MEDIA_TYPE_MAP_AST).json(mockMapAST);
         } else {
-          res.sendStatus(401);
+          res.sendStatus(400);
         }
       });
       identity.get(
         '/vcs/user-repos.github@1.0.0',
         (req: express.Request, res: express.Response) => {
-          if (req.headers?.authorization === 'Bearer AT') {
-            switch (req.headers?.accept) {
-              case MEDIA_TYPE_JSON:
-                res.json(mockResult);
-                break;
-              case MEDIA_TYPE_MAP:
-                res.send(mockMapSource);
-                break;
-              case MEDIA_TYPE_MAP_AST:
-                res.send(mockMapAST);
-                break;
-              default:
-                res.sendStatus(400);
-                break;
-            }
-            res.json(mockResult);
-          } else {
-            res.sendStatus(401);
+          switch (req.headers?.accept) {
+            case MEDIA_TYPE_JSON:
+              res.json(mockResult);
+              break;
+            case MEDIA_TYPE_MAP:
+              res.send(mockMapSource);
+              break;
+            case MEDIA_TYPE_MAP_AST:
+              res.send(mockMapAST);
+              break;
+            default:
+              res.sendStatus(400);
+              break;
           }
+          res.json(mockResult);
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
