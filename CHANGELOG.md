@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `fetch` options take `authenticate` boolean parameter to optionally disable authentication (which is enabled by default)
 
+## [0.0.11] - 2021-04-29
+
+### Fixed
+
+- Release script
+
 ## [0.0.10] - 2021-04-27
 
 ### Added
@@ -89,7 +95,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.10...HEAD
+[unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.11...HEAD
+[0.0.11]: https://github.com/superfaceai/service-client/compare/v0.0.9...v0.0.11
 [0.0.10]: https://github.com/superfaceai/service-client/compare/v0.0.9...v0.0.10
 [0.0.9]: https://github.com/superfaceai/service-client/compare/v0.0.8...v0.0.9
 [0.0.8]: https://github.com/superfaceai/service-client/compare/v0.0.7...v0.0.8
