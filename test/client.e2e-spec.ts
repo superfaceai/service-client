@@ -50,8 +50,14 @@ describe('client', () => {
       });
     });
 
-    it('fetch passes access token in authorization header', async () => {
+    it('fetch by default passes access token in authorization header', async () => {
       expect((await serviceClient.fetch('/test')).status).toBe(200);
+    });
+
+    it("fetch without authentication doesn't use authorization header", async () => {
+      expect(
+        (await serviceClient.fetch('/test', { authenticate: false })).status
+      ).toBe(401);
     });
   });
 
