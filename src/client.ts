@@ -38,6 +38,9 @@ interface ClientStorage {
   refreshToken?: string;
 }
 
+type FetchOptions = { authenticate?: boolean };
+type RequestOptions = RequestInit & FetchOptions;
+
 export class ServiceClient {
   private _STORAGE: ClientStorage = {
     baseUrl: 'https://superface.ai',
@@ -115,24 +118,34 @@ export class ServiceClient {
     return authToken;
   }
 
-  public async fetch(url: string, init: RequestInit = {}): Promise<Response> {
-    if (this.isAccessTokenExpired()) {
+  public async fetch(
+    url: string,
+    opts: RequestOptions = {}
+  ): Promise<Response> {
+    const useAuthentication = opts.authenticate ?? true;
+    if ('authenticate' in opts) delete opts['authenticate'];
+
+    if (useAuthentication && this.isAccessTokenExpired()) {
       // Try to get access token
       await this.refreshAccessToken();
     }
 
     const _fetch = () => {
-      init.headers = Object.assign({}, init.headers, {
-        Authorization: `Bearer ${this._STORAGE.authToken?.access_token}`,
-      });
-      init.credentials = 'include';
+      opts.headers = Object.assign(
+        {},
+        opts.headers,
+        useAuthentication && {
+          Authorization: `Bearer ${this._STORAGE.authToken?.access_token}`,
+        }
+      );
+      opts.credentials = 'include';
 
-      return crossfetch.fetch(`${this._STORAGE.baseUrl}${url}`, init);
+      return crossfetch.fetch(`${this._STORAGE.baseUrl}${url}`, opts);
     };
 
     let res = await _fetch();
 
-    if ([401, 403].includes(res.status)) {
+    if (useAuthentication && [401, 403].includes(res.status)) {
       await this.refreshAccessToken();
       res = await _fetch();
     }
