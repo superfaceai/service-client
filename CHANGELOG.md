@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `fetch` options take `authenticate` boolean parameter to optionally disable authentication (which is enabled by default)
+
 ## [0.0.10] - 2021-04-27
 
 ### Added
