@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `fetch` options take `authenticate` boolean parameter to optionally disable authentication (which is enabled by default)
+
+### Changed
+
+- the following methods now do _not_ authenticate against Brain: 
+  - `findAllProviders`
+  - `findOneProvider`
+  - `parseProfile`
+  - `getProfile`
+  - `getProfileSource`
+  - `getProfileAST`
+  - `parseMap`
+  - `getMap`
+  - `getMapSource`
+  - `getMapAST`
+
 ## [0.0.11] - 2021-04-29
 
 ### Fixed

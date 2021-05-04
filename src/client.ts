@@ -38,6 +38,9 @@ interface ClientStorage {
   refreshToken?: string;
 }
 
+type FetchOptions = { authenticate?: boolean };
+type RequestOptions = RequestInit & FetchOptions;
+
 export class ServiceClient {
   private _STORAGE: ClientStorage = {
     baseUrl: 'https://superface.ai',
@@ -115,24 +118,34 @@ export class ServiceClient {
     return authToken;
   }
 
-  public async fetch(url: string, init: RequestInit = {}): Promise<Response> {
-    if (this.isAccessTokenExpired()) {
+  public async fetch(
+    url: string,
+    opts: RequestOptions = {}
+  ): Promise<Response> {
+    const useAuthentication = opts.authenticate ?? true;
+    if ('authenticate' in opts) delete opts['authenticate'];
+
+    if (useAuthentication && this.isAccessTokenExpired()) {
       // Try to get access token
       await this.refreshAccessToken();
     }
 
     const _fetch = () => {
-      init.headers = Object.assign({}, init.headers, {
-        Authorization: `Bearer ${this._STORAGE.authToken?.access_token}`,
-      });
-      init.credentials = 'include';
+      opts.headers = Object.assign(
+        {},
+        opts.headers,
+        useAuthentication && {
+          Authorization: `Bearer ${this._STORAGE.authToken?.access_token}`,
+        }
+      );
+      opts.credentials = 'include';
 
-      return crossfetch.fetch(`${this._STORAGE.baseUrl}${url}`, init);
+      return crossfetch.fetch(`${this._STORAGE.baseUrl}${url}`, opts);
     };
 
     let res = await _fetch();
 
-    if ([401, 403].includes(res.status)) {
+    if (useAuthentication && [401, 403].includes(res.status)) {
       await this.refreshAccessToken();
       res = await _fetch();
     }
@@ -153,6 +166,7 @@ export class ServiceClient {
 
   async findAllProviders(): Promise<ProviderResponse[]> {
     const response: Response = await this.fetch('/providers', {
+      authenticate: false,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -165,6 +179,7 @@ export class ServiceClient {
 
   async findOneProvider(name: string): Promise<ProviderResponse> {
     const response: Response = await this.fetch(`/providers/${name}`, {
+      authenticate: false,
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -188,6 +203,7 @@ export class ServiceClient {
 
   async parseProfile(payload: string): Promise<string> {
     const response: Response = await this.fetch('/parse', {
+      authenticate: false,
       method: 'POST',
       body: payload,
       headers: {
@@ -206,6 +222,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(
       `/${scope}/${name}@${version}`,
       {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -225,6 +242,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(
       `/${scope}/${name}@${version}`,
       {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE,
@@ -243,6 +261,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(
       `/${scope}/${name}@${version}`,
       {
+        authenticate: false,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE_AST,
@@ -267,6 +286,7 @@ export class ServiceClient {
 
   async parseMap(payload: string): Promise<string> {
     const response: Response = await this.fetch('/parse', {
+      authenticate: false,
       method: 'POST',
       body: payload,
       headers: {
@@ -288,6 +308,7 @@ export class ServiceClient {
       ? `/${scope}/${name}.${provider}.${variant}@${version}`
       : `/${scope}/${name}.${provider}@${version}`;
     const response: Response = await this.fetch(url, {
+      authenticate: false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_JSON,
@@ -310,6 +331,7 @@ export class ServiceClient {
       ? `/${scope}/${name}.${provider}.${variant}@${version}`
       : `/${scope}/${name}.${provider}@${version}`;
     const response: Response = await this.fetch(url, {
+      authenticate: false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_MAP,
@@ -330,6 +352,7 @@ export class ServiceClient {
       ? `/${scope}/${name}.${provider}.${variant}@${version}`
       : `/${scope}/${name}.${provider}@${version}`;
     const response: Response = await this.fetch(url, {
+      authenticate: false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_MAP_AST,
