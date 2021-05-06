@@ -1,0 +1,82 @@
+workflow_dispatch:
+  inputs:
+    release-level:
+      description: 'Release level (one of): patch, minor, major, prepatch, preminor, premajor, prerelease'
+      required: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout project main and setup environment
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          token: ${{ secrets.SUPERFACE_BOT_PAT }}
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          registry-url: https://registry.npmjs.org/
+          node-version: '14'
+
+      # Install dependencies and run test
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Test the project
+      - name: Unit tests
+        run: yarn test
+
+      - name: End to end tests
+        run: yarn test:e2e
+
+      # Build the project
+      - name: Build
+        run: yarn build
+
+      # Git configuration
+      - name: Git configuration
+        run: |
+          git config --global user.email "bot@superface.ai"
+          git config --global user.name "GitHub Actions release job"
+
+      - name: Bump release version
+        if: startsWith(github.event.inputs.release-level, 'pre') != true
+        run: echo "NEW_VERSION=$(npm --no-git-tag-version version $RELEASE_LEVEL)" >> $GITHUB_ENV
+        env:
+          RELEASE_LEVEL: ${{ github.event.inputs.release-level }}
+
+      - name: Bump pre-release version
+        if: startsWith(github.event.inputs.release-level, 'pre')
+        run: echo "NEW_VERSION=$(npm --no-git-tag-version --preid=beta version $RELEASE_LEVEL)" >> $GITHUB_ENV
+        env:
+          RELEASE_LEVEL: ${{ github.event.inputs.release-level }}
+
+      # Update changelog unreleased section with new version
+      - name: Update changelog
+        uses: superfaceai/release-changelog-action@1
+        with:
+          path-to-changelog: CHANGELOG.md
+          version: ${{ env.NEW_VERSION }}
+          operation: release
+
+      # Commit changelog changes
+      - name: Commit CHANGELOG.md and package.json changes and create tag
+        run: |
+          git add "package.json"
+          git add "CHANGELOG.md"
+          git commit -m "chore: release ${{ env.NEW_VERSION }}"
+          git tag ${{ env.NEW_VERSION }}
+
+      # Publish version to public repository
+      - name: Publish
+        run: yarn publish --verbose --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_BOT_PAT }}
+
+      # Push changes to origin
+      - name: Push changes to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.SUPERFACE_BOT_PAT }}
+        run: |
+          git push origin && git push --tags
