@@ -1,8 +1,10 @@
-workflow_dispatch:
-  inputs:
-    release-level:
-      description: 'Release level (one of): patch, minor, major, prepatch, preminor, premajor, prerelease'
-      required: true
+name: Release package
+on:
+  workflow_dispatch:
+    inputs:
+      release-level:
+        description: 'Release level (one of): patch, minor, major, prepatch, preminor, premajor, prerelease'
+        required: true
 jobs:
   release:
     runs-on: ubuntu-latest
