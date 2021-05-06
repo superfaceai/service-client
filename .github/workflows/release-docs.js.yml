@@ -26,6 +26,6 @@ jobs:
       - name: Update GitHub release documentation
         uses: softprops/action-gh-release@v1
         with:
-          body: ${{ steps.read-changelog.outputs.version-changelog }}
+          body: ${{ steps.read-changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.SUPERFACE_BOT_PAT }}
