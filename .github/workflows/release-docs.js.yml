@@ -1,0 +1,31 @@
+name: Update GitHub release documentation
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Parse version
+        run: echo "VERSION=$(echo ${GITHUB_REF/refs\/tags\//})" >> $GITHUB_ENV
+
+      - name: Read changelog
+        id: read-changelog
+        uses: superfaceai/release-changelog-action@1
+        with:
+          path-to-changelog: ./CHANGELOG.md
+          version: ${{ env.VERSION }}
+          operation: read
+
+      - name: Update GitHub release documentation
+        uses: softprops/action-gh-release@v1
+        with:
+          body: ${{ steps.read-changelog.outputs.version-changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SUPERFACE_BOT_PAT }}
