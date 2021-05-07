@@ -17,7 +17,7 @@ jobs:
 
       - name: Read changelog
         id: read-changelog
-        uses: superfaceai/release-changelog-action@1
+        uses: superfaceai/release-changelog-action@v1
         with:
           path-to-changelog: ./CHANGELOG.md
           version: ${{ env.VERSION }}
