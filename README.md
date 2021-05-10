@@ -95,4 +95,4 @@ The intention here is to get another pair of eyes on the code. No real process o
 
 ### Release package
 
-Release package workflow is triggered manually from [Github actions](https://github.com/superfaceai/service-client/actions). Release package workflow takes `Release level` parameter which can be one of: `patch`, `minor`, `major`, `prepatch`, `preminor`, `premajor`, `prerelease` values. See [npm version](https://docs.npmjs.com/cli/v7/commands/npm-version) CLI documentation for more information. To decide which version should be bumped stick with [semver](https://semver.org/) versioning rules.
+To release new version of package trigger manually `Release package` workflow from [Github actions](https://github.com/superfaceai/service-client/actions). Release package workflow takes `Release level` parameter which can be one of: `patch`, `minor`, `major`, `prepatch`, `preminor`, `premajor`, `prerelease` values. See [npm version](https://docs.npmjs.com/cli/v7/commands/npm-version) CLI documentation for more information. To decide which version should be bumped stick with [semver](https://semver.org/) versioning rules.
