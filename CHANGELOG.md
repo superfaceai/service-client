@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Service Client throws custom errors. `ServiceClientError` as generic error from Service Client and `ServiceApiError` as error when non 2xx response is received from service apis.
+
 ## [0.0.13-beta.0] - 2021-05-13
 
 ## [0.0.12] - 2021-05-04
