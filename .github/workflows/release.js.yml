@@ -82,3 +82,22 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.SUPERFACE_BOT_PAT }}
         run: |
           git push origin && git push --tags
+
+      # Read version changelog
+      - id: get-changelog
+      name: Get release version changelog
+      uses: superfaceai/release-changelog-action@v1
+      with:
+        path-to-changelog: CHANGELOG.md
+        version: ${{ env.NEW_VERSION }}
+        operation: read
+
+      # Update release documentation
+      - name: Update GitHub release documentation
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          body: ${{ steps.get-changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
