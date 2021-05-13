@@ -1,14 +1,14 @@
-import { StoreApiErrorResponse } from './interfaces';
+import { ServiceApiErrorResponse } from './interfaces';
 
 export class ServiceClientError extends Error {}
 
-export class StoreApiError extends ServiceClientError {
+export class ServiceApiError extends ServiceClientError {
   public status: number;
   public instance: string;
   public title: string;
   public detail: string;
 
-  constructor(errorResponse: StoreApiErrorResponse) {
+  constructor(errorResponse: ServiceApiErrorResponse) {
     super(
       `Store responded with status: ${errorResponse.status} on: ${errorResponse.instance} ${errorResponse.title}: ${errorResponse.detail}`
     );

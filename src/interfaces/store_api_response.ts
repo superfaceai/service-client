@@ -32,7 +32,7 @@ export interface MapRevisionResponse {
   owner_url: string;
 }
 
-export interface StoreApiErrorResponse {
+export interface ServiceApiErrorResponse {
   status: number;
   instance: string;
   title: string;

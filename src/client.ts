@@ -15,7 +15,7 @@ import {
   ProfileVersionResponse,
   ProviderResponse,
   RefreshAccessTokenOptions,
-  StoreApiErrorResponse,
+  ServiceApiErrorResponse,
 } from './interfaces';
 import {
   DEFAULT_POLLING_INTERVAL_SECONDS,
@@ -28,7 +28,7 @@ import {
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
 import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
-import { ServiceClientError, StoreApiError } from './errors';
+import { ServiceClientError, ServiceApiError } from './errors';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -533,8 +533,8 @@ export class ServiceClient {
 
   private async unwrap(response: Response): Promise<Response> {
     if (!response.ok) {
-      const errorResponse = (await response.json()) as StoreApiErrorResponse;
-      throw new StoreApiError(errorResponse);
+      const errorResponse = (await response.json()) as ServiceApiErrorResponse;
+      throw new ServiceApiError(errorResponse);
     }
 
     return response;

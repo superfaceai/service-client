@@ -9,7 +9,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
-import { ServiceClientError, StoreApiError } from './errors';
+import { ServiceClientError, ServiceApiError } from './errors';
 import {
   MapRevisionResponse,
   ProfileVersionResponse,
@@ -428,7 +428,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createProvider('test')).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
@@ -484,7 +484,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.findAllProviders()).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
@@ -539,7 +539,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.findOneProvider('test')).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
@@ -586,7 +586,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createProfile('test')).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/profiles', {
@@ -636,7 +636,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.parseProfile('profileSource')).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
@@ -698,7 +698,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getProfile('vcs', '1.0.0', 'user-repos')
-      ).rejects.toEqual(new StoreApiError(payload));
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
@@ -747,7 +747,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getProfileSource('vcs', '1.0.0', 'user-repos')
-      ).rejects.toEqual(new StoreApiError(payload));
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
@@ -797,7 +797,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getProfileAST('vcs', '1.0.0', 'user-repos')
-      ).rejects.toEqual(new StoreApiError(payload));
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
@@ -843,7 +843,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createMap('test')).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/maps', {
@@ -892,7 +892,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.parseMap('mapSource')).rejects.toEqual(
-        new StoreApiError(payload)
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
@@ -960,7 +960,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getMap('vcs', '1.0.0', 'user-repos', 'github')
-      ).rejects.toEqual(new StoreApiError(payload));
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
         authenticate: false,
@@ -1009,7 +1009,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
-      ).rejects.toEqual(new StoreApiError(payload));
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
         authenticate: false,
@@ -1059,7 +1059,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
-      ).rejects.toEqual(new StoreApiError(payload));
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
         authenticate: false,
