@@ -7,15 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.13-beta.0] - 2021-05-13
+
 ## [0.0.12] - 2021-05-04
-
 ### Added
-
 - `fetch` options take `authenticate` boolean parameter to optionally disable authentication (which is enabled by default)
 
 ### Changed
-
-- the following methods now do _not_ authenticate against Brain: 
+- the following methods now do _not_ authenticate against Brain:
   - `findAllProviders`
   - `findOneProvider`
   - `parseProfile`
@@ -28,34 +27,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `getMapAST`
 
 ## [0.0.11] - 2021-04-29
-
 ### Fixed
-
 - Release script
 
 ## [0.0.10] - 2021-04-27
-
 ### Added
-
 - `getGithubLoginUrl` method parameter `mode` added
 
 ## [0.0.9] - 2021-04-23
-
 ### Changed
-
 - **BREAKING CHANGE:** `BrainClient` renamed to `ServiceClient`
 - **BREAKING CHANGE:** package renamed to `@superfaceai/service-client`
 
 ## [0.0.8] - 2021-04-23
-
 ### Changed
-
 - **BREAKING CHANGE:** `passwordlessLogin` returns error object instead of throwing
 
 ## [0.0.7] - 2021-04-20
-
 ### Added
-
 - `createProvider` method creates provider in store
 - `findAllProviders` method returns all providers in store
 - `findOneProvider` method returns one provider from store
@@ -72,48 +61,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `signOut` method for facilitating session sign out with Brain
 
 ## [0.0.6] - 2021-04-19
-
 ### Added
-
 - `passwordlessLogin` method takes optional login mode (`login` or `register`)
 
 ### Fixed
-
 - removed `RequestInit` and `Response` import from `cross-fetch`
 
 ## [0.0.5] - 2021-04-14
-
 ### Changed
-
 - **BREAKING CHANGE:** `passwordlessLogin` returns object with `verifyUrl` & `expiresAt`
 
 ## [0.0.4] - 2021-04-09
-
 ### Fixed
-
 - Fixed polling in `verifyPasswordlessLogin` when running in the browser
 
 ## [0.0.3] - 2021-04-08
-
 ### Added
-
 - `verifyPasswordlessLogin` method takes new optional argument `options` and polls verify endpoint if token verification status is `PENDING`
 
 ### Changed
-
 - **BREAKING CHANGE:** renamed `TokenVerificationStatus` to `VerificationStatus`
 
-## [0.0.2] - 2021-04-08
-
+## 0.0.2 - 2021-04-08
 ### Added
-
 - `passwordlessLogin` method to `BrainClient` which starts passworldess login flow by sending confirmation e-mail
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.12...HEAD
+[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.13-beta.0...HEAD
+[0.0.13-beta.0]: https://github.com/superfaceai/service-client/compare/v0.0.12...v0.0.13-beta.0
 [0.0.12]: https://github.com/superfaceai/service-client/compare/v0.0.11...v0.0.12
-[0.0.11]: https://github.com/superfaceai/service-client/compare/v0.0.9...v0.0.11
+[0.0.11]: https://github.com/superfaceai/service-client/compare/v0.0.10...v0.0.11
 [0.0.10]: https://github.com/superfaceai/service-client/compare/v0.0.9...v0.0.10
 [0.0.9]: https://github.com/superfaceai/service-client/compare/v0.0.8...v0.0.9
 [0.0.8]: https://github.com/superfaceai/service-client/compare/v0.0.7...v0.0.8
@@ -122,4 +100,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.0.5]: https://github.com/superfaceai/service-client/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/superfaceai/service-client/compare/v0.0.3...v0.0.4
 [0.0.3]: https://github.com/superfaceai/service-client/compare/v0.0.2...v0.0.3
-[0.0.2]: https://github.com/superfaceai/service-client/compare/v0.0.1...v0.0.2
