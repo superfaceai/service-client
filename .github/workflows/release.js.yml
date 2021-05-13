@@ -83,12 +83,12 @@ jobs:
 
       # Read version changelog
       - id: get-changelog
-      name: Get release version changelog
-      uses: superfaceai/release-changelog-action@v1
-      with:
-        path-to-changelog: CHANGELOG.md
-        version: ${{ env.NEW_VERSION }}
-        operation: read
+        name: Get release version changelog
+        uses: superfaceai/release-changelog-action@v1
+        with:
+          path-to-changelog: CHANGELOG.md
+          version: ${{ env.NEW_VERSION }}
+          operation: read
 
       # Update release documentation
       - name: Update GitHub release documentation
@@ -98,4 +98,3 @@ jobs:
           body: ${{ steps.get-changelog.outputs.changelog }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
