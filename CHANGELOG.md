@@ -7,8 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.14] - 2021-05-14
 ### Fixed
-
 - Custom errors have properly set prototype as described in TypeScript [Documentation](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work).
 
 ## [0.0.13] - 2021-05-14
@@ -96,7 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.13...HEAD
+[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.14...HEAD
+[0.0.14]: https://github.com/superfaceai/service-client/compare/v0.0.13...v0.0.14
 [0.0.13]: https://github.com/superfaceai/service-client/compare/v0.0.13-beta.0...v0.0.13
 [0.0.13-beta.0]: https://github.com/superfaceai/service-client/compare/v0.0.12...v0.0.13-beta.0
 [0.0.12]: https://github.com/superfaceai/service-client/compare/v0.0.11...v0.0.12
