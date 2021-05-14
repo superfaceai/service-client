@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.13] - 2021-05-14
 ### Changed
 - Service Client throws custom errors. `ServiceClientError` as generic error from Service Client and `ServiceApiError` as error when non 2xx response is received from service apis.
 
@@ -91,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.13-beta.0...HEAD
+[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.13...HEAD
+[0.0.13]: https://github.com/superfaceai/service-client/compare/v0.0.13-beta.0...v0.0.13
 [0.0.13-beta.0]: https://github.com/superfaceai/service-client/compare/v0.0.12...v0.0.13-beta.0
 [0.0.12]: https://github.com/superfaceai/service-client/compare/v0.0.11...v0.0.12
 [0.0.11]: https://github.com/superfaceai/service-client/compare/v0.0.10...v0.0.11
