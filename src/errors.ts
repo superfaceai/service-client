@@ -1,6 +1,11 @@
 import { ServiceApiErrorResponse } from './interfaces';
 
-export class ServiceClientError extends Error {}
+export class ServiceClientError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, ServiceClientError.prototype);
+  }
+}
 
 export class ServiceApiError extends ServiceClientError {
   public status: number;
@@ -12,6 +17,8 @@ export class ServiceApiError extends ServiceClientError {
     super(
       `Store responded with status: ${errorResponse.status} on: ${errorResponse.instance} ${errorResponse.title}: ${errorResponse.detail}`
     );
+
+    Object.setPrototypeOf(this, ServiceApiError.prototype);
 
     this.status = errorResponse.status;
     this.instance = errorResponse.instance;
