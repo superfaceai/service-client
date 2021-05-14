@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Fixed
+
+- Custom errors have properly set prototype as described in TypeScript [Documentation](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work).
+
 ## [0.0.13] - 2021-05-14
 ### Changed
 - Service Client throws custom errors. `ServiceClientError` as generic error from Service Client and `ServiceApiError` as error when non 2xx response is received from service apis.
