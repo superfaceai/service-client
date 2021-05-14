@@ -15,7 +15,7 @@ import {
   ProfileVersionResponse,
   ProviderResponse,
   RefreshAccessTokenOptions,
-  StoreApiErrorResponse,
+  ServiceApiErrorResponse,
 } from './interfaces';
 import {
   DEFAULT_POLLING_INTERVAL_SECONDS,
@@ -28,6 +28,7 @@ import {
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
 import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
+import { ServiceClientError, ServiceApiError } from './errors';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -92,7 +93,9 @@ export class ServiceClient {
     const cookie = this.getRefreshTokenCookie(options);
 
     if (!this._STORAGE.baseUrl) {
-      throw Error('Client is not initialized, baseUrl not configured');
+      throw new ServiceClientError(
+        'Client is not initialized, baseUrl not configured'
+      );
     }
 
     const init = {
@@ -469,9 +472,9 @@ export class ServiceClient {
 
       return null;
     } else if ([401, 403].includes(result.status)) {
-      throw new Error("No session found, couldn't log out");
+      throw new ServiceClientError("No session found, couldn't log out");
     } else {
-      throw new Error("Couldn't log out due to unknown reasons");
+      throw new ServiceClientError("Couldn't log out due to unknown reasons");
     }
   }
 
@@ -530,10 +533,8 @@ export class ServiceClient {
 
   private async unwrap(response: Response): Promise<Response> {
     if (!response.ok) {
-      const error = (await response.json()) as StoreApiErrorResponse;
-      throw new Error(
-        `Store responded with status: ${error.status} on: ${error.instance} ${error.title}: ${error.detail}`
-      );
+      const errorResponse = (await response.json()) as ServiceApiErrorResponse;
+      throw new ServiceApiError(errorResponse);
     }
 
     return response;

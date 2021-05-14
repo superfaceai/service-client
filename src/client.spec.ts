@@ -9,6 +9,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
+import { ServiceClientError, ServiceApiError } from './errors';
 import {
   MapRevisionResponse,
   ProfileVersionResponse,
@@ -413,22 +414,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/providers',
+        title: 'Already exists',
+        detail: 'Provider already exists',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 400,
-          instance: '/providers',
-          title: 'Already exists',
-          detail: 'Provider already exists',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createProvider('test')).rejects.toEqual(
-        new Error(
-          `Store responded with status: 400 on: /providers Already exists: Provider already exists`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
@@ -470,22 +470,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/providers',
+        title: 'Not Found',
+        detail: 'Provider not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/providers',
-          title: 'Not Found',
-          detail: 'Provider not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.findAllProviders()).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /providers Not Found: Provider not found`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
@@ -526,22 +525,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/providers',
+        title: 'Not Found',
+        detail: 'Provider not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/providers',
-          title: 'Not Found',
-          detail: 'Provider not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.findOneProvider('test')).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /providers Not Found: Provider not found`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
@@ -574,22 +572,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/profiles',
+        title: 'Already exists',
+        detail: 'Profile already exists',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 400,
-          instance: '/profiles',
-          title: 'Already exists',
-          detail: 'Profile already exists',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createProfile('test')).rejects.toEqual(
-        new Error(
-          `Store responded with status: 400 on: /profiles Already exists: Profile already exists`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/profiles', {
@@ -625,22 +622,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 500,
+        instance: '/parse',
+        title: 'Internal Server Exception',
+        detail: 'Unknow parser error',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 500,
-          instance: '/parse',
-          title: 'Internal Server Exception',
-          detail: 'Unknow parser error',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.parseProfile('profileSource')).rejects.toEqual(
-        new Error(
-          `Store responded with status: 500 on: /parse Internal Server Exception: Unknow parser error`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
@@ -687,25 +683,22 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/vcs/user-repos@1.0.0',
+        title: 'Not Found',
+        detail: 'Profile not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/vcs/user-repos@1.0.0',
-          title: 'Not Found',
-          detail: 'Profile not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getProfile('vcs', '1.0.0', 'user-repos')
-      ).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /vcs/user-repos@1.0.0 Not Found: Profile not found`
-        )
-      );
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
@@ -739,25 +732,22 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/vcs/user-repos@1.0.0',
+        title: 'Not Found',
+        detail: 'Profile not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/vcs/user-repos@1.0.0',
-          title: 'Not Found',
-          detail: 'Profile not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getProfileSource('vcs', '1.0.0', 'user-repos')
-      ).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /vcs/user-repos@1.0.0 Not Found: Profile not found`
-        )
-      );
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
@@ -792,25 +782,22 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/vcs/user-repos@1.0.0',
+        title: 'Not Found',
+        detail: 'Profile not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/vcs/user-repos@1.0.0',
-          title: 'Not Found',
-          detail: 'Profile not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getProfileAST('vcs', '1.0.0', 'user-repos')
-      ).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /vcs/user-repos@1.0.0 Not Found: Profile not found`
-        )
-      );
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
@@ -842,22 +829,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/maps',
+        title: 'Already exists',
+        detail: 'Map already exists',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 400,
-          instance: '/maps',
-          title: 'Already exists',
-          detail: 'Map already exists',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createMap('test')).rejects.toEqual(
-        new Error(
-          `Store responded with status: 400 on: /maps Already exists: Map already exists`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/maps', {
@@ -892,22 +878,21 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 500,
+        instance: '/parse',
+        title: 'Internal Server Exception',
+        detail: 'Unknow parser error',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 500,
-          instance: '/parse',
-          title: 'Internal Server Exception',
-          detail: 'Unknow parser error',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.parseMap('mapSource')).rejects.toEqual(
-        new Error(
-          `Store responded with status: 500 on: /parse Internal Server Exception: Unknow parser error`
-        )
+        new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/parse', {
@@ -960,25 +945,22 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/vcs/user-repos.github@1.0.0',
+        title: 'Not Found',
+        detail: 'Map not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/vcs/user-repos.github@1.0.0',
-          title: 'Not Found',
-          detail: 'Map not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getMap('vcs', '1.0.0', 'user-repos', 'github')
-      ).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /vcs/user-repos.github@1.0.0 Not Found: Map not found`
-        )
-      );
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
         authenticate: false,
@@ -1012,25 +994,22 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/vcs/user-repos.github@1.0.0',
+        title: 'Not Found',
+        detail: 'Map not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/vcs/user-repos.github@1.0.0',
-          title: 'Not Found',
-          detail: 'Map not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
-      ).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /vcs/user-repos.github@1.0.0 Not Found: Map not found`
-        )
-      );
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
         authenticate: false,
@@ -1065,25 +1044,22 @@ describe('client', () => {
     });
 
     it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: '/vcs/user-repos.github@1.0.0',
+        title: 'Not Found',
+        detail: 'Map not found',
+      };
       const mockResponse = {
         ok: false,
-        json: async () => ({
-          status: 404,
-          instance: '/vcs/user-repos.github@1.0.0',
-          title: 'Not Found',
-          detail: 'Map not found',
-        }),
+        json: async () => payload,
       };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
         client.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
-      ).rejects.toEqual(
-        new Error(
-          `Store responded with status: 404 on: /vcs/user-repos.github@1.0.0 Not Found: Map not found`
-        )
-      );
+      ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
         authenticate: false,
@@ -1142,7 +1118,7 @@ describe('client', () => {
 
         expect(logoutSpy).toHaveBeenCalledTimes(0);
         await expect(() => client.signOut()).rejects.toEqual(
-          Error("No session found, couldn't log out")
+          new ServiceClientError("No session found, couldn't log out")
         );
       });
     }
@@ -1161,7 +1137,7 @@ describe('client', () => {
 
       expect(logoutSpy).toHaveBeenCalledTimes(0);
       await expect(() => client.signOut()).rejects.toEqual(
-        Error("Couldn't log out due to unknown reasons")
+        new ServiceClientError("Couldn't log out due to unknown reasons")
       );
     });
   });
