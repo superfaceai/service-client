@@ -458,8 +458,9 @@ export class ServiceClient {
     email: string,
     code: string
   ): Promise<PasswordlessConfirmResponse> {
+    const encodedEmail = encodeURIComponent(email);
     const apiResponse = await this.fetch(
-      `/auth/passwordless/confirm?email=${email}&code=${code}`,
+      `/auth/passwordless/confirm?email=${encodedEmail}&code=${code}`,
       { authenticate: false, headers: { accept: 'application/json' } }
     );
 

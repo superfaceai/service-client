@@ -65,7 +65,7 @@ describe('client', () => {
   });
 
   describe('passwordless flow', () => {
-    const confirmEmail = 'some.user@superface.test';
+    const confirmEmail = 'some.user+shared@superface.test';
     const confirmCode = 'CODE1234';
 
     const identityServerState = {
@@ -519,7 +519,8 @@ function runMockedPasswordlessIdentityServer(
       const { email, code } = req.query || {};
 
       if (
-        email === identityServerState.expectedConfirmEmail &&
+        decodeURIComponent(email as string) ===
+          identityServerState.expectedConfirmEmail &&
         code === identityServerState.expectedConfirmCode
       ) {
         res.status(200).send({ status: 'CONFIRMED' });
