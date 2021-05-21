@@ -14,6 +14,7 @@ import {
   MapRevisionResponse,
   ProfileVersionResponse,
   ProviderResponse,
+  LoginConfirmationErrorCode,
 } from './interfaces';
 import { CancellationToken } from './interfaces/passwordless_verify_options';
 import { VerificationStatus } from './interfaces/passwordless_verify_response';
@@ -358,6 +359,88 @@ describe('client', () => {
         });
 
         expect(cancelCallback).toBeCalled();
+      });
+    });
+
+    describe('confirm', () => {
+      const email = 'email@superface.test';
+      const code =
+        '3d5665e8ff18a5c306c6df53bcc617d8b5923d7ea02b992b96f1773ec36ee152';
+
+      const confirmedRes = { status: 'CONFIRMED' };
+
+      const usedRes = {
+        status: 400,
+        instance: '/auth/passwordless/confirm',
+        title: 'Token already confirmed',
+        detail: `Code ${code} was already used to confirm login`,
+      };
+
+      const expiredRes = {
+        status: 400,
+        instance: '/auth/passwordless/confirm',
+        title: 'Code is expired',
+        detail: `Code ${code} is expired`,
+      };
+
+      const invalidRes = {
+        status: 400,
+        instance: '/auth/passwordless/confirm',
+        title: "Email doesn't match",
+        detail: `Email ${email} doesn't match with email for confirmation`,
+      };
+
+      it(`when API responds with status ${confirmedRes.status} • returns success`, async () => {
+        fetchMock.mockResponse(JSON.stringify(confirmedRes), { status: 200 });
+
+        const result = await client.confirmPasswordlessLogin(email, code);
+
+        expect(result).toStrictEqual({ success: true });
+      });
+
+      it(`when API responds with status 400 and title '${usedRes.title}' • returns failure with code 'USED'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(usedRes), { status: 400 });
+
+        const result = await client.confirmPasswordlessLogin(email, code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.USED,
+        });
+      });
+
+      it(`when API responds with status 400 and title '${expiredRes.title}' • returns failure with code 'EXPIRED'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(expiredRes), { status: 400 });
+
+        const result = await client.confirmPasswordlessLogin(email, code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.EXPIRED,
+        });
+      });
+
+      it(`when API responds with status 400 and title '${invalidRes.title}' • returns failure with code 'INVALID'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(invalidRes), { status: 400 });
+
+        const result = await client.confirmPasswordlessLogin(email, code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.INVALID,
+        });
+      });
+
+      it('when API responds with unfamiliar response • throws', () => {
+        fetchMock.mockResponse('500 Internal Server Error', { status: 500 });
+
+        expect(() =>
+          client.confirmPasswordlessLogin(email, code)
+        ).rejects.toStrictEqual(
+          new Error(
+            'Cannot deserialize confirmation API response: Unexpected token I in JSON at position 4'
+          )
+        );
       });
     });
   });

@@ -27,6 +27,10 @@ import {
   PasswordlessVerifyResponse,
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
+import {
+  PasswordlessConfirmResponse,
+  LoginConfirmationErrorCode,
+} from './interfaces/passwordless_confirm_response';
 import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
 import { ServiceClientError, ServiceApiError } from './errors';
 
@@ -448,6 +452,47 @@ export class ServiceClient {
     return {
       verificationStatus: VerificationStatus.POLLING_TIMEOUT,
     };
+  }
+
+  public async confirmPasswordlessLogin(
+    email: string,
+    code: string
+  ): Promise<PasswordlessConfirmResponse> {
+    const apiResponse = await this.fetch(
+      `/auth/passwordless/confirm?email=${email}&code=${code}`,
+      { authenticate: false, headers: { accept: 'application/json' } }
+    );
+
+    const { status, title } = await (async function () {
+      try {
+        return await apiResponse.json();
+      } catch (e) {
+        throw new ServiceClientError(
+          `Cannot deserialize confirmation API response: ${e.message}`
+        );
+      }
+    })();
+
+    function makeErrorCodeFrom(title: string): LoginConfirmationErrorCode {
+      if (title.toLocaleLowerCase().includes('expir'))
+        return LoginConfirmationErrorCode.EXPIRED;
+      if (
+        title.toLowerCase().includes('already confirm') ||
+        title.toLowerCase().includes('used')
+      )
+        return LoginConfirmationErrorCode.USED;
+
+      return LoginConfirmationErrorCode.INVALID;
+    }
+
+    if (status === 'CONFIRMED') {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        code: makeErrorCodeFrom(title),
+      };
+    }
   }
 
   public async signOut(
