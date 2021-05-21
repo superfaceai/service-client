@@ -436,9 +436,9 @@ describe('client', () => {
 
         expect(() =>
           client.confirmPasswordlessLogin(email, code)
-        ).rejects.toStrictEqual(
+        ).rejects.toEqual(
           new Error(
-            'Cannot deserialize confirmation API response: Unexpected token I in JSON at position 4'
+            'Cannot deserialize confirmation API response: invalid json response body at  reason: Unexpected token I in JSON at position 4'
           )
         );
       });
