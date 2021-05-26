@@ -188,7 +188,7 @@ describe('client', () => {
     const EXPIRES_AT = new Date('2021-04-13T12:08:27.103Z');
 
     describe('passwordlessLogin', () => {
-      it('when successful • should send login email and return verify url with code expiration date', async () => {
+      it('should send login email and return verify url with code expiration date when successful', async () => {
         fetchMock.mockResponse(
           JSON.stringify({ verify_url: VERIFY_URL, expires_at: EXPIRES_AT }),
           { status: 200 }
@@ -201,7 +201,7 @@ describe('client', () => {
         });
       });
 
-      it("when email doesn't exist • should return unsuccess with response title & optionally detail", async () => {
+      it("should return unsuccess with response title & optionally detail when email doesn't exist", async () => {
         fetchMock.mockResponse(
           JSON.stringify({
             status: 400,
@@ -392,7 +392,7 @@ describe('client', () => {
         detail: `Email ${email} doesn't match with email for confirmation`,
       };
 
-      it(`when API responds with status ${confirmedRes.status} • returns success`, async () => {
+      it(`should return success when API responds with status ${confirmedRes.status}`, async () => {
         fetchMock.mockResponse(JSON.stringify(confirmedRes), { status: 200 });
 
         const result = await client.confirmPasswordlessLogin(email, code);
@@ -400,7 +400,7 @@ describe('client', () => {
         expect(result).toStrictEqual({ success: true });
       });
 
-      it(`when API responds with status 400 and title '${usedRes.title}' • returns failure with code 'USED'`, async () => {
+      it(`should return failure with code 'USED' when API responds with status 400 and title '${usedRes.title}'`, async () => {
         fetchMock.mockResponse(JSON.stringify(usedRes), { status: 400 });
 
         const result = await client.confirmPasswordlessLogin(email, code);
@@ -411,7 +411,7 @@ describe('client', () => {
         });
       });
 
-      it(`when API responds with status 400 and title '${expiredRes.title}' • returns failure with code 'EXPIRED'`, async () => {
+      it(`should return failure with code 'EXPIRED' when API responds with status 400 and title '${expiredRes.title}'`, async () => {
         fetchMock.mockResponse(JSON.stringify(expiredRes), { status: 400 });
 
         const result = await client.confirmPasswordlessLogin(email, code);
@@ -422,7 +422,7 @@ describe('client', () => {
         });
       });
 
-      it(`when API responds with status 400 and title '${invalidRes.title}' • returns failure with code 'INVALID'`, async () => {
+      it(`should return failure with code 'INVALID' when API responds with status 400 and title '${invalidRes.title}'`, async () => {
         fetchMock.mockResponse(JSON.stringify(invalidRes), { status: 400 });
 
         const result = await client.confirmPasswordlessLogin(email, code);
@@ -433,7 +433,7 @@ describe('client', () => {
         });
       });
 
-      it('when API responds with unfamiliar response • throws', () => {
+      it('should throw when API responds with unfamiliar response', async () => {
         fetchMock.mockResponse('500 Internal Server Error', { status: 500 });
 
         expect(() =>
@@ -1156,7 +1156,7 @@ describe('client', () => {
     });
   });
   describe('signOut', () => {
-    it('signing out from all devices • should set `all` option in API call', async () => {
+    it('should set `all` option in API call when signing out from all devices', async () => {
       const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
       await client.signOut({ fromAllDevices: true });
@@ -1167,7 +1167,7 @@ describe('client', () => {
       });
     });
 
-    it('signing out from current session • should unset `all` option in API call', async () => {
+    it('should not set `all` option in API call when signing out from current session', async () => {
       const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
       await client.signOut();
@@ -1178,7 +1178,7 @@ describe('client', () => {
       });
     });
 
-    it('when server responds with 204 • should return null & call internal `logout` method', async () => {
+    it('should return null & call internal `logout` method when server responds with 204', async () => {
       fetchMock.mockResponse('', { status: 204 });
       const logoutSpy = jest.spyOn(client, 'logout');
       const result = await client.signOut();
@@ -1189,7 +1189,7 @@ describe('client', () => {
 
     const errorCodes = [401, 403];
     for (const errorCode of errorCodes) {
-      it(`when server responds with ${errorCode} • throws`, async () => {
+      it(`should throw when server responds with ${errorCode}`, async () => {
         fetchMock.mockResponse(
           JSON.stringify({
             status: errorCode,
@@ -1208,7 +1208,7 @@ describe('client', () => {
       });
     }
 
-    it(`when server responds with 500 • throws unknown error`, async () => {
+    it(`should throw unknown error when server responds with 500`, async () => {
       fetchMock.mockResponse(
         JSON.stringify({
           status: 500,
