@@ -9,12 +9,12 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
-import { ServiceClientError, ServiceApiError } from './errors';
+import { ServiceApiError, ServiceClientError } from './errors';
 import {
+  LoginConfirmationErrorCode,
   MapRevisionResponse,
   ProfileVersionResponse,
   ProviderResponse,
-  LoginConfirmationErrorCode,
 } from './interfaces';
 import { CancellationToken } from './interfaces/passwordless_verify_options';
 import { VerificationStatus } from './interfaces/passwordless_verify_response';
@@ -436,7 +436,7 @@ describe('client', () => {
       it('should throw when API responds with unfamiliar response', async () => {
         fetchMock.mockResponse('500 Internal Server Error', { status: 500 });
 
-        expect(() =>
+        await expect(() =>
           client.confirmPasswordlessLogin(email, code)
         ).rejects.toEqual(
           new Error(
