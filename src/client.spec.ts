@@ -169,7 +169,9 @@ describe('client', () => {
       });
       expect(client.isAccessTokenExpired()).toBe(false);
     });
+  });
 
+  describe('logout', () => {
     it('should logout', () => {
       client.login({
         access_token: 'AT',
@@ -185,7 +187,7 @@ describe('client', () => {
     const VERIFY_URL = 'https://superface.test/passwordless/verify';
     const EXPIRES_AT = new Date('2021-04-13T12:08:27.103Z');
 
-    describe('login', () => {
+    describe('passwordlessLogin', () => {
       it('when successful • should send login email and return verify url with code expiration date', async () => {
         fetchMock.mockResponse(
           JSON.stringify({ verify_url: VERIFY_URL, expires_at: EXPIRES_AT }),
@@ -218,7 +220,7 @@ describe('client', () => {
       });
     });
 
-    describe('verify', () => {
+    describe('verifyPasswordlessLogin', () => {
       describe('for confirmed token', () => {
         const authToken = {
           access_token: 'AT',
@@ -362,7 +364,7 @@ describe('client', () => {
       });
     });
 
-    describe('confirm', () => {
+    describe('confirmPasswordlessLogin', () => {
       const email = 'email@superface.test';
       const code =
         '3d5665e8ff18a5c306c6df53bcc617d8b5923d7ea02b992b96f1773ec36ee152';
@@ -445,7 +447,7 @@ describe('client', () => {
     });
   });
 
-  describe('github', () => {
+  describe('getGithubLoginUrl', () => {
     beforeEach(() => {
       client.setOptions({ baseUrl: BASE_URL });
     });
@@ -1153,7 +1155,7 @@ describe('client', () => {
       });
     });
   });
-  describe('signout', () => {
+  describe('signOut', () => {
     it('signing out from all devices • should set `all` option in API call', async () => {
       const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
