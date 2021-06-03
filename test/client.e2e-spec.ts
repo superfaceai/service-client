@@ -3,6 +3,7 @@ import * as http from 'http';
 
 import {
   CancellationToken,
+  LoginConfirmationErrorCode,
   MapRevisionResponse,
   MEDIA_TYPE_JSON,
   MEDIA_TYPE_MAP,
@@ -12,7 +13,9 @@ import {
   ProfileVersionResponse,
   ProviderResponse,
   ServiceClient,
+  SuccessfulConfirm,
   SuccessfulLogin,
+  UnsuccessfulConfirm,
 } from '../src';
 
 describe('client', () => {
@@ -62,9 +65,14 @@ describe('client', () => {
   });
 
   describe('passwordless flow', () => {
+    const confirmEmail = 'some.user+shared@superface.test';
+    const confirmCode = 'CODE1234';
+
     const identityServerState = {
       mockedTokenVerificationStatus: 'PENDING',
       verificationTokenExpiresAt: new Date('2021-04-13T12:08:27.103Z'),
+      expectedConfirmEmail: confirmEmail,
+      expectedConfirmCode: confirmCode,
     };
 
     beforeAll(() => {
@@ -139,6 +147,25 @@ describe('client', () => {
       cancellationToken.isCancellationRequested = true;
       const verifyResult = await verifyPromise;
       expect(verifyResult.verificationStatus).toBe('POLLING_CANCELLED');
+    });
+
+    test('call confirmPasswordlessLogin with expected email & code', async () => {
+      const { success } = (await serviceClient.confirmPasswordlessLogin(
+        confirmEmail,
+        confirmCode
+      )) as SuccessfulConfirm;
+
+      expect(success).toBe(true);
+    });
+
+    test('call confirmPasswordlessLogin with unknown email & code', async () => {
+      const { success, code } = (await serviceClient.confirmPasswordlessLogin(
+        'random@email.test',
+        'random-code'
+      )) as UnsuccessfulConfirm;
+
+      expect(success).toBe(false);
+      expect(code).toBe(LoginConfirmationErrorCode.INVALID);
     });
   });
 
@@ -436,6 +463,8 @@ function runMockedPasswordlessIdentityServer(
   identityServerState: {
     mockedTokenVerificationStatus: string;
     verificationTokenExpiresAt: Date;
+    expectedConfirmEmail: string;
+    expectedConfirmCode: string;
   }
 ) {
   const identity = express();
@@ -481,6 +510,27 @@ function runMockedPasswordlessIdentityServer(
         }
       } else {
         res.sendStatus(401);
+      }
+    }
+  );
+  identity.get(
+    '/auth/passwordless/confirm',
+    (req: express.Request, res: express.Response) => {
+      const { email, code } = req.query || {};
+
+      if (
+        decodeURIComponent(email as string) ===
+          identityServerState.expectedConfirmEmail &&
+        code === identityServerState.expectedConfirmCode
+      ) {
+        res.status(200).send({ status: 'CONFIRMED' });
+      } else {
+        res.status(400).send({
+          status: 400,
+          instance: '/auth/passwordless/confirm',
+          title: "Email doesn't match",
+          detail: `Email ${email} doesn't match with email for confirmation`,
+        });
       }
     }
   );

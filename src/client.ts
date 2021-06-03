@@ -8,6 +8,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
+import { ServiceApiError,ServiceClientError } from './errors';
 import {
   AuthToken,
   ClientOptions,
@@ -18,6 +19,11 @@ import {
   ServiceApiErrorResponse,
 } from './interfaces';
 import {
+  LoginConfirmationErrorCode,
+  PasswordlessConfirmResponse,
+} from './interfaces/passwordless_confirm_response';
+import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
+import {
   DEFAULT_POLLING_INTERVAL_SECONDS,
   DEFAULT_POLLING_TIMEOUT_SECONDS,
   PasswordlessVerifyOptions,
@@ -27,8 +33,6 @@ import {
   PasswordlessVerifyResponse,
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
-import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
-import { ServiceClientError, ServiceApiError } from './errors';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -398,7 +402,10 @@ export class ServiceClient {
         return { success: false, title: 'Unexpected API response' };
       }
     } else if (result.status === 400) {
-      const apiResponse = await result.json();
+      const apiResponse = (await result.json()) as {
+        title: string;
+        detail: string;
+      };
       const { title, detail } = apiResponse || {};
       if (title) {
         return { success: false, title, detail };
@@ -448,6 +455,51 @@ export class ServiceClient {
     return {
       verificationStatus: VerificationStatus.POLLING_TIMEOUT,
     };
+  }
+
+  public async confirmPasswordlessLogin(
+    email: string,
+    code: string
+  ): Promise<PasswordlessConfirmResponse> {
+    const encodedEmail = encodeURIComponent(email);
+    const apiResponse = await this.fetch(
+      `/auth/passwordless/confirm?email=${encodedEmail}&code=${code}`,
+      { authenticate: false, headers: { accept: 'application/json' } }
+    );
+
+    const { status, title } = await (async function () {
+      try {
+        return (await apiResponse.json()) as {
+          status: string | number;
+          title?: string;
+        };
+      } catch (e) {
+        throw new ServiceClientError(
+          `Cannot deserialize confirmation API response: ${String(e)}`
+        );
+      }
+    })();
+
+    function makeErrorCodeFrom(title?: string): LoginConfirmationErrorCode {
+      if (title?.toLocaleLowerCase().includes('expir'))
+        return LoginConfirmationErrorCode.EXPIRED;
+      if (
+        title?.toLowerCase().includes('already confirm') ||
+        title?.toLowerCase().includes('used')
+      )
+        return LoginConfirmationErrorCode.USED;
+
+      return LoginConfirmationErrorCode.INVALID;
+    }
+
+    if (status === 'CONFIRMED') {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        code: makeErrorCodeFrom(title),
+      };
+    }
   }
 
   public async signOut(
