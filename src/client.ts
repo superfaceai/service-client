@@ -8,7 +8,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
-import { ServiceApiError,ServiceClientError } from './errors';
+import { ServiceApiError, ServiceClientError } from './errors';
 import {
   AuthToken,
   ClientOptions,
@@ -33,6 +33,11 @@ import {
   PasswordlessVerifyResponse,
   VerificationStatus,
 } from './interfaces/passwordless_verify_response';
+import { ProjectUpdateBody } from './interfaces/projects_api_options';
+import {
+  ProjectResponse,
+  ProjectsListResponse,
+} from './interfaces/projects_api_response';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -500,6 +505,51 @@ export class ServiceClient {
         code: makeErrorCodeFrom(title),
       };
     }
+  }
+
+  public async getProjectsList(): Promise<ProjectsListResponse> {
+    const response: Response = await this.fetch('/projects', {
+      method: 'GET',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as ProjectsListResponse;
+  }
+
+  public async getProject(
+    handle: string,
+    name: string
+  ): Promise<ProjectResponse> {
+    const projectUrl = `/projects/${handle}/${name}`;
+
+    const response: Response = await this.fetch(projectUrl, {
+      method: 'GET',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as ProjectResponse;
+  }
+
+  public async updateProject(
+    handle: string,
+    name: string,
+    projectUpdate: ProjectUpdateBody
+  ): Promise<ProjectResponse> {
+    const projectUrl = `/projects/${handle}/${name}`;
+
+    const response: Response = await this.fetch(projectUrl, {
+      method: 'PATCH',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      body: JSON.stringify(projectUpdate),
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as ProjectResponse;
   }
 
   public async signOut(

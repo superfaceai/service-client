@@ -18,6 +18,11 @@ import {
 } from './interfaces';
 import { CancellationToken } from './interfaces/passwordless_verify_options';
 import { VerificationStatus } from './interfaces/passwordless_verify_response';
+import { ProjectUpdateBody } from './interfaces/projects_api_options';
+import {
+  ProjectResponse,
+  ProjectsListResponse,
+} from './interfaces/projects_api_response';
 
 const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
   title: 'Token is pending confirmation',
@@ -1155,6 +1160,183 @@ describe('client', () => {
       });
     });
   });
+
+  describe('getProjectsList', () => {
+    it('should find all projects', async () => {
+      const mockResult: ProjectsListResponse = {
+        url: '/projects',
+        data: [
+          {
+            url: 'https://superface.test/projects/username/new-project',
+            name: 'new-project',
+            created_at: '2021-06-04T07:11:34.114Z',
+          },
+          {
+            url: 'https://superface.test/projects/username/new-project-2',
+            name: 'new-project-2',
+            created_at: '2021-06-04T10:37:27.277Z',
+          },
+          {
+            url: 'https://superface.test/projects/username/new-project-3',
+            name: 'new-project-3',
+            created_at: '2021-06-04T10:37:30.535Z',
+          },
+        ],
+      };
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.getProjectsList()).resolves.toEqual(mockResult);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/projects', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+  });
+
+  describe('getProject', () => {
+    const owner = 'username';
+    const name = 'project-name';
+
+    it('should get a single project', async () => {
+      const mockResult: ProjectResponse = {
+        url: `https://superface.test/projects/${owner}/${name}`,
+        name,
+        sdk_auth_tokens: [
+          {
+            token: 't0k3n',
+            created_at: '2021-06-04T07:11:34.114Z',
+          },
+        ],
+        settings: {
+          email_notifications: true,
+        },
+        created_at: '2021-06-04T07:11:34.114Z',
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.getProject(owner, name)).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: `/projects/${owner}/${name}`,
+        title: 'Not Found',
+        detail: 'Project not found',
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.getProject(owner, name)).rejects.toEqual(
+        new ServiceApiError(payload)
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+  });
+
+  describe('updateProject', () => {
+    const owner = 'username';
+    const name = 'project-name';
+
+    const projectUpdate: ProjectUpdateBody = {
+      settings: { email_notifications: true },
+    };
+
+    it('should update project', async () => {
+      const mockResult: ProjectResponse = {
+        url: `https://superface.test/projects/${owner}/${name}`,
+        name,
+        sdk_auth_tokens: [
+          {
+            token: 't0k3n',
+            created_at: '2021-06-04T07:11:34.114Z',
+          },
+        ],
+        settings: {
+          email_notifications: true,
+        },
+        created_at: '2021-06-04T07:11:34.114Z',
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.updateProject(owner, name, projectUpdate)
+      ).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
+        method: 'PATCH',
+        body: JSON.stringify(projectUpdate),
+        headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      });
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 404,
+        instance: `/projects/${owner}/${name}`,
+        title: 'Not Found',
+        detail: 'Project not found',
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.updateProject(owner, name, projectUpdate)
+      ).rejects.toEqual(new ServiceApiError(payload));
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectUpdate),
+      });
+    });
+  });
+
   describe('signOut', () => {
     it('should set `all` option in API call when signing out from all devices', async () => {
       const client = new ServiceClient({ baseUrl: BASE_URL });
