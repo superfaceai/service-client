@@ -11,6 +11,8 @@ import {
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
   ProfileVersionResponse,
+  ProjectResponse,
+  ProjectsListResponse,
   ProviderResponse,
   ServiceClient,
   SuccessfulConfirm,
@@ -18,10 +20,6 @@ import {
   UnsuccessfulConfirm,
 } from '../src';
 import { ProjectUpdateBody } from '../src/interfaces/projects_api_options';
-import {
-  ProjectResponse,
-  ProjectsListResponse,
-} from '../src/interfaces/projects_api_response';
 
 describe('client', () => {
   const IDENTITY_PROVIDER_PORT = 3031;
