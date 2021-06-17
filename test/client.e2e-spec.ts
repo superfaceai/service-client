@@ -11,12 +11,15 @@ import {
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
   ProfileVersionResponse,
+  ProjectResponse,
+  ProjectsListResponse,
   ProviderResponse,
   ServiceClient,
   SuccessfulConfirm,
   SuccessfulLogin,
   UnsuccessfulConfirm,
 } from '../src';
+import { ProjectUpdateBody } from '../src/interfaces/projects_api_options';
 
 describe('client', () => {
   const IDENTITY_PROVIDER_PORT = 3031;
@@ -435,6 +438,96 @@ describe('client', () => {
       await expect(
         serviceClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
       ).resolves.toEqual(JSON.stringify(mockMapAST));
+    });
+  });
+
+  describe('projects', () => {
+    const owner = 'username';
+    const name = 'project-name';
+
+    const mockProjectUpdate: ProjectUpdateBody = {
+      settings: { email_notifications: false },
+    };
+
+    const mockExistingProject: ProjectResponse = {
+      url: `https://superface.test/projects/${owner}/${name}`,
+      name,
+      sdk_auth_tokens: [
+        { token: 't0k3n', created_at: '2021-06-04T07:11:34.114Z' },
+      ],
+      settings: { email_notifications: true },
+      created_at: '2021-06-04T07:11:34.114Z',
+    };
+
+    const mockUpdatedProject: ProjectResponse = {
+      ...mockExistingProject,
+      settings: {
+        ...mockExistingProject.settings,
+        email_notifications: false,
+      },
+    };
+
+    const mockProjectsList: ProjectsListResponse = {
+      url: '/projects',
+      data: [mockExistingProject],
+    };
+
+    beforeAll(() => {
+      const projects = createExpressMock();
+      projects.use(json());
+      projects.get(
+        '/projects',
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockProjectsList);
+        }
+      );
+      projects.get(
+        `/projects/${owner}/${name}`,
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockExistingProject);
+        }
+      );
+      projects.patch(
+        `/projects/${owner}/${name}`,
+        (req: express.Request, res: express.Response) => {
+          if (
+            (req.body as ProjectUpdateBody)?.settings?.email_notifications ===
+            undefined
+          ) {
+            res.sendStatus(400);
+          } else {
+            res.json(mockUpdatedProject);
+          }
+        }
+      );
+      identityServer = projects.listen(IDENTITY_PROVIDER_PORT);
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
+        baseUrl: IDENTITY_PROVIDER_BASE_URL,
+        refreshToken: 'RT',
+      });
+    });
+
+    afterAll(() => {
+      identityServer.close();
+    });
+
+    test('get all projects', async () => {
+      await expect(serviceClient.getProjectsList()).resolves.toEqual(
+        mockProjectsList
+      );
+    });
+
+    test('get a single project', async () => {
+      await expect(serviceClient.getProject(owner, name)).resolves.toEqual(
+        mockExistingProject
+      );
+    });
+
+    test('update a project', async () => {
+      await expect(
+        serviceClient.updateProject(owner, name, mockProjectUpdate)
+      ).resolves.toEqual(mockUpdatedProject);
     });
   });
 });
