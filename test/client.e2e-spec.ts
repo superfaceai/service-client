@@ -10,10 +10,14 @@ import {
   MEDIA_TYPE_MAP_AST,
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
+  PerformStatisticsResponse,
   ProfileVersionResponse,
   ProjectResponse,
   ProjectsListResponse,
   ProviderResponse,
+  SDKConfigResponse,
+  SDKProviderChangesListResponse,
+  SDKProviderChangeType,
   ServiceClient,
   SuccessfulConfirm,
   SuccessfulLogin,
@@ -528,6 +532,141 @@ describe('client', () => {
       await expect(
         serviceClient.updateProject(owner, name, mockProjectUpdate)
       ).resolves.toEqual(mockUpdatedProject);
+    });
+  });
+
+  describe('insights', () => {
+    const accountHandle = 'username';
+    const projectName = 'project-name';
+    const profile = 'communication/send-email';
+    const providers = ['sendgrid', 'mailchimp'];
+    const from = new Date('2021-05-23T00:00:00Z');
+    const to = new Date('2021-05-25T00:00:00Z');
+    const intervalMinutes = 1440;
+
+    const mockPerformStatistics: PerformStatisticsResponse = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      interval_minutes: intervalMinutes,
+      account_handle: accountHandle,
+      project_name: projectName,
+      profile,
+      statistics: providers.map(provider => ({
+        provider,
+        series: [
+          {
+            successful_performs: 0,
+            failed_performs: 0,
+            from: '2021-05-23T00:00:00.000Z',
+            to: '2021-05-24T00:00:00.000Z',
+          },
+          {
+            successful_performs: 0,
+            failed_performs: 0,
+            from: '2021-05-24T00:00:00.000Z',
+            to: '2021-05-25T00:00:00.000Z',
+          },
+        ],
+      })),
+    };
+
+    const mockSDKConfiguration: SDKConfigResponse = {
+      updated_at: new Date().toISOString(),
+      configuration_hash: 'h45h',
+      configuration: {
+        profiles: {
+          [profile]: {
+            version: '0.0.0',
+            providers: providers.map((provider, i) => ({
+              provider,
+              version: '0.0.0',
+              priority: i,
+            })),
+          },
+        },
+      },
+    };
+
+    const mockProviderChangesList: SDKProviderChangesListResponse = {
+      data: [
+        {
+          changed_at: new Date().toISOString(),
+          change_type: SDKProviderChangeType.Failover,
+          profile,
+          from_provider: providers[0],
+          to_provider: providers[1],
+          failover_reasons: [
+            {
+              reason: '', // TODO
+              occurred_at: new Date().toISOString(),
+            },
+          ],
+        },
+      ],
+    };
+
+    beforeAll(() => {
+      const insights = createExpressMock();
+      insights.use(json());
+      insights.get(
+        '/insights/perform_statistics',
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockPerformStatistics);
+        }
+      );
+      insights.get(
+        `/insights/sdk_config`,
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockSDKConfiguration);
+        }
+      );
+      insights.get(
+        `/insights/provider_changes`,
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockProviderChangesList);
+        }
+      );
+      identityServer = insights.listen(IDENTITY_PROVIDER_PORT);
+      serviceClient = new ServiceClient();
+      serviceClient.setOptions({
+        baseUrl: IDENTITY_PROVIDER_BASE_URL,
+        refreshToken: 'RT',
+      });
+    });
+
+    afterAll(() => {
+      identityServer.close();
+    });
+
+    test('get perform statistics', async () => {
+      await expect(
+        serviceClient.getPerformStatistics(
+          accountHandle,
+          projectName,
+          profile,
+          providers,
+          from,
+          to,
+          intervalMinutes
+        )
+      ).resolves.toStrictEqual(mockPerformStatistics);
+    });
+
+    test('get SDK configuration', async () => {
+      await expect(
+        serviceClient.getSDKConfiguration(accountHandle, projectName)
+      ).resolves.toStrictEqual(mockSDKConfiguration);
+    });
+
+    test('get provider changes list', async () => {
+      await expect(
+        serviceClient.getProviderChangesList(
+          accountHandle,
+          projectName,
+          profile,
+          providers.slice(0, 1)
+        )
+      ).resolves.toStrictEqual(mockProviderChangesList);
     });
   });
 });
