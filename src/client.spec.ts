@@ -1565,7 +1565,7 @@ describe('client', () => {
           to_provider: providers[1],
           failover_reasons: [
             {
-              reason: '', // TODO
+              reason: 'HTTP_ERROR_500',
               occurred_at: new Date().toISOString(),
             },
           ],

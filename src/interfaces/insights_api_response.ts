@@ -1,4 +1,3 @@
-import { SDKFailoverReason } from './sdk_failover_reason';
 import { SDKProviderChangeType } from './sdk_provider_change_type';
 
 export interface SDKConfigResponse {
@@ -43,7 +42,7 @@ export interface SDKProviderChangeResponse {
   to_provider: string;
   from_provider: string;
   failover_reasons: Array<{
-    reason: SDKFailoverReason;
+    reason: string; // TODO: This should be a proper enum
     occurred_at: string;
   }>;
 }
