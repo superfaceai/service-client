@@ -10,12 +10,12 @@ import {
   MEDIA_TYPE_MAP_AST,
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
-  PerformStatisticsResponse,
   ProfileVersionResponse,
   ProjectResponse,
   ProjectsListResponse,
   ProviderResponse,
   SDKConfigResponse,
+  SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
   ServiceClient,
@@ -544,7 +544,7 @@ describe('client', () => {
     const to = new Date('2021-05-25T00:00:00Z');
     const intervalMinutes = 1440;
 
-    const mockPerformStatistics: PerformStatisticsResponse = {
+    const mockPerformStatistics: SDKPerformStatisticsResponse = {
       from: from.toISOString(),
       to: to.toISOString(),
       interval_minutes: intervalMinutes,
@@ -638,9 +638,9 @@ describe('client', () => {
       identityServer.close();
     });
 
-    test('get perform statistics', async () => {
+    test('get SDK perform statistics', async () => {
       await expect(
-        serviceClient.getPerformStatistics(
+        serviceClient.getSDKPerformStatistics(
           accountHandle,
           projectName,
           profile,
@@ -658,9 +658,9 @@ describe('client', () => {
       ).resolves.toStrictEqual(mockSDKConfiguration);
     });
 
-    test('get provider changes list', async () => {
+    test('get SDK provider changes list', async () => {
       await expect(
-        serviceClient.getProviderChangesList(
+        serviceClient.getSDKProviderChangesList(
           accountHandle,
           projectName,
           profile,

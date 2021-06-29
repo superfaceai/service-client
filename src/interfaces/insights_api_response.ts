@@ -17,7 +17,7 @@ export interface SDKConfigResponse {
   };
 }
 
-export interface PerformStatisticsResponse {
+export interface SDKPerformStatisticsResponse {
   from: string;
   to: string;
   interval_minutes: number;

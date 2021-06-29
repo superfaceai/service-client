@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - `getSDKConfiguration` method fetches SDK configuration for a given project
-- `getPerformStatistics` method fetches perform statistics for a given project/profile/provider
-- `getProviderChangesList` method lists provider changes for a given project/profile/provider
+- `getSDKPerformStatistics` method fetches perform statistics for a given project/profile/provider
+- `getSDKProviderChangesList` method lists provider changes for a given project/profile/provider
 
 ## [0.0.16] - 2021-06-17
 ### Added

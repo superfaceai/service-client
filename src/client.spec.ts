@@ -13,10 +13,10 @@ import { ServiceApiError, ServiceClientError } from './errors';
 import {
   LoginConfirmationErrorCode,
   MapRevisionResponse,
-  PerformStatisticsResponse,
   ProfileVersionResponse,
   ProviderResponse,
   SDKConfigResponse,
+  SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
 } from './interfaces';
@@ -1416,7 +1416,7 @@ describe('client', () => {
     });
   });
 
-  describe('getPerformStatistics', () => {
+  describe('getSDKPerformStatistics', () => {
     const accountHandle = 'username';
     const projectName = 'project-name';
     const profile = 'communication/send-email';
@@ -1440,7 +1440,7 @@ describe('client', () => {
       .join('&');
 
     it('should get capability perform statistics', async () => {
-      const mockResult: PerformStatisticsResponse = {
+      const mockResult: SDKPerformStatisticsResponse = {
         from: from.toISOString(),
         to: to.toISOString(),
         interval_minutes: intervalMinutes,
@@ -1475,7 +1475,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
 
       await expect(
-        client.getPerformStatistics(
+        client.getSDKPerformStatistics(
           accountHandle,
           projectName,
           profile,
@@ -1512,7 +1512,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
 
       await expect(
-        client.getPerformStatistics(
+        client.getSDKPerformStatistics(
           accountHandle,
           projectName,
           profile,
@@ -1533,7 +1533,7 @@ describe('client', () => {
     });
   });
 
-  describe('getProviderChangesList', () => {
+  describe('getSDKProviderChangesList', () => {
     const accountHandle = 'username';
     const projectName = 'project-name';
     const profile = 'communication/send-email';
@@ -1592,7 +1592,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
 
       await expect(
-        client.getProviderChangesList(accountHandle, projectName)
+        client.getSDKProviderChangesList(accountHandle, projectName)
       ).resolves.toEqual(mockResult);
 
       expect(fetchMock).toBeCalledTimes(1);
@@ -1611,7 +1611,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
 
       await expect(
-        client.getProviderChangesList(
+        client.getSDKProviderChangesList(
           accountHandle,
           projectName,
           profile,
@@ -1647,7 +1647,7 @@ describe('client', () => {
         .mockResolvedValue(mockResponse as Response);
 
       await expect(
-        client.getProviderChangesList(
+        client.getSDKProviderChangesList(
           accountHandle,
           projectName,
           profile,

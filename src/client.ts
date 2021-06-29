@@ -13,11 +13,11 @@ import {
   AuthToken,
   ClientOptions,
   MapRevisionResponse,
-  PerformStatisticsResponse,
   ProfileVersionResponse,
   ProviderResponse,
   RefreshAccessTokenOptions,
   SDKConfigResponse,
+  SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
   ServiceApiErrorResponse,
@@ -572,7 +572,7 @@ export class ServiceClient {
     return (await response.json()) as SDKConfigResponse;
   }
 
-  public async getPerformStatistics(
+  public async getSDKPerformStatistics(
     handle: string,
     projectName: string,
     profileName: string,
@@ -580,7 +580,7 @@ export class ServiceClient {
     from: Date,
     to: Date,
     intervalMinutes: number
-  ): Promise<PerformStatisticsResponse> {
+  ): Promise<SDKPerformStatisticsResponse> {
     const queryParams = {
       from: from.toISOString(),
       to: to.toISOString(),
@@ -604,10 +604,10 @@ export class ServiceClient {
 
     await this.unwrap(response);
 
-    return (await response.json()) as PerformStatisticsResponse;
+    return (await response.json()) as SDKPerformStatisticsResponse;
   }
 
-  public async getProviderChangesList(
+  public async getSDKProviderChangesList(
     handle: string,
     projectName: string,
     profileName?: string,
