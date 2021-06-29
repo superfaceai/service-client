@@ -15,6 +15,10 @@ import {
   MapRevisionResponse,
   ProfileVersionResponse,
   ProviderResponse,
+  SDKConfigResponse,
+  SDKPerformStatisticsResponse,
+  SDKProviderChangesListResponse,
+  SDKProviderChangeType,
 } from './interfaces';
 import { CancellationToken } from './interfaces/passwordless_verify_options';
 import { VerificationStatus } from './interfaces/passwordless_verify_response';
@@ -1334,6 +1338,332 @@ describe('client', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projectUpdate),
       });
+    });
+  });
+
+  describe('getSDKConfiguration', () => {
+    const accountHandle = 'username';
+    const projectName = 'project-name';
+    const profile = 'communication/send-email';
+    const providers = ['sendgrid', 'mailchimp'];
+
+    it('should get SDK config', async () => {
+      const mockResult: SDKConfigResponse = {
+        updated_at: new Date().toISOString(),
+        configuration_hash: 'h45h',
+        configuration: {
+          profiles: {
+            [profile]: {
+              version: '0.0.0',
+              providers: providers.map((provider, i) => ({
+                provider,
+                version: '0.0.0',
+                priority: i,
+              })),
+            },
+          },
+        },
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKConfiguration(accountHandle, projectName)
+      ).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(
+        fetchMock
+      ).toBeCalledWith(
+        `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
+        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/insights/sdk_config',
+        title: 'Project not found',
+        detail: `Project ${accountHandle}/${projectName} doesn't exist`,
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKConfiguration(accountHandle, projectName)
+      ).rejects.toEqual(new ServiceApiError(payload));
+
+      expect(fetchMock).toBeCalledTimes(1);
+
+      expect(
+        fetchMock
+      ).toBeCalledWith(
+        `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
+        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+      );
+    });
+  });
+
+  describe('getSDKPerformStatistics', () => {
+    const accountHandle = 'username';
+    const projectName = 'project-name';
+    const profile = 'communication/send-email';
+    const providers = ['sendgrid', 'mailchimp'];
+    const from = new Date('2021-05-23T00:00:00Z');
+    const to = new Date('2021-05-25T00:00:00Z');
+    const intervalMinutes = 1440;
+
+    const expectedQueryParams = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      interval_minutes: intervalMinutes,
+      account_handle: accountHandle,
+      project_name: projectName,
+      profile,
+      providers: providers.join(','),
+    };
+
+    const expectedUrlQuery = Object.entries(expectedQueryParams)
+      .map(kv => kv.join('='))
+      .join('&');
+
+    it('should get capability perform statistics', async () => {
+      const mockResult: SDKPerformStatisticsResponse = {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        interval_minutes: intervalMinutes,
+        account_handle: accountHandle,
+        project_name: projectName,
+        profile,
+        statistics: providers.map(provider => ({
+          provider,
+          series: [
+            {
+              successful_performs: 0,
+              failed_performs: 0,
+              from: '2021-05-23T00:00:00.000Z',
+              to: '2021-05-24T00:00:00.000Z',
+            },
+            {
+              successful_performs: 0,
+              failed_performs: 0,
+              from: '2021-05-24T00:00:00.000Z',
+              to: '2021-05-25T00:00:00.000Z',
+            },
+          ],
+        })),
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKPerformStatistics(
+          accountHandle,
+          projectName,
+          profile,
+          providers,
+          from,
+          to,
+          intervalMinutes
+        )
+      ).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        `/insights/perform_statistics?${expectedUrlQuery}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/insights/perform_statistics',
+        title: 'Project not found',
+        detail: `Project ${accountHandle}/${projectName} doesn't exist`,
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKPerformStatistics(
+          accountHandle,
+          projectName,
+          profile,
+          providers,
+          from,
+          to,
+          intervalMinutes
+        )
+      ).rejects.toEqual(new ServiceApiError(payload));
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        `/insights/perform_statistics?${expectedUrlQuery}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+  });
+
+  describe('getSDKProviderChangesList', () => {
+    const accountHandle = 'username';
+    const projectName = 'project-name';
+    const profile = 'communication/send-email';
+    const providers = ['sendgrid', 'mailchimp'];
+    const providerChangeTypes = [
+      SDKProviderChangeType.Failover,
+      SDKProviderChangeType.Recovery,
+    ];
+    const limit = 50;
+
+    const expectedUrlQuery = Object.entries({
+      account_handle: accountHandle,
+      project_name: projectName,
+      profile,
+      from_providers: providers.join(','),
+      provider_change_types: providerChangeTypes.join(','),
+      limit,
+    })
+      .map(kv => kv.join('='))
+      .join('&');
+
+    const mockResult: SDKProviderChangesListResponse = {
+      data: [
+        {
+          changed_at: new Date().toISOString(),
+          change_type: SDKProviderChangeType.Failover,
+          profile,
+          from_provider: providers[0],
+          to_provider: providers[1],
+          failover_reasons: [
+            {
+              reason: 'HTTP_ERROR_500',
+              occurred_at: new Date().toISOString(),
+            },
+          ],
+        },
+      ],
+    };
+
+    const mockResponse = {
+      ok: true,
+      json: async () => mockResult,
+    };
+
+    it('should not set optional query params if not provided', async () => {
+      const expectedUrlQuery = Object.entries({
+        account_handle: accountHandle,
+        project_name: projectName,
+        limit: 10, // default
+      })
+        .map(kv => kv.join('='))
+        .join('&');
+
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKProviderChangesList(accountHandle, projectName)
+      ).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        `/insights/provider_changes?${expectedUrlQuery}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+
+    it('should get list of provider changes', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKProviderChangesList(
+          accountHandle,
+          projectName,
+          profile,
+          providers,
+          providerChangeTypes,
+          limit
+        )
+      ).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        `/insights/provider_changes?${expectedUrlQuery}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/insights/provider_changes',
+        title: 'Project not found',
+        detail: `Project ${accountHandle}/${projectName} doesn't exist`,
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(
+        client.getSDKProviderChangesList(
+          accountHandle,
+          projectName,
+          profile,
+          providers,
+          providerChangeTypes,
+          limit
+        )
+      ).rejects.toEqual(new ServiceApiError(payload));
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        `/insights/provider_changes?${expectedUrlQuery}`,
+        {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     });
   });
 

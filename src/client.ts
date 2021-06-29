@@ -16,6 +16,10 @@ import {
   ProfileVersionResponse,
   ProviderResponse,
   RefreshAccessTokenOptions,
+  SDKConfigResponse,
+  SDKPerformStatisticsResponse,
+  SDKProviderChangesListResponse,
+  SDKProviderChangeType,
   ServiceApiErrorResponse,
 } from './interfaces';
 import {
@@ -550,6 +554,91 @@ export class ServiceClient {
     await this.unwrap(response);
 
     return (await response.json()) as ProjectResponse;
+  }
+
+  public async getSDKConfiguration(
+    handle: string,
+    projectName: string
+  ): Promise<SDKConfigResponse> {
+    const configUrl = `/insights/sdk_config?account_handle=${handle}&project_name=${projectName}`;
+
+    const response: Response = await this.fetch(configUrl, {
+      method: 'GET',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as SDKConfigResponse;
+  }
+
+  public async getSDKPerformStatistics(
+    handle: string,
+    projectName: string,
+    profileName: string,
+    providers: string[],
+    from: Date,
+    to: Date,
+    intervalMinutes: number
+  ): Promise<SDKPerformStatisticsResponse> {
+    const queryParams = {
+      from: from.toISOString(),
+      to: to.toISOString(),
+      interval_minutes: intervalMinutes,
+      account_handle: handle,
+      project_name: projectName,
+      profile: profileName,
+      providers: providers.join(','),
+    };
+
+    const urlQuery = Object.entries(queryParams)
+      .map(kv => kv.join('='))
+      .join('&');
+
+    const statisticsUrl = `/insights/perform_statistics?${urlQuery}`;
+
+    const response: Response = await this.fetch(statisticsUrl, {
+      method: 'GET',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as SDKPerformStatisticsResponse;
+  }
+
+  public async getSDKProviderChangesList(
+    handle: string,
+    projectName: string,
+    profileName?: string,
+    fromProviders?: string[],
+    providerChangeTypes?: SDKProviderChangeType[],
+    limit = 10
+  ): Promise<SDKProviderChangesListResponse> {
+    const queryParams = {
+      account_handle: handle,
+      project_name: projectName,
+      profile: profileName,
+      from_providers: (fromProviders || []).join(','),
+      provider_change_types: (providerChangeTypes || []).join(','),
+      limit,
+    };
+
+    const urlQuery = Object.entries(queryParams)
+      .filter(([_, v]) => !!v)
+      .map(kv => kv.join('='))
+      .join('&');
+
+    const providerChangesUrl = `/insights/provider_changes?${urlQuery}`;
+
+    const response: Response = await this.fetch(providerChangesUrl, {
+      method: 'GET',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as SDKProviderChangesListResponse;
   }
 
   public async signOut(
