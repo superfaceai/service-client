@@ -50,6 +50,7 @@ interface ClientStorage {
   authToken?: AuthToken;
   authTokenExpiresAt?: number;
   refreshToken?: string;
+  commonHeaders?: Record<string, string>;
 }
 
 type FetchOptions = { authenticate?: boolean };
@@ -60,17 +61,25 @@ export class ServiceClient {
     baseUrl: 'https://superface.ai',
   };
 
-  constructor({ baseUrl, refreshToken }: ClientOptions = {}) {
-    this.setOptions({ baseUrl, refreshToken });
+  constructor({ baseUrl, refreshToken, commonHeaders }: ClientOptions = {}) {
+    this.setOptions({ baseUrl, refreshToken, commonHeaders });
   }
 
-  public setOptions({ baseUrl, refreshToken }: ClientOptions): void {
+  public setOptions({
+    baseUrl,
+    refreshToken,
+    commonHeaders,
+  }: ClientOptions): void {
     if (baseUrl) {
       this._STORAGE.baseUrl = baseUrl;
     }
 
     if (refreshToken) {
       this._STORAGE.refreshToken = refreshToken;
+    }
+
+    if (commonHeaders) {
+      this._STORAGE.commonHeaders = commonHeaders;
     }
   }
 
@@ -115,6 +124,7 @@ export class ServiceClient {
       method: 'POST',
       credentials: 'include',
       headers: {
+        ...this._STORAGE.commonHeaders,
         cookie,
       },
     } as RequestInit;
@@ -149,6 +159,7 @@ export class ServiceClient {
     const _fetch = () => {
       opts.headers = Object.assign(
         {},
+        this._STORAGE.commonHeaders,
         opts.headers,
         useAuthentication && {
           Authorization: `Bearer ${this._STORAGE.authToken?.access_token}`,

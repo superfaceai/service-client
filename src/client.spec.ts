@@ -167,6 +167,89 @@ describe('client', () => {
         expect(refreshAccessTokenMock.mock.calls.length).toBe(0);
       });
     });
+
+    it('should not require common headers', async () => {
+      client.setOptions({
+        baseUrl: BASE_URL,
+        commonHeaders: undefined,
+      });
+
+      await client.fetch('/test', { authenticate: false });
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/test`, {
+        credentials: 'include',
+        headers: {},
+      });
+    });
+
+    it('should add common headers into request', async () => {
+      client.setOptions({
+        baseUrl: BASE_URL,
+        commonHeaders: {
+          'User-Agent': 'SuperfaceCLI/1.0',
+        },
+      });
+
+      await client.fetch('/test', { authenticate: false });
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/test`, {
+        credentials: 'include',
+        headers: {
+          'User-Agent': 'SuperfaceCLI/1.0',
+        },
+      });
+    });
+
+    it('should override common header with request specific header', async () => {
+      client.setOptions({
+        baseUrl: BASE_URL,
+        commonHeaders: {
+          Accept: 'application/json',
+        },
+      });
+
+      await client.fetch('/test', {
+        authenticate: false,
+        headers: {
+          Accept: 'application/json, application/problem+json',
+        },
+      });
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/test`, {
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json, application/problem+json',
+        },
+      });
+    });
+
+    it('should override common authorization header with bearer authorization', async () => {
+      jest.spyOn(client, 'isAccessTokenExpired').mockImplementation(() => true);
+      fetchMock.mockResponse(
+        JSON.stringify({
+          access_token: 'AT',
+          token_type: 'Bearer',
+          expires_in: 3600,
+        }),
+        {
+          status: 201,
+        }
+      );
+      client.setOptions({
+        baseUrl: BASE_URL,
+        commonHeaders: {
+          Authorization: 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==',
+        },
+      });
+      await client.fetch('/test');
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/test`, {
+        credentials: 'include',
+        headers: {
+          Authorization: 'Bearer AT',
+        },
+      });
+    });
   });
 
   describe('login', () => {
