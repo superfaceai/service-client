@@ -200,6 +200,26 @@ describe('client', () => {
       });
     });
 
+    it('should add common headers into token request', async () => {
+      client.setOptions({
+        baseUrl: BASE_URL,
+        commonHeaders: {
+          'User-Agent': 'SuperfaceCLI/1.0',
+        },
+      });
+
+      await client.fetch('/test', { authenticate: true });
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/auth/token`, {
+        credentials: 'include',
+        headers: {
+          'User-Agent': 'SuperfaceCLI/1.0',
+          cookie: 'user_session=',
+        },
+        method: 'POST',
+      });
+    });
+
     it('should override common header with request specific header', async () => {
       client.setOptions({
         baseUrl: BASE_URL,
