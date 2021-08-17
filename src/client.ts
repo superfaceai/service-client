@@ -16,6 +16,7 @@ import {
   ProfileVersionResponse,
   ProviderResponse,
   RefreshAccessTokenOptions,
+  RefreshTokenUpdatedHandler,
   SDKConfigResponse,
   SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
@@ -51,6 +52,7 @@ interface ClientStorage {
   authTokenExpiresAt?: number;
   refreshToken?: string;
   commonHeaders?: Record<string, string>;
+  refreshTokenUpdatedHandler?: RefreshTokenUpdatedHandler;
 }
 
 type FetchOptions = { authenticate?: boolean };
@@ -61,14 +63,25 @@ export class ServiceClient {
     baseUrl: 'https://superface.ai',
   };
 
-  constructor({ baseUrl, refreshToken, commonHeaders }: ClientOptions = {}) {
-    this.setOptions({ baseUrl, refreshToken, commonHeaders });
+  constructor({
+    baseUrl,
+    refreshToken,
+    commonHeaders,
+    refreshTokenUpdatedHandler,
+  }: ClientOptions = {}) {
+    this.setOptions({
+      baseUrl,
+      refreshToken,
+      commonHeaders,
+      refreshTokenUpdatedHandler,
+    });
   }
 
   public setOptions({
     baseUrl,
     refreshToken,
     commonHeaders,
+    refreshTokenUpdatedHandler,
   }: ClientOptions): void {
     if (baseUrl) {
       this._STORAGE.baseUrl = baseUrl;
@@ -81,6 +94,8 @@ export class ServiceClient {
     if (commonHeaders) {
       this._STORAGE.commonHeaders = commonHeaders;
     }
+
+    this._STORAGE.refreshTokenUpdatedHandler = refreshTokenUpdatedHandler;
   }
 
   public login(authToken: AuthToken): void {
@@ -140,6 +155,17 @@ export class ServiceClient {
 
     const authToken = (await res.json()) as AuthToken;
     this.login(authToken);
+
+    if (
+      this._STORAGE.refreshTokenUpdatedHandler &&
+      authToken.refresh_token &&
+      this._STORAGE.refreshToken !== authToken.refresh_token
+    ) {
+      await this._STORAGE.refreshTokenUpdatedHandler(
+        this._STORAGE.baseUrl,
+        authToken.refresh_token
+      );
+    }
 
     return authToken;
   }
@@ -705,6 +731,17 @@ export class ServiceClient {
     if (result.status === 200) {
       const authToken = (await result.json()) as AuthToken;
       this.login(authToken);
+
+      if (
+        this._STORAGE.refreshTokenUpdatedHandler &&
+        authToken.refresh_token &&
+        this._STORAGE.baseUrl
+      ) {
+        await this._STORAGE.refreshTokenUpdatedHandler(
+          this._STORAGE.baseUrl,
+          authToken.refresh_token
+        );
+      }
 
       return {
         verificationStatus: VerificationStatus.CONFIRMED,
