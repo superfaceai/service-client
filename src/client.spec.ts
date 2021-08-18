@@ -14,6 +14,7 @@ import {
   LoginConfirmationErrorCode,
   MapRevisionResponse,
   ProfileVersionResponse,
+  ProviderListResponse,
   ProviderResponse,
   SDKConfigResponse,
   SDKPerformStatisticsResponse,
@@ -668,14 +669,17 @@ describe('client', () => {
 
   describe('findAllProviders', () => {
     it('should find all providers', async () => {
-      const mockResult: ProviderResponse[] = [
-        {
-          url: 'testUrl',
-          name: 'testName',
-          deployments: [],
-          security: [],
-        },
-      ];
+      const mockResult: ProviderListResponse = {
+        url: '/providers',
+        data: [
+          {
+            url: 'testUrl',
+            name: 'testName',
+            services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+            defaultService: 'default',
+          },
+        ],
+      };
       const mockResponse = {
         ok: true,
         json: async () => mockResult,
@@ -727,8 +731,8 @@ describe('client', () => {
       const mockResult: ProviderResponse = {
         url: 'testUrl',
         name: 'testName',
-        deployments: [],
-        security: [],
+        services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+        defaultService: 'default',
       };
 
       const mockResponse = {

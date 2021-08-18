@@ -14,6 +14,7 @@ import {
   ClientOptions,
   MapRevisionResponse,
   ProfileVersionResponse,
+  ProviderListResponse,
   ProviderResponse,
   RefreshAccessTokenOptions,
   RefreshTokenUpdatedHandler,
@@ -231,7 +232,7 @@ export class ServiceClient {
     await this.unwrap(response);
   }
 
-  async findAllProviders(): Promise<ProviderResponse[]> {
+  async findAllProviders(): Promise<ProviderListResponse> {
     const response: Response = await this.fetch('/providers', {
       authenticate: false,
       method: 'GET',
@@ -241,7 +242,7 @@ export class ServiceClient {
     });
     await this.unwrap(response);
 
-    return (await response.json()) as ProviderResponse[];
+    return (await response.json()) as ProviderListResponse;
   }
 
   async findOneProvider(name: string): Promise<ProviderResponse> {

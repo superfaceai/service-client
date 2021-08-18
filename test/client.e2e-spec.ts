@@ -180,8 +180,8 @@ describe('client', () => {
     const mockResult: ProviderResponse = {
       url: 'testUrl',
       name: 'testName',
-      deployments: [],
-      security: [],
+      services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+      defaultService: 'default',
     };
     beforeAll(() => {
       const identity = createExpressMock();
@@ -198,7 +198,10 @@ describe('client', () => {
       identity.get(
         '/providers',
         (_req: express.Request, res: express.Response) => {
-          res.json([mockResult]);
+          res.json({
+            url: '/providers',
+            data: [mockResult]
+          });
         }
       );
       identity.get(
@@ -226,9 +229,10 @@ describe('client', () => {
     });
 
     test('find all providers', async () => {
-      await expect(serviceClient.findAllProviders()).resolves.toEqual([
-        mockResult,
-      ]);
+      await expect(serviceClient.findAllProviders()).resolves.toEqual({
+        url: '/providers',
+        data: [mockResult],
+      });
     });
 
     test('find one provider', async () => {

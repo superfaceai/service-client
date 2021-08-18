@@ -1,10 +1,3 @@
-export interface ProviderResponse {
-  url: string;
-  name: string;
-  deployments: [];
-  security: [];
-}
-
 export interface ProfileVersionResponse {
   profile_id: string;
   profile_name: string;
