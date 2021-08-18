@@ -459,9 +459,9 @@ describe('client', () => {
         await client.verifyPasswordlessLogin(VERIFY_URL, {
           pollingTimeoutSeconds: pollingTimeoutSeconds,
         });
-        expect(new Date().getTime() - testStart.getTime()).toBeGreaterThan(
-          pollingTimeoutSeconds * 1000
-        );
+        expect(
+          new Date().getTime() - testStart.getTime()
+        ).toBeGreaterThanOrEqual(pollingTimeoutSeconds * 1000);
       });
 
       it('should cancel polling', async () => {
