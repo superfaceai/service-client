@@ -98,15 +98,40 @@ export class ServiceClient {
     this._STORAGE.refreshTokenUpdatedHandler = refreshTokenUpdatedHandler;
   }
 
-  public login(authToken: AuthToken): void {
+  public async login(authToken: AuthToken): Promise<void> {
     const currentTime = this.getCurrentTime();
+
+    const refreshToken =
+      this._STORAGE.authToken?.refresh_token || this._STORAGE.refreshToken;
+    const newRefreshToken = authToken.refresh_token;
+
     this._STORAGE.authTokenExpiresAt = currentTime + authToken.expires_in;
     this._STORAGE.authToken = authToken;
+
+    if (
+      this._STORAGE.refreshTokenUpdatedHandler &&
+      this._STORAGE.baseUrl &&
+      newRefreshToken &&
+      refreshToken !== newRefreshToken
+    ) {
+      await this._STORAGE.refreshTokenUpdatedHandler(
+        this._STORAGE.baseUrl,
+        newRefreshToken
+      );
+    }
   }
 
-  public logout(): void {
+  public async logout(): Promise<void> {
     this._STORAGE.authToken = undefined;
     this._STORAGE.authTokenExpiresAt = undefined;
+    this._STORAGE.refreshToken = undefined;
+
+    if (this._STORAGE.refreshTokenUpdatedHandler && this._STORAGE.baseUrl) {
+      await this._STORAGE.refreshTokenUpdatedHandler(
+        this._STORAGE.baseUrl,
+        null
+      );
+    }
   }
 
   public isAccessTokenExpired(): boolean {
@@ -154,18 +179,7 @@ export class ServiceClient {
     }
 
     const authToken = (await res.json()) as AuthToken;
-    this.login(authToken);
-
-    if (
-      this._STORAGE.refreshTokenUpdatedHandler &&
-      authToken.refresh_token &&
-      this._STORAGE.refreshToken !== authToken.refresh_token
-    ) {
-      await this._STORAGE.refreshTokenUpdatedHandler(
-        this._STORAGE.baseUrl,
-        authToken.refresh_token
-      );
-    }
+    await this.login(authToken);
 
     return authToken;
   }
@@ -696,7 +710,7 @@ export class ServiceClient {
     );
 
     if (result.ok) {
-      this.logout();
+      await this.logout();
 
       return null;
     } else if ([401, 403].includes(result.status)) {
@@ -730,18 +744,7 @@ export class ServiceClient {
     });
     if (result.status === 200) {
       const authToken = (await result.json()) as AuthToken;
-      this.login(authToken);
-
-      if (
-        this._STORAGE.refreshTokenUpdatedHandler &&
-        authToken.refresh_token &&
-        this._STORAGE.baseUrl
-      ) {
-        await this._STORAGE.refreshTokenUpdatedHandler(
-          this._STORAGE.baseUrl,
-          authToken.refresh_token
-        );
-      }
+      await this.login(authToken);
 
       return {
         verificationStatus: VerificationStatus.CONFIRMED,

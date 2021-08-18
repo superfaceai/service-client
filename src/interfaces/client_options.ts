@@ -1,6 +1,6 @@
 export type RefreshTokenUpdatedHandler = (
   serviceUrl: string,
-  refreshToken: string
+  refreshToken: string | null
 ) => Promise<void>;
 
 export interface ClientOptions {

@@ -123,30 +123,6 @@ describe('client', () => {
         client.setOptions({ baseUrl: BASE_URL });
         await expect(async () => client.fetch('/test')).rejects.toThrow(err);
       });
-
-      it('should call refresh token changed handler when refresh token updated', async () => {
-        const refreshTokenUpdatedHandlerMock = jest.fn();
-        client = new ServiceClient({
-          baseUrl: BASE_URL,
-          refreshTokenUpdatedHandler: refreshTokenUpdatedHandlerMock,
-        });
-
-        fetchMock.mockResponse(
-          JSON.stringify({
-            access_token: 'AT',
-            token_type: 'Bearer',
-            expires_in: 3600,
-            refresh_token: 'RT',
-          }),
-          {
-            status: 201,
-          }
-        );
-
-        await client.fetch('/test');
-
-        expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, 'RT');
-      });
     });
 
     describe('when NOT using authentication', () => {
@@ -297,25 +273,52 @@ describe('client', () => {
   });
 
   describe('login', () => {
-    it('should login', () => {
-      client.login({
+    it('should login', async () => {
+      await client.login({
         access_token: 'AT',
         token_type: 'Bearer',
         expires_in: 3600,
       });
       expect(client.isAccessTokenExpired()).toBe(false);
     });
+
+    it('should call refresh token changed handler', async () => {
+      const refreshTokenUpdatedHandlerMock = jest.fn();
+      client = new ServiceClient({
+        baseUrl: BASE_URL,
+        refreshTokenUpdatedHandler: refreshTokenUpdatedHandlerMock,
+      });
+
+      await client.login({
+        access_token: 'AT',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'RT',
+      });
+      expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, 'RT');
+    });
   });
 
   describe('logout', () => {
-    it('should logout', () => {
-      client.login({
+    it('should logout', async () => {
+      await client.login({
         access_token: 'AT',
         token_type: 'Bearer',
         expires_in: 3600,
       });
-      client.logout();
+      await client.logout();
       expect(client.isAccessTokenExpired()).toBe(true);
+    });
+
+    it('should call refresh token changed handler', async () => {
+      const refreshTokenUpdatedHandlerMock = jest.fn();
+      client = new ServiceClient({
+        baseUrl: BASE_URL,
+        refreshTokenUpdatedHandler: refreshTokenUpdatedHandlerMock,
+      });
+
+      await client.logout();
+      expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, null);
     });
   });
 
@@ -358,7 +361,6 @@ describe('client', () => {
 
     describe('verifyPasswordlessLogin', () => {
       describe('for confirmed token', () => {
-        let refreshTokenUpdatedHandler: jest.Mock;
         const authToken = {
           access_token: 'AT',
           token_type: 'Bearer',
@@ -366,11 +368,6 @@ describe('client', () => {
           refresh_token: 'RT',
         };
         beforeEach(() => {
-          refreshTokenUpdatedHandler = jest.fn();
-          client = new ServiceClient({
-            baseUrl: BASE_URL,
-            refreshTokenUpdatedHandler,
-          });
           fetchMock.mockResponse(JSON.stringify(authToken), {
             status: 200,
           });
@@ -390,11 +387,6 @@ describe('client', () => {
           const loginMock = jest.spyOn(client, 'login');
           await client.verifyPasswordlessLogin(VERIFY_URL);
           expect(loginMock.mock.calls.length).toBe(1);
-        });
-
-        it('should call refresh token changed handler', async () => {
-          await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(refreshTokenUpdatedHandler).toBeCalledWith(BASE_URL, 'RT');
         });
       });
 
