@@ -9,5 +9,6 @@ export * from './passwordless_confirm_response';
 export * from './projects_api_response';
 export * from './projects_api_options';
 export * from './providers_api_response';
+export * from './providers_api_options';
 export * from './sdk_provider_change_type';
 export * from './store_api_response';

@@ -698,6 +698,27 @@ describe('client', () => {
       });
     });
 
+    it('should use query params to filter providers (if provided)', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+
+      await client.findAllProviders({
+        profile: 'scope/profile-name',
+        accountHandle: 'username',
+        limit: 100,
+      });
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers?profile=scope/profile-name&account_handle=username&limit=100', {
+        authenticate: false,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
     it('should throw error', async () => {
       const payload = {
         status: 404,

@@ -16,6 +16,7 @@ import {
   ProfileVersionResponse,
   ProviderListResponse,
   ProviderResponse,
+  ProvidersListOptions,
   RefreshAccessTokenOptions,
   RefreshTokenUpdatedHandler,
   SDKConfigResponse,
@@ -232,8 +233,18 @@ export class ServiceClient {
     await this.unwrap(response);
   }
 
-  async findAllProviders(): Promise<ProviderListResponse> {
-    const response: Response = await this.fetch('/providers', {
+  async findAllProviders(
+    options?: ProvidersListOptions
+  ): Promise<ProviderListResponse> {
+    const { profile, accountHandle, limit } = options || {};
+
+    const url = this.makePathWithQueryParams('/providers', {
+      profile,
+      account_handle: accountHandle,
+      limit,
+    });
+
+    const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
       headers: {
