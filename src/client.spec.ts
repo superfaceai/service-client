@@ -273,25 +273,52 @@ describe('client', () => {
   });
 
   describe('login', () => {
-    it('should login', () => {
-      client.login({
+    it('should login', async () => {
+      await client.login({
         access_token: 'AT',
         token_type: 'Bearer',
         expires_in: 3600,
       });
       expect(client.isAccessTokenExpired()).toBe(false);
     });
+
+    it('should call refresh token changed handler', async () => {
+      const refreshTokenUpdatedHandlerMock = jest.fn();
+      client = new ServiceClient({
+        baseUrl: BASE_URL,
+        refreshTokenUpdatedHandler: refreshTokenUpdatedHandlerMock,
+      });
+
+      await client.login({
+        access_token: 'AT',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'RT',
+      });
+      expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, 'RT');
+    });
   });
 
   describe('logout', () => {
-    it('should logout', () => {
-      client.login({
+    it('should logout', async () => {
+      await client.login({
         access_token: 'AT',
         token_type: 'Bearer',
         expires_in: 3600,
       });
-      client.logout();
+      await client.logout();
       expect(client.isAccessTokenExpired()).toBe(true);
+    });
+
+    it('should call refresh token changed handler', async () => {
+      const refreshTokenUpdatedHandlerMock = jest.fn();
+      client = new ServiceClient({
+        baseUrl: BASE_URL,
+        refreshTokenUpdatedHandler: refreshTokenUpdatedHandlerMock,
+      });
+
+      await client.logout();
+      expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, null);
     });
   });
 
@@ -338,6 +365,7 @@ describe('client', () => {
           access_token: 'AT',
           token_type: 'Bearer',
           expires_in: 3600,
+          refresh_token: 'RT',
         };
         beforeEach(() => {
           fetchMock.mockResponse(JSON.stringify(authToken), {
@@ -431,9 +459,9 @@ describe('client', () => {
         await client.verifyPasswordlessLogin(VERIFY_URL, {
           pollingTimeoutSeconds: pollingTimeoutSeconds,
         });
-        expect(new Date().getTime() - testStart.getTime()).toBeGreaterThan(
-          pollingTimeoutSeconds * 1000
-        );
+        expect(
+          new Date().getTime() - testStart.getTime()
+        ).toBeGreaterThanOrEqual(pollingTimeoutSeconds * 1000);
       });
 
       it('should cancel polling', async () => {
