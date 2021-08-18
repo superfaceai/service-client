@@ -633,21 +633,18 @@ export class ServiceClient {
     to: Date,
     intervalMinutes: number
   ): Promise<SDKPerformStatisticsResponse> {
-    const queryParams = {
-      from: from.toISOString(),
-      to: to.toISOString(),
-      interval_minutes: intervalMinutes,
-      account_handle: handle,
-      project_name: projectName,
-      profile: profileName,
-      providers: providers.join(','),
-    };
-
-    const urlQuery = Object.entries(queryParams)
-      .map(kv => kv.join('='))
-      .join('&');
-
-    const statisticsUrl = `/insights/perform_statistics?${urlQuery}`;
+    const statisticsUrl = this.makePathWithQueryParams(
+      '/insights/perform_statistics',
+      {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        interval_minutes: intervalMinutes,
+        account_handle: handle,
+        project_name: projectName,
+        profile: profileName,
+        providers: providers.join(','),
+      }
+    );
 
     const response: Response = await this.fetch(statisticsUrl, {
       method: 'GET',
@@ -667,21 +664,17 @@ export class ServiceClient {
     providerChangeTypes?: SDKProviderChangeType[],
     limit = 10
   ): Promise<SDKProviderChangesListResponse> {
-    const queryParams = {
-      account_handle: handle,
-      project_name: projectName,
-      profile: profileName,
-      from_providers: (fromProviders || []).join(','),
-      provider_change_types: (providerChangeTypes || []).join(','),
-      limit,
-    };
-
-    const urlQuery = Object.entries(queryParams)
-      .filter(([_, v]) => !!v)
-      .map(kv => kv.join('='))
-      .join('&');
-
-    const providerChangesUrl = `/insights/provider_changes?${urlQuery}`;
+    const providerChangesUrl = this.makePathWithQueryParams(
+      '/insights/provider_changes',
+      {
+        account_handle: handle,
+        project_name: projectName,
+        profile: profileName,
+        from_providers: (fromProviders || []).join(','),
+        provider_change_types: (providerChangeTypes || []).join(','),
+        limit,
+      }
+    );
 
     const response: Response = await this.fetch(providerChangesUrl, {
       method: 'GET',
@@ -792,5 +785,17 @@ export class ServiceClient {
         ''
       }`
     );
+  }
+
+  private makePathWithQueryParams(
+    path: string,
+    paramsObject: Record<string, unknown>
+  ): string {
+    const searchParams = Object.entries(paramsObject)
+      .filter(([_, v]) => !!v)
+      .map(kv => kv.join('='))
+      .join('&');
+
+    return [path, searchParams].filter(v => !!v).join('?');
   }
 }
