@@ -13,6 +13,8 @@ import {
   AuthToken,
   ClientOptions,
   MapRevisionResponse,
+  ProfilesListOptions,
+  ProfilesListResponse,
   ProfileVersionResponse,
   ProviderListResponse,
   ProviderResponse,
@@ -349,6 +351,26 @@ export class ServiceClient {
     );
 
     return (await this.unwrap(response)).text();
+  }
+
+  async getProfilesList(
+    options?: ProfilesListOptions
+  ): Promise<ProfilesListResponse> {
+    const { accountHandle, limit } = options || {};
+
+    const url = this.makePathWithQueryParams('/profiles', {
+      account_handle: accountHandle,
+      limit,
+    });
+
+    const response: Response = await this.fetch(url, {
+      authenticate: false,
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    await this.unwrap(response);
+
+    return (await response.json()) as ProfilesListResponse;
   }
 
   async createMap(payload: string): Promise<void> {

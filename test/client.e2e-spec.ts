@@ -10,6 +10,7 @@ import {
   MEDIA_TYPE_MAP_AST,
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
+  ProfileResponse,
   ProfileVersionResponse,
   ProjectResponse,
   ProjectsListResponse,
@@ -200,7 +201,7 @@ describe('client', () => {
         (_req: express.Request, res: express.Response) => {
           res.json({
             url: '/providers',
-            data: [mockResult]
+            data: [mockResult],
           });
         }
       );
@@ -248,6 +249,11 @@ describe('client', () => {
       kind: 'ProfileDocument',
     };
 
+    const mockProfile: ProfileResponse = {
+      id: 'vcs/user-repos',
+      url: 'https://superface.test/vcs/user-repos',
+    };
+
     const mockResult: ProfileVersionResponse = {
       profile_id: 'testId',
       profile_name: 'testName',
@@ -269,6 +275,15 @@ describe('client', () => {
           } else {
             res.sendStatus(401);
           }
+        }
+      );
+      identity.get(
+        '/profiles',
+        (_req: express.Request, res: express.Response) => {
+          res.json({
+            url: '/profiles',
+            data: [mockProfile],
+          });
         }
       );
       identity.post('/parse', (req: express.Request, res: express.Response) => {
@@ -343,6 +358,13 @@ describe('client', () => {
       await expect(
         serviceClient.getProfileAST('vcs', '1.0.0', 'user-repos')
       ).resolves.toEqual(JSON.stringify(mockProfileAST));
+    });
+
+    test('get profiles list', async () => {
+      await expect(serviceClient.getProfilesList()).resolves.toEqual({
+        url: '/profiles',
+        data: [mockProfile],
+      });
     });
   });
 
