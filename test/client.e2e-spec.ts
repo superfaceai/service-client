@@ -4,6 +4,7 @@ import * as http from 'http';
 import {
   CancellationToken,
   LoginConfirmationErrorCode,
+  MapResponse,
   MapRevisionResponse,
   MEDIA_TYPE_JSON,
   MEDIA_TYPE_MAP,
@@ -374,6 +375,11 @@ describe('client', () => {
       kind: 'MappDocument',
     };
 
+    const mockMap: MapResponse = {
+      id: 'vcs/user-repos.provider@1.0',
+      url: 'https://superface.test/vcs/user-repos.provider@1.0',
+    };
+
     const mockResult: MapRevisionResponse = {
       map_id: 'testId',
       profile_name: 'testName',
@@ -398,6 +404,12 @@ describe('client', () => {
         } else {
           res.sendStatus(401);
         }
+      });
+      identity.get('/maps', (_req: express.Request, res: express.Response) => {
+        res.json({
+          url: '/maps',
+          data: [mockMap],
+        });
       });
       identity.post('/parse', (req: express.Request, res: express.Response) => {
         if (req.headers?.['content-type'] === MEDIA_TYPE_MAP) {
@@ -468,6 +480,13 @@ describe('client', () => {
       await expect(
         serviceClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
       ).resolves.toEqual(JSON.stringify(mockMapAST));
+    });
+
+    test('get maps list', async () => {
+      await expect(serviceClient.getMapsList()).resolves.toEqual({
+        url: '/maps',
+        data: [mockMap],
+      });
     });
   });
 

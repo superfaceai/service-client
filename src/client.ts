@@ -13,6 +13,8 @@ import {
   AuthToken,
   ClientOptions,
   MapRevisionResponse,
+  MapsListOptions,
+  MapsListResponse,
   ProfilesListOptions,
   ProfilesListResponse,
   ProfileVersionResponse,
@@ -461,6 +463,26 @@ export class ServiceClient {
     });
 
     return (await this.unwrap(response)).text();
+  }
+
+  async getMapsList(
+    options?: MapsListOptions
+  ): Promise<MapsListResponse> {
+    const { accountHandle, limit } = options || {};
+
+    const url = this.makePathWithQueryParams('/maps', {
+      account_handle: accountHandle,
+      limit,
+    });
+
+    const response: Response = await this.fetch(url, {
+      authenticate: false,
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    await this.unwrap(response);
+
+    return (await response.json()) as MapsListResponse;
   }
 
   public async passwordlessLogin(

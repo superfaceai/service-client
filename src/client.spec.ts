@@ -13,6 +13,7 @@ import { ServiceApiError, ServiceClientError } from './errors';
 import {
   LoginConfirmationErrorCode,
   MapRevisionResponse,
+  MapsListResponse,
   ProfilesListResponse,
   ProfileVersionResponse,
   ProviderListResponse,
@@ -1300,6 +1301,83 @@ describe('client', () => {
       });
     });
   });
+
+  describe('getMapsList', () => {
+    it('should get list of maps', async () => {
+      const mockResult: MapsListResponse = {
+        url: '/maps',
+        data: [
+          {
+            id: 'scope/profile-name.provider@1.0',
+            url: 'https://superface.test/scope/profile-name.provider@1.0',
+          },
+        ],
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.getMapsList()).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+
+    it('should use query params to filter maps (if provided)', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+
+      await client.getMapsList({
+        accountHandle: 'username',
+        limit: 100,
+      });
+
+      expect(fetchMock).toBeCalledWith(
+        '/maps?account_handle=username&limit=100',
+        {
+          authenticate: false,
+          method: 'GET',
+          headers: { Accept: MEDIA_TYPE_JSON },
+        }
+      );
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/maps',
+        title: 'Bad Request',
+        detail: 'limit must not be greater than 100',
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.getMapsList({ limit: 101 })).rejects.toEqual(
+        new ServiceApiError(payload)
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps?limit=101', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+  });
+
   describe('getMapSource', () => {
     it('should get map source', async () => {
       const mockResponse = {

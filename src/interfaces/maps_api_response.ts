@@ -1,3 +1,13 @@
+export interface MapResponse {
+  url: string;
+  id: string;
+}
+
+export interface MapsListResponse {
+  url: string;
+  data: MapResponse[];
+}
+
 export interface MapRevisionResponse {
   map_id: string;
   profile_name: string;
@@ -12,11 +22,4 @@ export interface MapRevisionResponse {
   published_by: string;
   owner: string;
   owner_url: string;
-}
-
-export interface ServiceApiErrorResponse {
-  status: number;
-  instance: string;
-  title: string;
-  detail: string;
 }
