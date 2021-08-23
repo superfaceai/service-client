@@ -365,7 +365,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     await this.unwrap(response);
 
@@ -462,9 +462,7 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getMapsList(
-    options?: MapsListOptions
-  ): Promise<MapsListResponse> {
+  async getMapsList(options?: MapsListOptions): Promise<MapsListResponse> {
     const { accountHandle, limit } = options || {};
 
     const url = this.makePathWithQueryParams('/maps', {
@@ -475,7 +473,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     await this.unwrap(response);
 
@@ -537,37 +535,7 @@ export class ServiceClient {
     verifyUrl: string,
     options?: VerifyOptions
   ): Promise<VerifyResponse> {
-    const startPollingTimeStamp = new Date();
-    const timeoutMilliseconds =
-      (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
-      1000;
-    const pollingIntervalMilliseconds =
-      (options?.pollingIntervalSeconds ?? DEFAULT_POLLING_INTERVAL_SECONDS) *
-      1000;
-    while (
-      new Date().getTime() - startPollingTimeStamp.getTime() <
-      timeoutMilliseconds
-    ) {
-      const result = await this.fetchVerifyLogin(verifyUrl);
-
-      if (result.verificationStatus !== VerificationStatus.PENDING) {
-        return result;
-      }
-
-      if (options?.cancellationToken?.isCancellationRequested) {
-        options.cancellationToken.cancellationFinished();
-
-        return {
-          verificationStatus: VerificationStatus.POLLING_CANCELLED,
-        };
-      }
-
-      await sleep(pollingIntervalMilliseconds);
-    }
-
-    return {
-      verificationStatus: VerificationStatus.POLLING_TIMEOUT,
-    };
+    return this.verifyLogin(verifyUrl, options);
   }
 
   public async confirmPasswordlessLogin(
@@ -889,5 +857,42 @@ export class ServiceClient {
       .join('&');
 
     return [path, searchParams].filter(v => !!v).join('?');
+  }
+
+  private async verifyLogin(
+    verifyUrl: string,
+    options?: VerifyOptions
+  ): Promise<VerifyResponse> {
+    const startPollingTimeStamp = new Date();
+    const timeoutMilliseconds =
+      (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
+      1000;
+    const pollingIntervalMilliseconds =
+      (options?.pollingIntervalSeconds ?? DEFAULT_POLLING_INTERVAL_SECONDS) *
+      1000;
+    while (
+      new Date().getTime() - startPollingTimeStamp.getTime() <
+      timeoutMilliseconds
+    ) {
+      const result = await this.fetchVerifyLogin(verifyUrl);
+
+      if (result.verificationStatus !== VerificationStatus.PENDING) {
+        return result;
+      }
+
+      if (options?.cancellationToken?.isCancellationRequested) {
+        options.cancellationToken.cancellationFinished();
+
+        return {
+          verificationStatus: VerificationStatus.POLLING_CANCELLED,
+        };
+      }
+
+      await sleep(pollingIntervalMilliseconds);
+    }
+
+    return {
+      verificationStatus: VerificationStatus.POLLING_TIMEOUT,
+    };
   }
 }

@@ -363,147 +363,32 @@ describe('client', () => {
     });
 
     describe('verifyPasswordlessLogin', () => {
-      describe('for confirmed token', () => {
-        const authToken = {
-          access_token: 'AT',
-          token_type: 'Bearer',
-          expires_in: 3600,
-          refresh_token: 'RT',
-        };
-        beforeEach(() => {
-          fetchMock.mockResponse(JSON.stringify(authToken), {
-            status: 200,
-          });
-        });
+      let verifyLoginSpy: jest.SpyInstance;
 
-        it('should return authToken', async () => {
-          const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(result.authToken).toEqual(authToken);
-        });
-
-        it('should return verificationStatus = CONFIRMED', async () => {
-          const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(result.verificationStatus).toBe(VerificationStatus.CONFIRMED);
-        });
-
-        it('should call login mock', async () => {
-          const loginMock = jest.spyOn(client, 'login');
-          await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(loginMock.mock.calls.length).toBe(1);
+      beforeEach(() => {
+        //eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        verifyLoginSpy = jest.spyOn(client as any, 'verifyLogin');
+        verifyLoginSpy.mockResolvedValue({
+          verificationStatus: VerificationStatus.CONFIRMED,
         });
       });
 
-      it('should return polling timeout status when token confirmation is pending', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: 1,
+      it('should call verifyLogin with verify url and options parameters', async () => {
+        await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
         });
-        expect(result.verificationStatus).toBe(
-          VerificationStatus.POLLING_TIMEOUT
-        );
+
+        expect(verifyLoginSpy).toBeCalledWith(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
+        });
       });
 
-      it('should return expired status when token expired', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Token is expired',
-            status: 'EXPIRED',
-          }),
-          {
-            status: 400,
-          }
-        );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(VerificationStatus.EXPIRED);
-      });
-
-      it('should return used status when token was already used', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Token was already used',
-            status: 'USED',
-          }),
-          {
-            status: 400,
-          }
-        );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(VerificationStatus.USED);
-      });
-
-      it('should throw when bad request status received', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Bad request',
-          }),
-          {
-            status: 400,
-          }
-        );
+      it('should return verifyLogin result', async () => {
         await expect(
           client.verifyPasswordlessLogin(VERIFY_URL)
-        ).rejects.toThrow();
-      });
-
-      it('should poll verfication endpoint for pollingTimeoutSeconds', async () => {
-        const testStart = new Date();
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-        const pollingTimeoutSeconds = 2;
-        await client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: pollingTimeoutSeconds,
+        ).resolves.toEqual({
+          verificationStatus: VerificationStatus.CONFIRMED,
         });
-        expect(
-          new Date().getTime() - testStart.getTime()
-        ).toBeGreaterThanOrEqual(pollingTimeoutSeconds * 1000);
-      });
-
-      it('should cancel polling', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-        const pollingTimeoutSeconds = 10;
-        const pollingCancellationToken = new CancellationToken();
-        const resultPromise = client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: pollingTimeoutSeconds,
-          cancellationToken: pollingCancellationToken,
-        });
-        pollingCancellationToken.isCancellationRequested = true;
-        expect(await resultPromise).toEqual({
-          verificationStatus: VerificationStatus.POLLING_CANCELLED,
-        });
-      });
-
-      it('should call cancel polling callback', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-
-        const cancelCallback = jest.fn();
-        const cancellationToken = new CancellationToken(cancelCallback);
-        cancellationToken.isCancellationRequested = true;
-
-        await client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: 2,
-          cancellationToken,
-        });
-
-        expect(cancelCallback).toBeCalled();
       });
     });
 
@@ -2092,6 +1977,150 @@ describe('client', () => {
       await expect(() => client.signOut()).rejects.toEqual(
         new ServiceClientError("Couldn't log out due to unknown reasons")
       );
+    });
+  });
+
+  describe('#verifyLogin', () => {
+    const VERIFY_URL = 'https://superface.test/passwordless/verify';
+    describe('for confirmed token', () => {
+      const authToken = {
+        access_token: 'AT',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'RT',
+      };
+      beforeEach(() => {
+        fetchMock.mockResponse(JSON.stringify(authToken), {
+          status: 200,
+        });
+      });
+
+      it('should return authToken', async () => {
+        const result = await client['verifyLogin'](VERIFY_URL);
+        expect(result.authToken).toEqual(authToken);
+      });
+
+      it('should return verificationStatus = CONFIRMED', async () => {
+        const result = await client['verifyLogin'](VERIFY_URL);
+        expect(result.verificationStatus).toBe(VerificationStatus.CONFIRMED);
+      });
+
+      it('should call login mock', async () => {
+        const loginMock = jest.spyOn(client, 'login');
+        await client['verifyLogin'](VERIFY_URL);
+        expect(loginMock.mock.calls.length).toBe(1);
+      });
+    });
+
+    it('should return polling timeout status when token confirmation is pending', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+      const result = await client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: 1,
+      });
+      expect(result.verificationStatus).toBe(
+        VerificationStatus.POLLING_TIMEOUT
+      );
+    });
+
+    it('should return expired status when token expired', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          title: 'Token is expired',
+          status: 'EXPIRED',
+        }),
+        {
+          status: 400,
+        }
+      );
+      const result = await client['verifyLogin'](VERIFY_URL);
+      expect(result.verificationStatus).toBe(VerificationStatus.EXPIRED);
+    });
+
+    it('should return used status when token was already used', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          title: 'Token was already used',
+          status: 'USED',
+        }),
+        {
+          status: 400,
+        }
+      );
+      const result = await client['verifyLogin'](VERIFY_URL);
+      expect(result.verificationStatus).toBe(VerificationStatus.USED);
+    });
+
+    it('should throw when bad request status received', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          title: 'Bad request',
+        }),
+        {
+          status: 400,
+        }
+      );
+      await expect(client['verifyLogin'](VERIFY_URL)).rejects.toThrow();
+    });
+
+    it('should poll verfication endpoint for pollingTimeoutSeconds', async () => {
+      const testStart = new Date();
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+      const pollingTimeoutSeconds = 2;
+      await client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: pollingTimeoutSeconds,
+      });
+      expect(new Date().getTime() - testStart.getTime()).toBeGreaterThanOrEqual(
+        pollingTimeoutSeconds * 1000
+      );
+    });
+
+    it('should cancel polling', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+      const pollingTimeoutSeconds = 10;
+      const pollingCancellationToken = new CancellationToken();
+      const resultPromise = client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: pollingTimeoutSeconds,
+        cancellationToken: pollingCancellationToken,
+      });
+      pollingCancellationToken.isCancellationRequested = true;
+      expect(await resultPromise).toEqual({
+        verificationStatus: VerificationStatus.POLLING_CANCELLED,
+      });
+    });
+
+    it('should call cancel polling callback', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+
+      const cancelCallback = jest.fn();
+      const cancellationToken = new CancellationToken(cancelCallback);
+      cancellationToken.isCancellationRequested = true;
+
+      await client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: 2,
+        cancellationToken,
+      });
+
+      expect(cancelCallback).toBeCalled();
     });
   });
 });
