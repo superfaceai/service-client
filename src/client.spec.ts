@@ -590,6 +590,49 @@ describe('client', () => {
     });
   });
 
+  describe('cli login', () => {
+    const VERIFY_URL = 'https://superface.test/cli/verify';
+    const BROWSER_URL = 'https://superface.test/cli/confirm';
+    const EXPIRES_AT = new Date('2021-04-13T12:08:27.103Z');
+
+    describe('cliLogin', () => {
+      it('should return verify and browser url with code expiration date', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            verify_url: VERIFY_URL,
+            browser_url: BROWSER_URL,
+            expires_at: EXPIRES_AT,
+          }),
+          { status: 201 }
+        );
+        const result = await client.cliLogin();
+        expect(result).toStrictEqual({
+          success: true,
+          verifyUrl: VERIFY_URL,
+          browserUrl: BROWSER_URL,
+          expiresAt: EXPIRES_AT,
+        });
+      });
+
+      it('should return unsuccess with response title', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            status: 500,
+            instance: '/auth/cli',
+            title: 'Internal server error',
+          }),
+          { status: 500 }
+        );
+        const result = await client.cliLogin();
+        expect(result).toStrictEqual({
+          success: false,
+          title: 'Internal server error',
+          detail: undefined,
+        });
+      });
+    });
+  });
+
   describe('getGithubLoginUrl', () => {
     beforeEach(() => {
       client.setOptions({ baseUrl: BASE_URL });

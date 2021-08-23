@@ -29,6 +29,7 @@ import {
   SDKProviderChangeType,
   ServiceApiErrorResponse,
 } from './interfaces';
+import { CLILoginResponse } from './interfaces/cli_login_response';
 import {
   LoginConfirmationErrorCode,
   PasswordlessConfirmResponse,
@@ -615,6 +616,48 @@ export class ServiceClient {
         success: false,
         code: makeErrorCodeFrom(title),
       };
+    }
+  }
+
+  public async cliLogin(): Promise<CLILoginResponse> {
+    const result: Response = await crossfetch.fetch(
+      `${this._STORAGE.baseUrl}/auth/cli`,
+      {
+        method: 'POST',
+      }
+    );
+    if (result.status === 201) {
+      const apiResponse = (await result.json()) as {
+        verify_url: string;
+        browser_url: string;
+        expires_at: string;
+      };
+      const { verify_url, browser_url, expires_at } = apiResponse || {};
+
+      if (verify_url && browser_url && expires_at) {
+        return {
+          success: true,
+          verifyUrl: verify_url,
+          browserUrl: browser_url,
+          expiresAt: new Date(expires_at),
+        };
+      } else {
+        return { success: false, title: 'Unexpected API response' };
+      }
+    } else {
+      const apiResponse = (await result.json()) as {
+        title: string;
+        detail: string;
+      };
+      const { title, detail } = apiResponse || {};
+      if (title) {
+        return { success: false, title, detail };
+      } else {
+        return {
+          success: false,
+          title: `Unexpected status code ${result.status} received`,
+        };
+      }
     }
   }
 
