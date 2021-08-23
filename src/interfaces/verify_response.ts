@@ -8,12 +8,12 @@ export enum VerificationStatus {
   POLLING_TIMEOUT = 'POLLING_TIMEOUT',
   POLLING_CANCELLED = 'POLLING_CANCELLED',
 }
-export interface PasswordlessVerifyResponse {
+export interface VerifyResponse {
   verificationStatus: VerificationStatus;
   authToken?: AuthToken;
 }
 
-export interface PasswordlessVerifyErrorResponse {
+export interface VerifyErrorResponse {
   title: string;
   status: VerificationStatus;
 }

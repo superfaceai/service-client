@@ -12,6 +12,8 @@ import { ServiceApiError, ServiceClientError } from './errors';
 import {
   AuthToken,
   ClientOptions,
+  DEFAULT_POLLING_INTERVAL_SECONDS,
+  DEFAULT_POLLING_TIMEOUT_SECONDS,
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
@@ -28,6 +30,10 @@ import {
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
   ServiceApiErrorResponse,
+  VerificationStatus,
+  VerifyErrorResponse,
+  VerifyOptions,
+  VerifyResponse,
 } from './interfaces';
 import { CLILoginResponse } from './interfaces/cli_login_response';
 import {
@@ -35,16 +41,6 @@ import {
   PasswordlessConfirmResponse,
 } from './interfaces/passwordless_confirm_response';
 import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
-import {
-  DEFAULT_POLLING_INTERVAL_SECONDS,
-  DEFAULT_POLLING_TIMEOUT_SECONDS,
-  PasswordlessVerifyOptions,
-} from './interfaces/passwordless_verify_options';
-import {
-  PasswordlessVerifyErrorResponse,
-  PasswordlessVerifyResponse,
-  VerificationStatus,
-} from './interfaces/passwordless_verify_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,
@@ -539,8 +535,8 @@ export class ServiceClient {
 
   public async verifyPasswordlessLogin(
     verifyUrl: string,
-    options?: PasswordlessVerifyOptions
-  ): Promise<PasswordlessVerifyResponse> {
+    options?: VerifyOptions
+  ): Promise<VerifyResponse> {
     const startPollingTimeStamp = new Date();
     const timeoutMilliseconds =
       (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
@@ -552,7 +548,7 @@ export class ServiceClient {
       new Date().getTime() - startPollingTimeStamp.getTime() <
       timeoutMilliseconds
     ) {
-      const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
+      const result = await this.fetchVerifyLogin(verifyUrl);
 
       if (result.verificationStatus !== VerificationStatus.PENDING) {
         return result;
@@ -828,9 +824,7 @@ export class ServiceClient {
     return urlWithoutParams;
   }
 
-  private async fetchVerifyPasswordlessLogin(
-    verifyUrl: string
-  ): Promise<PasswordlessVerifyResponse> {
+  private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
     const result = await crossfetch.fetch(verifyUrl, {
       method: 'GET',
     });
@@ -844,7 +838,7 @@ export class ServiceClient {
       };
     }
     if (result.status === 400) {
-      const error = (await result.json()) as PasswordlessVerifyErrorResponse;
+      const error = (await result.json()) as VerifyErrorResponse;
       if (
         error.status === VerificationStatus.PENDING ||
         error.status === VerificationStatus.USED ||
