@@ -40,6 +40,7 @@ import {
   LoginConfirmationErrorCode,
   LoginConfirmResponse,
   PasswordlessLoginResponse,
+  UnsuccessfulLogin,
 } from './interfaces/login_api_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
@@ -484,7 +485,7 @@ export class ServiceClient {
     email: string,
     mode: 'login' | 'register' = 'login'
   ): Promise<PasswordlessLoginResponse> {
-    const result: Response = await crossfetch.fetch(
+    const response: Response = await crossfetch.fetch(
       `${this._STORAGE.baseUrl}/auth/passwordless?mode=${mode}`,
       {
         method: 'POST',
@@ -496,12 +497,17 @@ export class ServiceClient {
         }),
       }
     );
-    if (result.status === 200) {
-      const apiResponse = (await result.json()) as {
+    if (response.status === 200) {
+      const apiResponse = await this.tryParseLoginResponseJson<{
         verify_url: string;
         expires_at: string;
-      };
-      const { verify_url, expires_at } = apiResponse || {};
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { verify_url, expires_at } = apiResponse.json || {};
 
       if (verify_url && expires_at) {
         return {
@@ -512,12 +518,17 @@ export class ServiceClient {
       } else {
         return { success: false, title: 'Unexpected API response' };
       }
-    } else if (result.status === 400) {
-      const apiResponse = (await result.json()) as {
+    } else if (response.status === 400) {
+      const apiResponse = await this.tryParseLoginResponseJson<{
         title: string;
         detail: string;
-      };
-      const { title, detail } = apiResponse || {};
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { title, detail } = apiResponse.json || {};
       if (title) {
         return { success: false, title, detail };
       } else {
@@ -526,7 +537,7 @@ export class ServiceClient {
     } else {
       return {
         success: false,
-        title: `Unexpected status code ${result.status} received`,
+        title: `Unexpected status code ${response.status} received`,
       };
     }
   }
@@ -572,19 +583,24 @@ export class ServiceClient {
   }
 
   public async cliLogin(): Promise<CLILoginResponse> {
-    const result: Response = await crossfetch.fetch(
+    const response: Response = await crossfetch.fetch(
       `${this._STORAGE.baseUrl}/auth/cli`,
       {
         method: 'POST',
       }
     );
-    if (result.status === 201) {
-      const apiResponse = (await result.json()) as {
+    if (response.status === 201) {
+      const apiResponse = await this.tryParseLoginResponseJson<{
         verify_url: string;
         browser_url: string;
         expires_at: string;
-      };
-      const { verify_url, browser_url, expires_at } = apiResponse || {};
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { verify_url, browser_url, expires_at } = apiResponse.json || {};
 
       if (verify_url && browser_url && expires_at) {
         return {
@@ -597,17 +613,22 @@ export class ServiceClient {
         return { success: false, title: 'Unexpected API response' };
       }
     } else {
-      const apiResponse = (await result.json()) as {
+      const apiResponse = await this.tryParseLoginResponseJson<{
         title: string;
         detail: string;
-      };
-      const { title, detail } = apiResponse || {};
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { title, detail } = apiResponse.json || {};
       if (title) {
         return { success: false, title, detail };
       } else {
         return {
           success: false,
-          title: `Unexpected status code ${result.status} received`,
+          title: `Unexpected status code ${response.status} received`,
         };
       }
     }
@@ -932,5 +953,23 @@ export class ServiceClient {
       return LoginConfirmationErrorCode.USED;
 
     return LoginConfirmationErrorCode.INVALID;
+  }
+
+  private async tryParseLoginResponseJson<T>(
+    response: Response
+  ): Promise<{ json?: T; error?: UnsuccessfulLogin }> {
+    let apiResponse;
+    try {
+      apiResponse = (await response.json()) as T;
+    } catch (e) {
+      return {
+        error: {
+          success: false,
+          title: `Cannot deserialize login API response: ${String(e)}`,
+        },
+      };
+    }
+
+    return { json: apiResponse };
   }
 }

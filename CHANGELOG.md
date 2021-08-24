@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING CHANGE** `PasswordlessVerifyResponse` renamed to `VerifyResponse`
 - **BREAKING CHANGE** `PasswordlessVerifyErrorResponse` renamed to `VerifyErrorResponse`
 - **BREAKING CHANGE** `PasswordlessConfirmErrorResponse` renamed to `LoginConfirmErrorResponse`
+- **BREAKING CHANGE** `passwordlessLogin` do not throw on json deserialization errors and returns `UnsuccessfulLogin` as result
 
 ## [0.0.18] - 2021-08-18
 

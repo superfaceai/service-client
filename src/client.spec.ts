@@ -360,6 +360,30 @@ describe('client', () => {
           detail: "user with mail@mydomain.com doesn't exist",
         });
       });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (200 status code)', async () => {
+        fetchMock.mockResponse('Text body instead of JSON', { status: 200 });
+
+        const result = await client.passwordlessLogin('mail@mydomain.com');
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token T in JSON at position 0',
+        });
+      });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (400 status code)', async () => {
+        fetchMock.mockResponse('400 Bad Request', { status: 400 });
+
+        const result = await client.passwordlessLogin('mail@mydomain.com');
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token B in JSON at position 4',
+        });
+      });
     });
 
     describe('verifyPasswordlessLogin', () => {
@@ -513,6 +537,30 @@ describe('client', () => {
           success: false,
           title: 'Internal server error',
           detail: undefined,
+        });
+      });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (200 status code)', async () => {
+        fetchMock.mockResponse('Text body instead of JSON', { status: 200 });
+
+        const result = await client.cliLogin();
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token T in JSON at position 0',
+        });
+      });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (400 status code)', async () => {
+        fetchMock.mockResponse('400 Bad Request', { status: 400 });
+
+        const result = await client.cliLogin();
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token B in JSON at position 4',
         });
       });
     });
