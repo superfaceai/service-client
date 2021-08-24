@@ -13,6 +13,4 @@ export type UnsuccessfulConfirm = {
   code: LoginConfirmationErrorCode;
 };
 
-export type PasswordlessConfirmResponse =
-  | SuccessfulConfirm
-  | UnsuccessfulConfirm;
+export type LoginConfirmResponse = SuccessfulConfirm | UnsuccessfulConfirm;

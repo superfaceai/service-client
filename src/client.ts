@@ -38,8 +38,8 @@ import {
 import { CLILoginResponse } from './interfaces/cli_login_response';
 import {
   LoginConfirmationErrorCode,
-  PasswordlessConfirmResponse,
-} from './interfaces/passwordless_confirm_response';
+  LoginConfirmResponse,
+} from './interfaces/login_confirm_response';
 import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
@@ -541,7 +541,7 @@ export class ServiceClient {
   public async confirmPasswordlessLogin(
     email: string,
     code: string
-  ): Promise<PasswordlessConfirmResponse> {
+  ): Promise<LoginConfirmResponse> {
     const encodedEmail = encodeURIComponent(email);
     const apiResponse = await this.fetch(
       `/auth/passwordless/confirm?email=${encodedEmail}&code=${code}`,
@@ -561,24 +561,12 @@ export class ServiceClient {
       }
     })();
 
-    function makeErrorCodeFrom(title?: string): LoginConfirmationErrorCode {
-      if (title?.toLocaleLowerCase().includes('expir'))
-        return LoginConfirmationErrorCode.EXPIRED;
-      if (
-        title?.toLowerCase().includes('already confirm') ||
-        title?.toLowerCase().includes('used')
-      )
-        return LoginConfirmationErrorCode.USED;
-
-      return LoginConfirmationErrorCode.INVALID;
-    }
-
     if (status === 'CONFIRMED') {
       return { success: true };
     } else {
       return {
         success: false,
-        code: makeErrorCodeFrom(title),
+        code: this.makeErrorCodeFromLoginConfirmationError(title),
       };
     }
   }
@@ -630,6 +618,35 @@ export class ServiceClient {
     options?: VerifyOptions
   ): Promise<VerifyResponse> {
     return this.verifyLogin(verifyUrl, options);
+  }
+
+  public async confirmCLILogin(code: string): Promise<LoginConfirmResponse> {
+    const apiResponse = await this.fetch(`/auth/cli/confirm?code=${code}`, {
+      authenticate: true,
+      headers: { accept: 'application/json' },
+    });
+
+    const { status, title } = await (async function () {
+      try {
+        return (await apiResponse.json()) as {
+          status: string | number;
+          title?: string;
+        };
+      } catch (e) {
+        throw new ServiceClientError(
+          `Cannot deserialize confirmation API response: ${String(e)}`
+        );
+      }
+    })();
+
+    if (status === 'CONFIRMED') {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        code: this.makeErrorCodeFromLoginConfirmationError(title),
+      };
+    }
   }
 
   public async getProjectsList(): Promise<ProjectsListResponse> {
@@ -901,5 +918,19 @@ export class ServiceClient {
     return {
       verificationStatus: VerificationStatus.POLLING_TIMEOUT,
     };
+  }
+
+  private makeErrorCodeFromLoginConfirmationError(
+    title?: string
+  ): LoginConfirmationErrorCode {
+    if (title?.toLocaleLowerCase().includes('expir'))
+      return LoginConfirmationErrorCode.EXPIRED;
+    if (
+      title?.toLowerCase().includes('already confirm') ||
+      title?.toLowerCase().includes('used')
+    )
+      return LoginConfirmationErrorCode.USED;
+
+    return LoginConfirmationErrorCode.INVALID;
   }
 }

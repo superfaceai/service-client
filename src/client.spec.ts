@@ -546,6 +546,67 @@ describe('client', () => {
         });
       });
     });
+
+    describe('confirmCLILogin', () => {
+      const code =
+        '3d5665e8ff18a5c306c6df53bcc617d8b5923d7ea02b992b96f1773ec36ee152';
+
+      const confirmedRes = { status: 'CONFIRMED' };
+
+      const usedRes = {
+        status: 400,
+        instance: '/auth/cli/confirm',
+        title: 'Token already confirmed',
+        detail: `Code ${code} was already used to confirm login`,
+      };
+
+      const expiredRes = {
+        status: 400,
+        instance: '/auth/cli/confirm',
+        title: 'Code is expired',
+        detail: `Code ${code} is expired`,
+      };
+
+      it(`should return success when API responds with status ${confirmedRes.status}`, async () => {
+        fetchMock.mockResponse(JSON.stringify(confirmedRes), { status: 200 });
+
+        const result = await client.confirmCLILogin(code);
+
+        expect(result).toStrictEqual({ success: true });
+      });
+
+      it(`should return failure with code 'USED' when API responds with status 400 and title '${usedRes.title}'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(usedRes), { status: 400 });
+
+        const result = await client.confirmCLILogin(code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.USED,
+        });
+      });
+
+      it(`should return failure with code 'EXPIRED' when API responds with status 400 and title '${expiredRes.title}'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(expiredRes), { status: 400 });
+
+        const result = await client.confirmCLILogin(code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.EXPIRED,
+        });
+      });
+
+      it('should throw when API responds with unfamiliar response', async () => {
+        fetchMock.mockResponse('500 Internal Server Error', { status: 500 });
+
+        await expect(() => client.confirmCLILogin(code)).rejects.toEqual(
+          new Error(
+            'Cannot deserialize confirmation API response: FetchError: invalid json response body at  reason: Unexpected token I in JSON at position 4'
+          )
+        );
+      });
+    });
   });
 
   describe('getGithubLoginUrl', () => {
