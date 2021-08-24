@@ -516,6 +516,36 @@ describe('client', () => {
         });
       });
     });
+
+    describe('verifyCLILogin', () => {
+      let verifyLoginSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        //eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        verifyLoginSpy = jest.spyOn(client as any, 'verifyLogin');
+        verifyLoginSpy.mockResolvedValue({
+          verificationStatus: VerificationStatus.CONFIRMED,
+        });
+      });
+
+      it('should call verifyLogin with verify url and options parameters', async () => {
+        await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
+        });
+
+        expect(verifyLoginSpy).toBeCalledWith(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
+        });
+      });
+
+      it('should return verifyLogin result', async () => {
+        await expect(
+          client.verifyPasswordlessLogin(VERIFY_URL)
+        ).resolves.toEqual({
+          verificationStatus: VerificationStatus.CONFIRMED,
+        });
+      });
+    });
   });
 
   describe('getGithubLoginUrl', () => {

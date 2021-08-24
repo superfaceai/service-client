@@ -625,6 +625,13 @@ export class ServiceClient {
     }
   }
 
+  public async verifyCLILogin(
+    verifyUrl: string,
+    options?: VerifyOptions
+  ): Promise<VerifyResponse> {
+    return this.verifyLogin(verifyUrl, options);
+  }
+
   public async getProjectsList(): Promise<ProjectsListResponse> {
     const response: Response = await this.fetch('/projects', {
       method: 'GET',
