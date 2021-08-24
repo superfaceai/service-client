@@ -35,12 +35,12 @@ import {
   VerifyOptions,
   VerifyResponse,
 } from './interfaces';
-import { CLILoginResponse } from './interfaces/cli_login_response';
 import {
+  CLILoginResponse,
   LoginConfirmationErrorCode,
   LoginConfirmResponse,
-} from './interfaces/login_confirm_response';
-import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
+  PasswordlessLoginResponse,
+} from './interfaces/login_api_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,

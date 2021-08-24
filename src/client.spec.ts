@@ -23,13 +23,13 @@ import {
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
 } from './interfaces';
+import { VerificationStatus } from './interfaces/login_api_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,
   ProjectsListResponse,
 } from './interfaces/projects_api_response';
 import { CancellationToken } from './interfaces/verify_options';
-import { VerificationStatus } from './interfaces/verify_response';
 
 const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
   title: 'Token is pending confirmation',
