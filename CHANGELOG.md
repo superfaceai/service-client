@@ -19,10 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **BREAKING CHANGE** `findOneProvider` renamed to `getProvider`
 - **BREAKING CHANGE** `findAllProviders` renamed to `getProvidersList`, now has ability to filter providers by profile and owner (incl. results count limit)
-- `PasswordlessVerifyOptions` renamed to `VerifyOptions`
-- `PasswordlessVerifyResponse` renamed to `VerifyResponse`
-- `PasswordlessVerifyErrorResponse` renamed to `VerifyErrorResponse`
-- `PasswordlessConfirmErrorResponse` renamed to `LoginConfirmErrorResponse`
+- **BREAKING CHANGE** `PasswordlessVerifyOptions` renamed to `VerifyOptions`
+- **BREAKING CHANGE** `PasswordlessVerifyResponse` renamed to `VerifyResponse`
+- **BREAKING CHANGE** `PasswordlessVerifyErrorResponse` renamed to `VerifyErrorResponse`
+- **BREAKING CHANGE** `PasswordlessConfirmErrorResponse` renamed to `LoginConfirmErrorResponse`
 
 ## [0.0.18] - 2021-08-18
 
