@@ -237,7 +237,7 @@ export class ServiceClient {
     await this.unwrap(response);
   }
 
-  async findAllProviders(
+  async getProvidersList(
     options?: ProvidersListOptions
   ): Promise<ProviderListResponse> {
     const { profile, accountHandle, limit } = options || {};
@@ -260,7 +260,7 @@ export class ServiceClient {
     return (await response.json()) as ProviderListResponse;
   }
 
-  async findOneProvider(name: string): Promise<ProviderResponse> {
+  async getProvider(name: string): Promise<ProviderResponse> {
     const response: Response = await this.fetch(`/providers/${name}`, {
       authenticate: false,
       method: 'GET',

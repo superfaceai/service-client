@@ -669,7 +669,7 @@ describe('client', () => {
     });
   });
 
-  describe('findAllProviders', () => {
+  describe('getProvidersList', () => {
     it('should find all providers', async () => {
       const mockResult: ProviderListResponse = {
         url: '/providers',
@@ -689,7 +689,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findAllProviders()).resolves.toEqual(mockResult);
+      await expect(client.getProvidersList()).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
         authenticate: false,
@@ -705,7 +705,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue({ ok: true, json: async () => {} } as Response);
 
-      await client.findAllProviders({
+      await client.getProvidersList({
         profile: 'scope/profile-name',
         accountHandle: 'username',
         limit: 100,
@@ -738,7 +738,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findAllProviders()).rejects.toEqual(
+      await expect(client.getProvidersList()).rejects.toEqual(
         new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
@@ -752,7 +752,7 @@ describe('client', () => {
     });
   });
 
-  describe('findOneProvider', () => {
+  describe('getProvider', () => {
     it('should get one provider', async () => {
       const mockResult: ProviderResponse = {
         url: 'testUrl',
@@ -768,7 +768,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findOneProvider('test')).resolves.toEqual(mockResult);
+      await expect(client.getProvider('test')).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
         authenticate: false,
@@ -793,7 +793,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findOneProvider('test')).rejects.toEqual(
+      await expect(client.getProvider('test')).rejects.toEqual(
         new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);

@@ -231,14 +231,14 @@ describe('client', () => {
     });
 
     test('find all providers', async () => {
-      await expect(serviceClient.findAllProviders()).resolves.toEqual({
+      await expect(serviceClient.getProvidersList()).resolves.toEqual({
         url: '/providers',
         data: [mockResult],
       });
     });
 
     test('find one provider', async () => {
-      await expect(serviceClient.findOneProvider('test')).resolves.toEqual(
+      await expect(serviceClient.getProvider('test')).resolves.toEqual(
         mockResult
       );
     });

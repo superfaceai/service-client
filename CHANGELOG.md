@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `getMapsList` method fetches list of published map variants (incl. filter by map owner & results count limit)
 
 ### Changed
-- `findAllProviders` now has ability to filter providers by profile and owner (incl. results count limit)
+- **BREAKING CHANGE** `findOneProvider` renamed to `getProvider`
+- **BREAKING CHANGE** `findAllProviders` renamed to  `getProvidersList`, now has ability to filter providers by profile and owner (incl. results count limit)
 
 ## [0.0.18] - 2021-08-18
 
