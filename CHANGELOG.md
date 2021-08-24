@@ -9,10 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `cliLogin` method fetches verify and browser urls with expiration date
 - `getProfilesList` method fetches list of published profiles (incl. filter by profile owner & results count limit)
 - `getMapsList` method fetches list of published map variants (incl. filter by map owner & results count limit)
-- `verifyCLILogin` method fetches status of CLI login
+- `cliLogin` method fetches verify and browser urls with expiration date
+- `verifyCliLogin` method fetches status of CLI login
 - `confirmCLILogin` method confirms CLI login
 
 ### Changed

@@ -613,7 +613,7 @@ export class ServiceClient {
     }
   }
 
-  public async verifyCLILogin(
+  public async verifyCliLogin(
     verifyUrl: string,
     options?: VerifyOptions
   ): Promise<VerifyResponse> {

@@ -517,7 +517,7 @@ describe('client', () => {
       });
     });
 
-    describe('verifyCLILogin', () => {
+    describe('verifyCliLogin', () => {
       let verifyLoginSpy: jest.SpyInstance;
 
       beforeEach(() => {
