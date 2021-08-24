@@ -13,7 +13,10 @@ import { ServiceApiError, ServiceClientError } from './errors';
 import {
   LoginConfirmationErrorCode,
   MapRevisionResponse,
+  MapsListResponse,
+  ProfilesListResponse,
   ProfileVersionResponse,
+  ProviderListResponse,
   ProviderResponse,
   SDKConfigResponse,
   SDKPerformStatisticsResponse,
@@ -666,16 +669,19 @@ describe('client', () => {
     });
   });
 
-  describe('findAllProviders', () => {
+  describe('getProvidersList', () => {
     it('should find all providers', async () => {
-      const mockResult: ProviderResponse[] = [
-        {
-          url: 'testUrl',
-          name: 'testName',
-          deployments: [],
-          security: [],
-        },
-      ];
+      const mockResult: ProviderListResponse = {
+        url: '/providers',
+        data: [
+          {
+            url: 'testUrl',
+            name: 'testName',
+            services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+            defaultService: 'default',
+          },
+        ],
+      };
       const mockResponse = {
         ok: true,
         json: async () => mockResult,
@@ -683,7 +689,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findAllProviders()).resolves.toEqual(mockResult);
+      await expect(client.getProvidersList()).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
         authenticate: false,
@@ -692,6 +698,30 @@ describe('client', () => {
           'Content-Type': 'application/json',
         },
       });
+    });
+
+    it('should use query params to filter providers (if provided)', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+
+      await client.getProvidersList({
+        profile: 'scope/profile-name',
+        accountHandle: 'username',
+        limit: 100,
+      });
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(
+        '/providers?profile=scope/profile-name&account_handle=username&limit=100',
+        {
+          authenticate: false,
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
     });
 
     it('should throw error', async () => {
@@ -708,7 +738,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findAllProviders()).rejects.toEqual(
+      await expect(client.getProvidersList()).rejects.toEqual(
         new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
@@ -722,13 +752,13 @@ describe('client', () => {
     });
   });
 
-  describe('findOneProvider', () => {
+  describe('getProvider', () => {
     it('should get one provider', async () => {
       const mockResult: ProviderResponse = {
         url: 'testUrl',
         name: 'testName',
-        deployments: [],
-        security: [],
+        services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+        defaultService: 'default',
       };
 
       const mockResponse = {
@@ -738,7 +768,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findOneProvider('test')).resolves.toEqual(mockResult);
+      await expect(client.getProvider('test')).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
         authenticate: false,
@@ -763,7 +793,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.findOneProvider('test')).rejects.toEqual(
+      await expect(client.getProvider('test')).rejects.toEqual(
         new ServiceApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
@@ -934,6 +964,81 @@ describe('client', () => {
       });
     });
   });
+
+  describe('getProfilesList', () => {
+    it('should get list of profiles', async () => {
+      const mockResult: ProfilesListResponse = {
+        url: '/profiles',
+        data: [
+          {
+            id: 'scope/profile-name',
+            url: 'https://superface.test/scope/profile-name',
+          },
+        ],
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.getProfilesList()).resolves.toEqual(mockResult);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/profiles', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+
+    it('should use query params to filter profiles (if provided)', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+
+      await client.getProfilesList({
+        accountHandle: 'username',
+        limit: 100,
+      });
+
+      expect(fetchMock).toBeCalledWith(
+        '/profiles?account_handle=username&limit=100',
+        {
+          authenticate: false,
+          method: 'GET',
+          headers: { Accept: MEDIA_TYPE_JSON },
+        }
+      );
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/profiles',
+        title: 'Bad Request',
+        detail: 'limit must not be greater than 100',
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.getProfilesList({ limit: 101 })).rejects.toEqual(
+        new ServiceApiError(payload)
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/profiles?limit=101', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+  });
+
   describe('getProfileSource', () => {
     it('should get profile source', async () => {
       const mockResponse = {
@@ -1196,6 +1301,83 @@ describe('client', () => {
       });
     });
   });
+
+  describe('getMapsList', () => {
+    it('should get list of maps', async () => {
+      const mockResult: MapsListResponse = {
+        url: '/maps',
+        data: [
+          {
+            id: 'scope/profile-name.provider@1.0',
+            url: 'https://superface.test/scope/profile-name.provider@1.0',
+          },
+        ],
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.getMapsList()).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+
+    it('should use query params to filter maps (if provided)', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+
+      await client.getMapsList({
+        accountHandle: 'username',
+        limit: 100,
+      });
+
+      expect(fetchMock).toBeCalledWith(
+        '/maps?account_handle=username&limit=100',
+        {
+          authenticate: false,
+          method: 'GET',
+          headers: { Accept: MEDIA_TYPE_JSON },
+        }
+      );
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 400,
+        instance: '/maps',
+        title: 'Bad Request',
+        detail: 'limit must not be greater than 100',
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.getMapsList({ limit: 101 })).rejects.toEqual(
+        new ServiceApiError(payload)
+      );
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps?limit=101', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+  });
+
   describe('getMapSource', () => {
     it('should get map source', async () => {
       const mockResponse = {

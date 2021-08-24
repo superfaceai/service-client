@@ -13,8 +13,14 @@ import {
   AuthToken,
   ClientOptions,
   MapRevisionResponse,
+  MapsListOptions,
+  MapsListResponse,
+  ProfilesListOptions,
+  ProfilesListResponse,
   ProfileVersionResponse,
+  ProviderListResponse,
   ProviderResponse,
+  ProvidersListOptions,
   RefreshAccessTokenOptions,
   RefreshTokenUpdatedHandler,
   SDKConfigResponse,
@@ -231,8 +237,18 @@ export class ServiceClient {
     await this.unwrap(response);
   }
 
-  async findAllProviders(): Promise<ProviderResponse[]> {
-    const response: Response = await this.fetch('/providers', {
+  async getProvidersList(
+    options?: ProvidersListOptions
+  ): Promise<ProviderListResponse> {
+    const { profile, accountHandle, limit } = options || {};
+
+    const url = this.makePathWithQueryParams('/providers', {
+      profile,
+      account_handle: accountHandle,
+      limit,
+    });
+
+    const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
       headers: {
@@ -241,10 +257,10 @@ export class ServiceClient {
     });
     await this.unwrap(response);
 
-    return (await response.json()) as ProviderResponse[];
+    return (await response.json()) as ProviderListResponse;
   }
 
-  async findOneProvider(name: string): Promise<ProviderResponse> {
+  async getProvider(name: string): Promise<ProviderResponse> {
     const response: Response = await this.fetch(`/providers/${name}`, {
       authenticate: false,
       method: 'GET',
@@ -339,6 +355,26 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
+  async getProfilesList(
+    options?: ProfilesListOptions
+  ): Promise<ProfilesListResponse> {
+    const { accountHandle, limit } = options || {};
+
+    const url = this.makePathWithQueryParams('/profiles', {
+      account_handle: accountHandle,
+      limit,
+    });
+
+    const response: Response = await this.fetch(url, {
+      authenticate: false,
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    await this.unwrap(response);
+
+    return (await response.json()) as ProfilesListResponse;
+  }
+
   async createMap(payload: string): Promise<void> {
     const response: Response = await this.fetch('/maps', {
       method: 'POST',
@@ -427,6 +463,26 @@ export class ServiceClient {
     });
 
     return (await this.unwrap(response)).text();
+  }
+
+  async getMapsList(
+    options?: MapsListOptions
+  ): Promise<MapsListResponse> {
+    const { accountHandle, limit } = options || {};
+
+    const url = this.makePathWithQueryParams('/maps', {
+      account_handle: accountHandle,
+      limit,
+    });
+
+    const response: Response = await this.fetch(url, {
+      authenticate: false,
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    await this.unwrap(response);
+
+    return (await response.json()) as MapsListResponse;
   }
 
   public async passwordlessLogin(
@@ -632,21 +688,18 @@ export class ServiceClient {
     to: Date,
     intervalMinutes: number
   ): Promise<SDKPerformStatisticsResponse> {
-    const queryParams = {
-      from: from.toISOString(),
-      to: to.toISOString(),
-      interval_minutes: intervalMinutes,
-      account_handle: handle,
-      project_name: projectName,
-      profile: profileName,
-      providers: providers.join(','),
-    };
-
-    const urlQuery = Object.entries(queryParams)
-      .map(kv => kv.join('='))
-      .join('&');
-
-    const statisticsUrl = `/insights/perform_statistics?${urlQuery}`;
+    const statisticsUrl = this.makePathWithQueryParams(
+      '/insights/perform_statistics',
+      {
+        from: from.toISOString(),
+        to: to.toISOString(),
+        interval_minutes: intervalMinutes,
+        account_handle: handle,
+        project_name: projectName,
+        profile: profileName,
+        providers: providers.join(','),
+      }
+    );
 
     const response: Response = await this.fetch(statisticsUrl, {
       method: 'GET',
@@ -666,21 +719,17 @@ export class ServiceClient {
     providerChangeTypes?: SDKProviderChangeType[],
     limit = 10
   ): Promise<SDKProviderChangesListResponse> {
-    const queryParams = {
-      account_handle: handle,
-      project_name: projectName,
-      profile: profileName,
-      from_providers: (fromProviders || []).join(','),
-      provider_change_types: (providerChangeTypes || []).join(','),
-      limit,
-    };
-
-    const urlQuery = Object.entries(queryParams)
-      .filter(([_, v]) => !!v)
-      .map(kv => kv.join('='))
-      .join('&');
-
-    const providerChangesUrl = `/insights/provider_changes?${urlQuery}`;
+    const providerChangesUrl = this.makePathWithQueryParams(
+      '/insights/provider_changes',
+      {
+        account_handle: handle,
+        project_name: projectName,
+        profile: profileName,
+        from_providers: (fromProviders || []).join(','),
+        provider_change_types: (providerChangeTypes || []).join(','),
+        limit,
+      }
+    );
 
     const response: Response = await this.fetch(providerChangesUrl, {
       method: 'GET',
@@ -791,5 +840,17 @@ export class ServiceClient {
         ''
       }`
     );
+  }
+
+  private makePathWithQueryParams(
+    path: string,
+    paramsObject: Record<string, unknown>
+  ): string {
+    const searchParams = Object.entries(paramsObject)
+      .filter(([_, v]) => !!v)
+      .map(kv => kv.join('='))
+      .join('&');
+
+    return [path, searchParams].filter(v => !!v).join('?');
   }
 }

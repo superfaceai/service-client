@@ -4,12 +4,14 @@ import * as http from 'http';
 import {
   CancellationToken,
   LoginConfirmationErrorCode,
+  MapResponse,
   MapRevisionResponse,
   MEDIA_TYPE_JSON,
   MEDIA_TYPE_MAP,
   MEDIA_TYPE_MAP_AST,
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
+  ProfileResponse,
   ProfileVersionResponse,
   ProjectResponse,
   ProjectsListResponse,
@@ -180,8 +182,8 @@ describe('client', () => {
     const mockResult: ProviderResponse = {
       url: 'testUrl',
       name: 'testName',
-      deployments: [],
-      security: [],
+      services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+      defaultService: 'default',
     };
     beforeAll(() => {
       const identity = createExpressMock();
@@ -198,7 +200,10 @@ describe('client', () => {
       identity.get(
         '/providers',
         (_req: express.Request, res: express.Response) => {
-          res.json([mockResult]);
+          res.json({
+            url: '/providers',
+            data: [mockResult],
+          });
         }
       );
       identity.get(
@@ -226,13 +231,14 @@ describe('client', () => {
     });
 
     test('find all providers', async () => {
-      await expect(serviceClient.findAllProviders()).resolves.toEqual([
-        mockResult,
-      ]);
+      await expect(serviceClient.getProvidersList()).resolves.toEqual({
+        url: '/providers',
+        data: [mockResult],
+      });
     });
 
     test('find one provider', async () => {
-      await expect(serviceClient.findOneProvider('test')).resolves.toEqual(
+      await expect(serviceClient.getProvider('test')).resolves.toEqual(
         mockResult
       );
     });
@@ -242,6 +248,11 @@ describe('client', () => {
     const mockProfileSource = 'profileSource';
     const mockProfileAST = {
       kind: 'ProfileDocument',
+    };
+
+    const mockProfile: ProfileResponse = {
+      id: 'vcs/user-repos',
+      url: 'https://superface.test/vcs/user-repos',
     };
 
     const mockResult: ProfileVersionResponse = {
@@ -265,6 +276,15 @@ describe('client', () => {
           } else {
             res.sendStatus(401);
           }
+        }
+      );
+      identity.get(
+        '/profiles',
+        (_req: express.Request, res: express.Response) => {
+          res.json({
+            url: '/profiles',
+            data: [mockProfile],
+          });
         }
       );
       identity.post('/parse', (req: express.Request, res: express.Response) => {
@@ -340,12 +360,24 @@ describe('client', () => {
         serviceClient.getProfileAST('vcs', '1.0.0', 'user-repos')
       ).resolves.toEqual(JSON.stringify(mockProfileAST));
     });
+
+    test('get profiles list', async () => {
+      await expect(serviceClient.getProfilesList()).resolves.toEqual({
+        url: '/profiles',
+        data: [mockProfile],
+      });
+    });
   });
 
   describe('maps', () => {
     const mockMapSource = 'mapSource';
     const mockMapAST = {
       kind: 'MappDocument',
+    };
+
+    const mockMap: MapResponse = {
+      id: 'vcs/user-repos.provider@1.0',
+      url: 'https://superface.test/vcs/user-repos.provider@1.0',
     };
 
     const mockResult: MapRevisionResponse = {
@@ -372,6 +404,12 @@ describe('client', () => {
         } else {
           res.sendStatus(401);
         }
+      });
+      identity.get('/maps', (_req: express.Request, res: express.Response) => {
+        res.json({
+          url: '/maps',
+          data: [mockMap],
+        });
       });
       identity.post('/parse', (req: express.Request, res: express.Response) => {
         if (req.headers?.['content-type'] === MEDIA_TYPE_MAP) {
@@ -442,6 +480,13 @@ describe('client', () => {
       await expect(
         serviceClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
       ).resolves.toEqual(JSON.stringify(mockMapAST));
+    });
+
+    test('get maps list', async () => {
+      await expect(serviceClient.getMapsList()).resolves.toEqual({
+        url: '/maps',
+        data: [mockMap],
+      });
     });
   });
 

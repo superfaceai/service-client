@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `getProfilesList` method fetches list of published profiles (incl. filter by profile owner & results count limit)
+- `getMapsList` method fetches list of published map variants (incl. filter by map owner & results count limit)
+
+### Changed
+- **BREAKING CHANGE** `findOneProvider` renamed to `getProvider`
+- **BREAKING CHANGE** `findAllProviders` renamed to  `getProvidersList`, now has ability to filter providers by profile and owner (incl. results count limit)
+
 ## [0.0.18] - 2021-08-18
 
 ## [0.0.17] - 2021-06-29
