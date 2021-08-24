@@ -44,5 +44,5 @@ export interface ProviderResponse {
 
 export interface ProviderListResponse {
   url: string;
-  data: ProviderResponse[]
+  data: ProviderResponse[];
 }
