@@ -1,6 +1,8 @@
 export * from './auth_token';
 export * from './client_options';
 export * from './insights_api_response';
+export * from './login_api_options';
+export * from './login_api_response';
 export * from './maps_api_response';
 export * from './maps_api_options';
 export * from './refresh_access_token_options';
@@ -12,5 +14,3 @@ export * from './providers_api_response';
 export * from './providers_api_options';
 export * from './sdk_provider_change_type';
 export * from './service_api_error_response';
-export * from './verify_options';
-export * from './login_api_response';

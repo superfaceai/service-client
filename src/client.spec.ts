@@ -11,6 +11,7 @@ import {
 } from './constants';
 import { ServiceApiError, ServiceClientError } from './errors';
 import {
+  CancellationToken,
   LoginConfirmationErrorCode,
   MapRevisionResponse,
   MapsListResponse,
@@ -29,7 +30,6 @@ import {
   ProjectResponse,
   ProjectsListResponse,
 } from './interfaces/projects_api_response';
-import { CancellationToken } from './interfaces/verify_options';
 
 const VERIFY_PENDING_STATUS_RESPONSE_BODY = {
   title: 'Token is pending confirmation',
