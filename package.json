@@ -18,6 +18,7 @@
     "test": "jest",
     "test:e2e": "jest --config ./test/jest-e2e.config.js --runInBand",
     "lint": "eslint .",
+    "lint:fix": "yarn lint --fix",
     "format": "prettier . --write"
   },
   "devDependencies": {
