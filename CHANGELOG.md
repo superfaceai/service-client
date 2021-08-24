@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `getMapsList` method fetches list of published map variants (incl. filter by map owner & results count limit)
 - `cliLogin` method fetches verify and browser urls with expiration date
 - `verifyCliLogin` method fetches status of CLI login
-- `confirmCLILogin` method confirms CLI login
+- `confirmCliLogin` method confirms CLI login
 
 ### Changed
 

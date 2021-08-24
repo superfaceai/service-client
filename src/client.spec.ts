@@ -570,7 +570,7 @@ describe('client', () => {
       it(`should return success when API responds with status ${confirmedRes.status}`, async () => {
         fetchMock.mockResponse(JSON.stringify(confirmedRes), { status: 200 });
 
-        const result = await client.confirmCLILogin(code);
+        const result = await client.confirmCliLogin(code);
 
         expect(result).toStrictEqual({ success: true });
       });
@@ -578,7 +578,7 @@ describe('client', () => {
       it(`should return failure with code 'USED' when API responds with status 400 and title '${usedRes.title}'`, async () => {
         fetchMock.mockResponse(JSON.stringify(usedRes), { status: 400 });
 
-        const result = await client.confirmCLILogin(code);
+        const result = await client.confirmCliLogin(code);
 
         expect(result).toStrictEqual({
           success: false,
@@ -589,7 +589,7 @@ describe('client', () => {
       it(`should return failure with code 'EXPIRED' when API responds with status 400 and title '${expiredRes.title}'`, async () => {
         fetchMock.mockResponse(JSON.stringify(expiredRes), { status: 400 });
 
-        const result = await client.confirmCLILogin(code);
+        const result = await client.confirmCliLogin(code);
 
         expect(result).toStrictEqual({
           success: false,
@@ -600,7 +600,7 @@ describe('client', () => {
       it('should throw when API responds with unfamiliar response', async () => {
         fetchMock.mockResponse('500 Internal Server Error', { status: 500 });
 
-        await expect(() => client.confirmCLILogin(code)).rejects.toEqual(
+        await expect(() => client.confirmCliLogin(code)).rejects.toEqual(
           new Error(
             'Cannot deserialize confirmation API response: FetchError: invalid json response body at  reason: Unexpected token I in JSON at position 4'
           )

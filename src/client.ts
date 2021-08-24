@@ -620,7 +620,7 @@ export class ServiceClient {
     return this.verifyLogin(verifyUrl, options);
   }
 
-  public async confirmCLILogin(code: string): Promise<LoginConfirmResponse> {
+  public async confirmCliLogin(code: string): Promise<LoginConfirmResponse> {
     const apiResponse = await this.fetch(`/auth/cli/confirm?code=${code}`, {
       authenticate: true,
       headers: { accept: 'application/json' },
