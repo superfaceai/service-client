@@ -11,6 +11,7 @@ import {
 } from './constants';
 import { ServiceApiError, ServiceClientError } from './errors';
 import {
+  CancellationToken,
   LoginConfirmationErrorCode,
   MapRevisionResponse,
   MapsListResponse,
@@ -23,8 +24,7 @@ import {
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
 } from './interfaces';
-import { CancellationToken } from './interfaces/passwordless_verify_options';
-import { VerificationStatus } from './interfaces/passwordless_verify_response';
+import { VerificationStatus } from './interfaces/login_api_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,
@@ -360,150 +360,59 @@ describe('client', () => {
           detail: "user with mail@mydomain.com doesn't exist",
         });
       });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (200 status code)', async () => {
+        fetchMock.mockResponse('Text body instead of JSON', { status: 200 });
+
+        const result = await client.passwordlessLogin('mail@mydomain.com');
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token T in JSON at position 0',
+        });
+      });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (400 status code)', async () => {
+        fetchMock.mockResponse('400 Bad Request', { status: 400 });
+
+        const result = await client.passwordlessLogin('mail@mydomain.com');
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token B in JSON at position 4',
+        });
+      });
     });
 
     describe('verifyPasswordlessLogin', () => {
-      describe('for confirmed token', () => {
-        const authToken = {
-          access_token: 'AT',
-          token_type: 'Bearer',
-          expires_in: 3600,
-          refresh_token: 'RT',
-        };
-        beforeEach(() => {
-          fetchMock.mockResponse(JSON.stringify(authToken), {
-            status: 200,
-          });
-        });
+      let verifyLoginSpy: jest.SpyInstance;
 
-        it('should return authToken', async () => {
-          const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(result.authToken).toEqual(authToken);
-        });
-
-        it('should return verificationStatus = CONFIRMED', async () => {
-          const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(result.verificationStatus).toBe(VerificationStatus.CONFIRMED);
-        });
-
-        it('should call login mock', async () => {
-          const loginMock = jest.spyOn(client, 'login');
-          await client.verifyPasswordlessLogin(VERIFY_URL);
-          expect(loginMock.mock.calls.length).toBe(1);
+      beforeEach(() => {
+        //eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        verifyLoginSpy = jest.spyOn(client as any, 'verifyLogin');
+        verifyLoginSpy.mockResolvedValue({
+          verificationStatus: VerificationStatus.CONFIRMED,
         });
       });
 
-      it('should return polling timeout status when token confirmation is pending', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: 1,
+      it('should call verifyLogin with verify url and options parameters', async () => {
+        await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
         });
-        expect(result.verificationStatus).toBe(
-          VerificationStatus.POLLING_TIMEOUT
-        );
+
+        expect(verifyLoginSpy).toBeCalledWith(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
+        });
       });
 
-      it('should return expired status when token expired', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Token is expired',
-            status: 'EXPIRED',
-          }),
-          {
-            status: 400,
-          }
-        );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(VerificationStatus.EXPIRED);
-      });
-
-      it('should return used status when token was already used', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Token was already used',
-            status: 'USED',
-          }),
-          {
-            status: 400,
-          }
-        );
-        const result = await client.verifyPasswordlessLogin(VERIFY_URL);
-        expect(result.verificationStatus).toBe(VerificationStatus.USED);
-      });
-
-      it('should throw when bad request status received', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify({
-            title: 'Bad request',
-          }),
-          {
-            status: 400,
-          }
-        );
+      it('should return verifyLogin result', async () => {
         await expect(
           client.verifyPasswordlessLogin(VERIFY_URL)
-        ).rejects.toThrow();
-      });
-
-      it('should poll verfication endpoint for pollingTimeoutSeconds', async () => {
-        const testStart = new Date();
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-        const pollingTimeoutSeconds = 2;
-        await client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: pollingTimeoutSeconds,
+        ).resolves.toEqual({
+          verificationStatus: VerificationStatus.CONFIRMED,
         });
-        expect(
-          new Date().getTime() - testStart.getTime()
-        ).toBeGreaterThanOrEqual(pollingTimeoutSeconds * 1000);
-      });
-
-      it('should cancel polling', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-        const pollingTimeoutSeconds = 10;
-        const pollingCancellationToken = new CancellationToken();
-        const resultPromise = client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: pollingTimeoutSeconds,
-          cancellationToken: pollingCancellationToken,
-        });
-        pollingCancellationToken.isCancellationRequested = true;
-        expect(await resultPromise).toEqual({
-          verificationStatus: VerificationStatus.POLLING_CANCELLED,
-        });
-      });
-
-      it('should call cancel polling callback', async () => {
-        fetchMock.mockResponse(
-          JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
-          {
-            status: 400,
-          }
-        );
-
-        const cancelCallback = jest.fn();
-        const cancellationToken = new CancellationToken(cancelCallback);
-        cancellationToken.isCancellationRequested = true;
-
-        await client.verifyPasswordlessLogin(VERIFY_URL, {
-          pollingTimeoutSeconds: 2,
-          cancellationToken,
-        });
-
-        expect(cancelCallback).toBeCalled();
       });
     });
 
@@ -582,6 +491,164 @@ describe('client', () => {
         await expect(() =>
           client.confirmPasswordlessLogin(email, code)
         ).rejects.toEqual(
+          new Error(
+            'Cannot deserialize confirmation API response: FetchError: invalid json response body at  reason: Unexpected token I in JSON at position 4'
+          )
+        );
+      });
+    });
+  });
+
+  describe('cli login', () => {
+    const VERIFY_URL = 'https://superface.test/cli/verify';
+    const BROWSER_URL = 'https://superface.test/cli/confirm';
+    const EXPIRES_AT = new Date('2021-04-13T12:08:27.103Z');
+
+    describe('cliLogin', () => {
+      it('should return verify and browser url with code expiration date', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            verify_url: VERIFY_URL,
+            browser_url: BROWSER_URL,
+            expires_at: EXPIRES_AT,
+          }),
+          { status: 201 }
+        );
+        const result = await client.cliLogin();
+        expect(result).toStrictEqual({
+          success: true,
+          verifyUrl: VERIFY_URL,
+          browserUrl: BROWSER_URL,
+          expiresAt: EXPIRES_AT,
+        });
+      });
+
+      it('should return unsuccess with response title', async () => {
+        fetchMock.mockResponse(
+          JSON.stringify({
+            status: 500,
+            instance: '/auth/cli',
+            title: 'Internal server error',
+          }),
+          { status: 500 }
+        );
+        const result = await client.cliLogin();
+        expect(result).toStrictEqual({
+          success: false,
+          title: 'Internal server error',
+          detail: undefined,
+        });
+      });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (200 status code)', async () => {
+        fetchMock.mockResponse('Text body instead of JSON', { status: 200 });
+
+        const result = await client.cliLogin();
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token T in JSON at position 0',
+        });
+      });
+
+      it('should return unsuccessful result when API responds with unfamiliar response (400 status code)', async () => {
+        fetchMock.mockResponse('400 Bad Request', { status: 400 });
+
+        const result = await client.cliLogin();
+
+        expect(result).toStrictEqual({
+          success: false,
+          title:
+            'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token B in JSON at position 4',
+        });
+      });
+    });
+
+    describe('verifyCliLogin', () => {
+      let verifyLoginSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        //eslint-disable-next-line  @typescript-eslint/no-explicit-any
+        verifyLoginSpy = jest.spyOn(client as any, 'verifyLogin');
+        verifyLoginSpy.mockResolvedValue({
+          verificationStatus: VerificationStatus.CONFIRMED,
+        });
+      });
+
+      it('should call verifyLogin with verify url and options parameters', async () => {
+        await client.verifyPasswordlessLogin(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
+        });
+
+        expect(verifyLoginSpy).toBeCalledWith(VERIFY_URL, {
+          pollingIntervalSeconds: 10,
+        });
+      });
+
+      it('should return verifyLogin result', async () => {
+        await expect(
+          client.verifyPasswordlessLogin(VERIFY_URL)
+        ).resolves.toEqual({
+          verificationStatus: VerificationStatus.CONFIRMED,
+        });
+      });
+    });
+
+    describe('confirmCLILogin', () => {
+      const code =
+        '3d5665e8ff18a5c306c6df53bcc617d8b5923d7ea02b992b96f1773ec36ee152';
+
+      const confirmedRes = { status: 'CONFIRMED' };
+
+      const usedRes = {
+        status: 400,
+        instance: '/auth/cli/confirm',
+        title: 'Token already confirmed',
+        detail: `Code ${code} was already used to confirm login`,
+      };
+
+      const expiredRes = {
+        status: 400,
+        instance: '/auth/cli/confirm',
+        title: 'Code is expired',
+        detail: `Code ${code} is expired`,
+      };
+
+      it(`should return success when API responds with status ${confirmedRes.status}`, async () => {
+        fetchMock.mockResponse(JSON.stringify(confirmedRes), { status: 200 });
+
+        const result = await client.confirmCliLogin(code);
+
+        expect(result).toStrictEqual({ success: true });
+      });
+
+      it(`should return failure with code 'USED' when API responds with status 400 and title '${usedRes.title}'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(usedRes), { status: 400 });
+
+        const result = await client.confirmCliLogin(code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.USED,
+        });
+      });
+
+      it(`should return failure with code 'EXPIRED' when API responds with status 400 and title '${expiredRes.title}'`, async () => {
+        fetchMock.mockResponse(JSON.stringify(expiredRes), { status: 400 });
+
+        const result = await client.confirmCliLogin(code);
+
+        expect(result).toStrictEqual({
+          success: false,
+          code: LoginConfirmationErrorCode.EXPIRED,
+        });
+      });
+
+      it('should throw when API responds with unfamiliar response', async () => {
+        fetchMock.mockResponse('500 Internal Server Error', { status: 500 });
+
+        await expect(() => client.confirmCliLogin(code)).rejects.toEqual(
           new Error(
             'Cannot deserialize confirmation API response: FetchError: invalid json response body at  reason: Unexpected token I in JSON at position 4'
           )
@@ -2049,6 +2116,150 @@ describe('client', () => {
       await expect(() => client.signOut()).rejects.toEqual(
         new ServiceClientError("Couldn't log out due to unknown reasons")
       );
+    });
+  });
+
+  describe('#verifyLogin', () => {
+    const VERIFY_URL = 'https://superface.test/passwordless/verify';
+    describe('for confirmed token', () => {
+      const authToken = {
+        access_token: 'AT',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'RT',
+      };
+      beforeEach(() => {
+        fetchMock.mockResponse(JSON.stringify(authToken), {
+          status: 200,
+        });
+      });
+
+      it('should return authToken', async () => {
+        const result = await client['verifyLogin'](VERIFY_URL);
+        expect(result.authToken).toEqual(authToken);
+      });
+
+      it('should return verificationStatus = CONFIRMED', async () => {
+        const result = await client['verifyLogin'](VERIFY_URL);
+        expect(result.verificationStatus).toBe(VerificationStatus.CONFIRMED);
+      });
+
+      it('should call login mock', async () => {
+        const loginMock = jest.spyOn(client, 'login');
+        await client['verifyLogin'](VERIFY_URL);
+        expect(loginMock.mock.calls.length).toBe(1);
+      });
+    });
+
+    it('should return polling timeout status when token confirmation is pending', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+      const result = await client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: 1,
+      });
+      expect(result.verificationStatus).toBe(
+        VerificationStatus.POLLING_TIMEOUT
+      );
+    });
+
+    it('should return expired status when token expired', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          title: 'Token is expired',
+          status: 'EXPIRED',
+        }),
+        {
+          status: 400,
+        }
+      );
+      const result = await client['verifyLogin'](VERIFY_URL);
+      expect(result.verificationStatus).toBe(VerificationStatus.EXPIRED);
+    });
+
+    it('should return used status when token was already used', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          title: 'Token was already used',
+          status: 'USED',
+        }),
+        {
+          status: 400,
+        }
+      );
+      const result = await client['verifyLogin'](VERIFY_URL);
+      expect(result.verificationStatus).toBe(VerificationStatus.USED);
+    });
+
+    it('should throw when bad request status received', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify({
+          title: 'Bad request',
+        }),
+        {
+          status: 400,
+        }
+      );
+      await expect(client['verifyLogin'](VERIFY_URL)).rejects.toThrow();
+    });
+
+    it('should poll verfication endpoint for pollingTimeoutSeconds', async () => {
+      const testStart = new Date();
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+      const pollingTimeoutSeconds = 2;
+      await client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: pollingTimeoutSeconds,
+      });
+      expect(new Date().getTime() - testStart.getTime()).toBeGreaterThanOrEqual(
+        pollingTimeoutSeconds * 1000
+      );
+    });
+
+    it('should cancel polling', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+      const pollingTimeoutSeconds = 10;
+      const pollingCancellationToken = new CancellationToken();
+      const resultPromise = client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: pollingTimeoutSeconds,
+        cancellationToken: pollingCancellationToken,
+      });
+      pollingCancellationToken.isCancellationRequested = true;
+      expect(await resultPromise).toEqual({
+        verificationStatus: VerificationStatus.POLLING_CANCELLED,
+      });
+    });
+
+    it('should call cancel polling callback', async () => {
+      fetchMock.mockResponse(
+        JSON.stringify(VERIFY_PENDING_STATUS_RESPONSE_BODY),
+        {
+          status: 400,
+        }
+      );
+
+      const cancelCallback = jest.fn();
+      const cancellationToken = new CancellationToken(cancelCallback);
+      cancellationToken.isCancellationRequested = true;
+
+      await client['verifyLogin'](VERIFY_URL, {
+        pollingTimeoutSeconds: 2,
+        cancellationToken,
+      });
+
+      expect(cancelCallback).toBeCalled();
     });
   });
 });

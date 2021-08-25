@@ -8,46 +8,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - `getProfilesList` method fetches list of published profiles (incl. filter by profile owner & results count limit)
 - `getMapsList` method fetches list of published map variants (incl. filter by map owner & results count limit)
+- `cliLogin` method fetches verify and browser urls with expiration date
+- `verifyCliLogin` method fetches status of CLI login
+- `confirmCliLogin` method confirms CLI login
 
 ### Changed
+
 - **BREAKING CHANGE** `findOneProvider` renamed to `getProvider`
-- **BREAKING CHANGE** `findAllProviders` renamed to  `getProvidersList`, now has ability to filter providers by profile and owner (incl. results count limit)
+- **BREAKING CHANGE** `findAllProviders` renamed to `getProvidersList`, now has ability to filter providers by profile and owner (incl. results count limit)
+- **BREAKING CHANGE** `PasswordlessVerifyOptions` renamed to `VerifyOptions`
+- **BREAKING CHANGE** `PasswordlessVerifyResponse` renamed to `VerifyResponse`
+- **BREAKING CHANGE** `PasswordlessVerifyErrorResponse` renamed to `VerifyErrorResponse`
+- **BREAKING CHANGE** `PasswordlessConfirmErrorResponse` renamed to `LoginConfirmErrorResponse`
+- **BREAKING CHANGE** `passwordlessLogin` do not throw on json deserialization errors and returns `UnsuccessfulLogin` as result
 
 ## [0.0.18] - 2021-08-18
 
 ## [0.0.17] - 2021-06-29
+
 ### Added
+
 - `getSDKConfiguration` method fetches SDK configuration for a given project
 - `getSDKPerformStatistics` method fetches perform statistics for a given project/profile/provider
 - `getSDKProviderChangesList` method lists provider changes for a given project/profile/provider
 
 ## [0.0.16] - 2021-06-17
+
 ### Added
+
 - `getProjectsList` method lists all projects owned by the authenticated user
 - `getProject` method fetches a single project
 - `updateProject` method updates a project
 
 ## [0.0.15] - 2021-06-03
+
 ### Added
+
 - `confirmPasswordlessLogin` method with logic for confirming passwordless login flow
 
 ## [0.0.14] - 2021-05-14
+
 ### Fixed
+
 - Custom errors have properly set prototype as described in TypeScript [Documentation](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work).
 
 ## [0.0.13] - 2021-05-14
+
 ### Changed
+
 - Service Client throws custom errors. `ServiceClientError` as generic error from Service Client and `ServiceApiError` as error when non 2xx response is received from service apis.
 
 ## [0.0.13-beta.0] - 2021-05-13
 
 ## [0.0.12] - 2021-05-04
+
 ### Added
+
 - `fetch` options take `authenticate` boolean parameter to optionally disable authentication (which is enabled by default)
 
 ### Changed
+
 - the following methods now do _not_ authenticate against Brain:
   - `findAllProviders`
   - `findOneProvider`
@@ -61,24 +84,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `getMapAST`
 
 ## [0.0.11] - 2021-04-29
+
 ### Fixed
+
 - Release script
 
 ## [0.0.10] - 2021-04-27
+
 ### Added
+
 - `getGithubLoginUrl` method parameter `mode` added
 
 ## [0.0.9] - 2021-04-23
+
 ### Changed
+
 - **BREAKING CHANGE:** `BrainClient` renamed to `ServiceClient`
 - **BREAKING CHANGE:** package renamed to `@superfaceai/service-client`
 
 ## [0.0.8] - 2021-04-23
+
 ### Changed
+
 - **BREAKING CHANGE:** `passwordlessLogin` returns error object instead of throwing
 
 ## [0.0.7] - 2021-04-20
+
 ### Added
+
 - `createProvider` method creates provider in store
 - `findAllProviders` method returns all providers in store
 - `findOneProvider` method returns one provider from store
@@ -95,34 +128,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `signOut` method for facilitating session sign out with Brain
 
 ## [0.0.6] - 2021-04-19
+
 ### Added
+
 - `passwordlessLogin` method takes optional login mode (`login` or `register`)
 
 ### Fixed
+
 - removed `RequestInit` and `Response` import from `cross-fetch`
 
 ## [0.0.5] - 2021-04-14
+
 ### Changed
+
 - **BREAKING CHANGE:** `passwordlessLogin` returns object with `verifyUrl` & `expiresAt`
 
 ## [0.0.4] - 2021-04-09
+
 ### Fixed
+
 - Fixed polling in `verifyPasswordlessLogin` when running in the browser
 
 ## [0.0.3] - 2021-04-08
+
 ### Added
+
 - `verifyPasswordlessLogin` method takes new optional argument `options` and polls verify endpoint if token verification status is `PENDING`
 
 ### Changed
+
 - **BREAKING CHANGE:** renamed `TokenVerificationStatus` to `VerificationStatus`
 
 ## 0.0.2 - 2021-04-08
+
 ### Added
+
 - `passwordlessLogin` method to `BrainClient` which starts passworldess login flow by sending confirmation e-mail
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.18...HEAD
+[unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.18...HEAD
 [0.0.18]: https://github.com/superfaceai/service-client/compare/v0.0.17...v0.0.18
 [0.0.17]: https://github.com/superfaceai/service-client/compare/v0.0.16...v0.0.17
 [0.0.16]: https://github.com/superfaceai/service-client/compare/v0.0.15...v0.0.16

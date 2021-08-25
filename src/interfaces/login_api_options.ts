@@ -1,4 +1,4 @@
-export interface PasswordlessVerifyOptions {
+export interface VerifyOptions {
   pollingTimeoutSeconds?: number;
   pollingIntervalSeconds?: number;
   cancellationToken?: CancellationToken;

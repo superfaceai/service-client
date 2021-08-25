@@ -12,6 +12,8 @@ import { ServiceApiError, ServiceClientError } from './errors';
 import {
   AuthToken,
   ClientOptions,
+  DEFAULT_POLLING_INTERVAL_SECONDS,
+  DEFAULT_POLLING_TIMEOUT_SECONDS,
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
@@ -28,22 +30,18 @@ import {
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
   ServiceApiErrorResponse,
+  VerificationStatus,
+  VerifyErrorResponse,
+  VerifyOptions,
+  VerifyResponse,
 } from './interfaces';
 import {
+  CLILoginResponse,
   LoginConfirmationErrorCode,
-  PasswordlessConfirmResponse,
-} from './interfaces/passwordless_confirm_response';
-import { PasswordlessLoginResponse } from './interfaces/passwordless_login_response';
-import {
-  DEFAULT_POLLING_INTERVAL_SECONDS,
-  DEFAULT_POLLING_TIMEOUT_SECONDS,
-  PasswordlessVerifyOptions,
-} from './interfaces/passwordless_verify_options';
-import {
-  PasswordlessVerifyErrorResponse,
-  PasswordlessVerifyResponse,
-  VerificationStatus,
-} from './interfaces/passwordless_verify_response';
+  LoginConfirmResponse,
+  PasswordlessLoginResponse,
+  UnsuccessfulLogin,
+} from './interfaces/login_api_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,
@@ -368,7 +366,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     await this.unwrap(response);
 
@@ -465,9 +463,7 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getMapsList(
-    options?: MapsListOptions
-  ): Promise<MapsListResponse> {
+  async getMapsList(options?: MapsListOptions): Promise<MapsListResponse> {
     const { accountHandle, limit } = options || {};
 
     const url = this.makePathWithQueryParams('/maps', {
@@ -478,7 +474,7 @@ export class ServiceClient {
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     await this.unwrap(response);
 
@@ -489,7 +485,7 @@ export class ServiceClient {
     email: string,
     mode: 'login' | 'register' = 'login'
   ): Promise<PasswordlessLoginResponse> {
-    const result: Response = await crossfetch.fetch(
+    const response: Response = await crossfetch.fetch(
       `${this._STORAGE.baseUrl}/auth/passwordless?mode=${mode}`,
       {
         method: 'POST',
@@ -501,12 +497,17 @@ export class ServiceClient {
         }),
       }
     );
-    if (result.status === 200) {
-      const apiResponse = (await result.json()) as {
+    if (response.status === 200) {
+      const apiResponse = await this.tryParseLoginResponseJson<{
         verify_url: string;
         expires_at: string;
-      };
-      const { verify_url, expires_at } = apiResponse || {};
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { verify_url, expires_at } = apiResponse.json || {};
 
       if (verify_url && expires_at) {
         return {
@@ -517,12 +518,17 @@ export class ServiceClient {
       } else {
         return { success: false, title: 'Unexpected API response' };
       }
-    } else if (result.status === 400) {
-      const apiResponse = (await result.json()) as {
+    } else if (response.status === 400) {
+      const apiResponse = await this.tryParseLoginResponseJson<{
         title: string;
         detail: string;
-      };
-      const { title, detail } = apiResponse || {};
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { title, detail } = apiResponse.json || {};
       if (title) {
         return { success: false, title, detail };
       } else {
@@ -531,52 +537,22 @@ export class ServiceClient {
     } else {
       return {
         success: false,
-        title: `Unexpected status code ${result.status} received`,
+        title: `Unexpected status code ${response.status} received`,
       };
     }
   }
 
   public async verifyPasswordlessLogin(
     verifyUrl: string,
-    options?: PasswordlessVerifyOptions
-  ): Promise<PasswordlessVerifyResponse> {
-    const startPollingTimeStamp = new Date();
-    const timeoutMilliseconds =
-      (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
-      1000;
-    const pollingIntervalMilliseconds =
-      (options?.pollingIntervalSeconds ?? DEFAULT_POLLING_INTERVAL_SECONDS) *
-      1000;
-    while (
-      new Date().getTime() - startPollingTimeStamp.getTime() <
-      timeoutMilliseconds
-    ) {
-      const result = await this.fetchVerifyPasswordlessLogin(verifyUrl);
-
-      if (result.verificationStatus !== VerificationStatus.PENDING) {
-        return result;
-      }
-
-      if (options?.cancellationToken?.isCancellationRequested) {
-        options.cancellationToken.cancellationFinished();
-
-        return {
-          verificationStatus: VerificationStatus.POLLING_CANCELLED,
-        };
-      }
-
-      await sleep(pollingIntervalMilliseconds);
-    }
-
-    return {
-      verificationStatus: VerificationStatus.POLLING_TIMEOUT,
-    };
+    options?: VerifyOptions
+  ): Promise<VerifyResponse> {
+    return this.verifyLogin(verifyUrl, options);
   }
 
   public async confirmPasswordlessLogin(
     email: string,
     code: string
-  ): Promise<PasswordlessConfirmResponse> {
+  ): Promise<LoginConfirmResponse> {
     const encodedEmail = encodeURIComponent(email);
     const apiResponse = await this.fetch(
       `/auth/passwordless/confirm?email=${encodedEmail}&code=${code}`,
@@ -596,24 +572,100 @@ export class ServiceClient {
       }
     })();
 
-    function makeErrorCodeFrom(title?: string): LoginConfirmationErrorCode {
-      if (title?.toLocaleLowerCase().includes('expir'))
-        return LoginConfirmationErrorCode.EXPIRED;
-      if (
-        title?.toLowerCase().includes('already confirm') ||
-        title?.toLowerCase().includes('used')
-      )
-        return LoginConfirmationErrorCode.USED;
-
-      return LoginConfirmationErrorCode.INVALID;
+    if (status === 'CONFIRMED') {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        code: this.makeErrorCodeFromLoginConfirmationError(title),
+      };
     }
+  }
+
+  public async cliLogin(): Promise<CLILoginResponse> {
+    const response: Response = await crossfetch.fetch(
+      `${this._STORAGE.baseUrl}/auth/cli`,
+      {
+        method: 'POST',
+      }
+    );
+    if (response.status === 201) {
+      const apiResponse = await this.tryParseLoginResponseJson<{
+        verify_url: string;
+        browser_url: string;
+        expires_at: string;
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { verify_url, browser_url, expires_at } = apiResponse.json || {};
+
+      if (verify_url && browser_url && expires_at) {
+        return {
+          success: true,
+          verifyUrl: verify_url,
+          browserUrl: browser_url,
+          expiresAt: new Date(expires_at),
+        };
+      } else {
+        return { success: false, title: 'Unexpected API response' };
+      }
+    } else {
+      const apiResponse = await this.tryParseLoginResponseJson<{
+        title: string;
+        detail: string;
+      }>(response);
+
+      if (apiResponse.error) {
+        return apiResponse.error;
+      }
+
+      const { title, detail } = apiResponse.json || {};
+      if (title) {
+        return { success: false, title, detail };
+      } else {
+        return {
+          success: false,
+          title: `Unexpected status code ${response.status} received`,
+        };
+      }
+    }
+  }
+
+  public async verifyCliLogin(
+    verifyUrl: string,
+    options?: VerifyOptions
+  ): Promise<VerifyResponse> {
+    return this.verifyLogin(verifyUrl, options);
+  }
+
+  public async confirmCliLogin(code: string): Promise<LoginConfirmResponse> {
+    const apiResponse = await this.fetch(`/auth/cli/confirm?code=${code}`, {
+      authenticate: true,
+      headers: { accept: 'application/json' },
+    });
+
+    const { status, title } = await (async function () {
+      try {
+        return (await apiResponse.json()) as {
+          status: string | number;
+          title?: string;
+        };
+      } catch (e) {
+        throw new ServiceClientError(
+          `Cannot deserialize confirmation API response: ${String(e)}`
+        );
+      }
+    })();
 
     if (status === 'CONFIRMED') {
       return { success: true };
     } else {
       return {
         success: false,
-        code: makeErrorCodeFrom(title),
+        code: this.makeErrorCodeFromLoginConfirmationError(title),
       };
     }
   }
@@ -785,9 +837,7 @@ export class ServiceClient {
     return urlWithoutParams;
   }
 
-  private async fetchVerifyPasswordlessLogin(
-    verifyUrl: string
-  ): Promise<PasswordlessVerifyResponse> {
+  private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
     const result = await crossfetch.fetch(verifyUrl, {
       method: 'GET',
     });
@@ -801,7 +851,7 @@ export class ServiceClient {
       };
     }
     if (result.status === 400) {
-      const error = (await result.json()) as PasswordlessVerifyErrorResponse;
+      const error = (await result.json()) as VerifyErrorResponse;
       if (
         error.status === VerificationStatus.PENDING ||
         error.status === VerificationStatus.USED ||
@@ -852,5 +902,74 @@ export class ServiceClient {
       .join('&');
 
     return [path, searchParams].filter(v => !!v).join('?');
+  }
+
+  private async verifyLogin(
+    verifyUrl: string,
+    options?: VerifyOptions
+  ): Promise<VerifyResponse> {
+    const startPollingTimeStamp = new Date();
+    const timeoutMilliseconds =
+      (options?.pollingTimeoutSeconds ?? DEFAULT_POLLING_TIMEOUT_SECONDS) *
+      1000;
+    const pollingIntervalMilliseconds =
+      (options?.pollingIntervalSeconds ?? DEFAULT_POLLING_INTERVAL_SECONDS) *
+      1000;
+    while (
+      new Date().getTime() - startPollingTimeStamp.getTime() <
+      timeoutMilliseconds
+    ) {
+      const result = await this.fetchVerifyLogin(verifyUrl);
+
+      if (result.verificationStatus !== VerificationStatus.PENDING) {
+        return result;
+      }
+
+      if (options?.cancellationToken?.isCancellationRequested) {
+        options.cancellationToken.cancellationFinished();
+
+        return {
+          verificationStatus: VerificationStatus.POLLING_CANCELLED,
+        };
+      }
+
+      await sleep(pollingIntervalMilliseconds);
+    }
+
+    return {
+      verificationStatus: VerificationStatus.POLLING_TIMEOUT,
+    };
+  }
+
+  private makeErrorCodeFromLoginConfirmationError(
+    title?: string
+  ): LoginConfirmationErrorCode {
+    if (title?.toLocaleLowerCase().includes('expir'))
+      return LoginConfirmationErrorCode.EXPIRED;
+    if (
+      title?.toLowerCase().includes('already confirm') ||
+      title?.toLowerCase().includes('used')
+    )
+      return LoginConfirmationErrorCode.USED;
+
+    return LoginConfirmationErrorCode.INVALID;
+  }
+
+  private async tryParseLoginResponseJson<T>(
+    response: Response
+  ): Promise<{ json?: T; error?: UnsuccessfulLogin }> {
+    let apiResponse;
+    try {
+      apiResponse = (await response.json()) as T;
+    } catch (e) {
+      return {
+        error: {
+          success: false,
+          title: `Cannot deserialize login API response: ${String(e)}`,
+        },
+      };
+    }
+
+    return { json: apiResponse };
   }
 }
