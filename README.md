@@ -1,6 +1,6 @@
 # Superface Service Client _(service-client)_
 
-This repository provides HTTP client for communication with Superface services. It encapsulates user authentication.
+This repository provides HTTP client for communication with Superface services. If you are not from Superface Team, you probably don't need this library.
 
 ## Table of Contents
 
