@@ -644,6 +644,7 @@ export class ServiceClient {
   public async confirmCliLogin(code: string): Promise<LoginConfirmResponse> {
     const apiResponse = await this.fetch(`/auth/cli/confirm?code=${code}`, {
       authenticate: true,
+      method: 'POST',
       headers: { accept: 'application/json' },
     });
 
