@@ -50,7 +50,7 @@ yarn build
 
 ### Fetch
 
-Fetches specified URL. Adds authorization header by default. Updates access token when
+Fetches specified URL. Method adds authorization header to the request by default.
 
 ```ts
 import { ServiceClient } from '@superfaceai/service-client';
