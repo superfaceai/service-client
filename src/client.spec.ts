@@ -615,6 +615,24 @@ describe('client', () => {
         detail: `Code ${code} is expired`,
       };
 
+      it('should call /auth/cli/confirm using POST method', async () => {
+        const fetchMock = jest.spyOn(client, 'fetch').mockResolvedValue({
+          ok: true,
+          json: async () => confirmedRes,
+        } as Response);
+
+        await client.confirmCliLogin(code);
+
+        expect(fetchMock).toHaveBeenCalledWith(
+          `/auth/cli/confirm?code=${code}`,
+          {
+            authenticate: true,
+            method: 'POST',
+            headers: { accept: 'application/json' },
+          }
+        );
+      });
+
       it(`should return success when API responds with status ${confirmedRes.status}`, async () => {
         fetchMock.mockResponse(JSON.stringify(confirmedRes), { status: 200 });
 
