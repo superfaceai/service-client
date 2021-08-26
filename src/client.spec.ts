@@ -24,6 +24,10 @@ import {
   SDKProviderChangesListResponse,
   SDKProviderChangeType,
 } from './interfaces';
+import {
+  UserAccountType,
+  UserResponse,
+} from './interfaces/identity_api_response';
 import { VerificationStatus } from './interfaces/login_api_response';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
@@ -2278,6 +2282,58 @@ describe('client', () => {
       });
 
       expect(cancelCallback).toBeCalled();
+    });
+  });
+
+  describe('getUserInfo', () => {
+    const mockResult: UserResponse = {
+      name: 'john.doe',
+      email: 'john.doe@example.com',
+      accounts: [
+        {
+          handle: 'johndoe',
+          type: UserAccountType.PERSONAL,
+        },
+      ],
+    };
+
+    const mockResponse = {
+      ok: true,
+      json: async () => mockResult,
+    };
+
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      fetchSpy = jest.spyOn(client, 'fetch');
+    });
+
+    it('should call fetch with correct parameters', async () => {
+      fetchSpy.mockResolvedValue(mockResponse as Response);
+
+      await client.getUserInfo();
+
+      expect(fetchSpy).toBeCalledWith('/id/user', {
+        headers: { 'Content-Type': 'application/json' },
+        method: 'GET',
+      });
+    });
+
+    it('should return user', async () => {
+      fetchSpy.mockResolvedValue(mockResponse as Response);
+
+      await expect(client.getUserInfo()).resolves.toEqual(mockResult);
+    });
+
+    it('should throw error', async () => {
+      const mockErrorResponse = {
+        ok: false,
+        json: async () => 'Internal server error',
+      };
+
+      fetchSpy.mockResolvedValue(mockErrorResponse as Response);
+
+      await expect(client.getUserInfo()).rejects.toThrowError(ServiceApiError);
     });
   });
 });

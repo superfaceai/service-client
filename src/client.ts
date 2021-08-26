@@ -35,6 +35,7 @@ import {
   VerifyOptions,
   VerifyResponse,
 } from './interfaces';
+import { UserResponse } from './interfaces/identity_api_response';
 import {
   CLILoginResponse,
   LoginConfirmationErrorCode,
@@ -836,6 +837,17 @@ export class ServiceClient {
     }
 
     return urlWithoutParams;
+  }
+
+  public async getUserInfo(): Promise<UserResponse> {
+    const response: Response = await this.fetch(`/id/user`, {
+      method: 'GET',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as UserResponse;
   }
 
   private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
