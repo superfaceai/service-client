@@ -1,18 +1,56 @@
-# Service client
+# Superface Service Client _(service-client)_
 
-Service client provides HTTP client for communication with Superface backend services. It encapsulates user authentication.
+This repository provides HTTP client for communication with Superface services. If you are not from Superface Team, you probably don't need this library.
 
-# Usage
+## Table of Contents
 
-## Installation
+- [Superface Service Client _(service-client)_](#superface-service-client-service-client)
+  - [Table of Contents](#table-of-contents)
+  - [Background](#background)
+  - [Install](#install)
+  - [Usage](#usage)
+    - [Fetch](#fetch)
+    - [Passwordless Authentication Flow](#passwordless-authentication-flow)
+      - [Passwordless authentication sequence](#passwordless-authentication-sequence)
+  - [Development](#development)
+  - [Maintainers](#maintainers)
+  - [Contributing](#contributing)
+  - [License](#license)
 
-Install library into your project directory:
+## Background
 
-```bash
-yarn add @superfaceai/service-client
+Superface (super-interface) is a higher-order API, an abstraction on top of the modern APIs like GraphQL and REST. Superface is one interface to discover, connect, and query any capabilities available via conventional APIs.
+
+Through its focus on application-level semantics, Superface decouples the clients from servers, enabling fully autonomous evolution. As such it minimizes the code base as well as errors and downtimes while providing unmatched resiliency and redundancy.
+
+Superface allows for switching capability providers without development at a runtime in milliseconds. Furthermore, Superface decentralizes the composition and aggregation, and thus creates an Autonomous Integration Mesh.
+
+Motivation behind Superface is nicely described in this [video](https://www.youtube.com/watch?v=BCvq3NXFb94) from APIdays conference.
+
+You can get more information at https://superface.ai and https://superface.ai/docs.
+
+## Install
+
+Install dependencies:
+
+```
+yarn install
 ```
 
-## Basic fetch example
+Build TS files:
+
+```
+yarn build
+```
+
+## Usage
+
+- [Fetch](#fetch)
+- [Passwordless Authentication Flow](#passwordless-authentication-flow)
+
+### Fetch
+
+Fetches specified URL. Method adds authorization header to the request by default.
 
 ```ts
 import { ServiceClient } from '@superfaceai/service-client';
@@ -28,7 +66,7 @@ const response = client.fetch('/providers', {
 });
 ```
 
-## Passwordless flow
+### Passwordless Authentication Flow
 
 Passwordless flow allows user to login by clicking on magic link in e-mail. As result of passwordless flow application will receive access and refresh tokens.
 
@@ -37,7 +75,7 @@ Passwordless flow allows user to login by clicking on magic link in e-mail. As r
 `passwordlessLogin` method sends e-mail with magic link to user
 `verifyPasswordlessLogin` method returns refresh and access token once login has been confirmed
 
-### Passwordless authentication sequence
+#### Passwordless authentication sequence
 
 1. Application requests e-mail address input from user
 2. Application initializes `ServiceClient` via `setOptions` with Superface backend base address
@@ -48,51 +86,49 @@ Passwordless flow allows user to login by clicking on magic link in e-mail. As r
 7. Application persists refresh token (Air can rely on auth cookie)
 8. Application can start authenticated communication to Superface backend APIs via `fetch` method
 
-# Development
+## Development
 
-## Install
+When developing, start with cloning the repository using `git clone https://github.com/superfaceai/service-client.git` (or `git clone git@github.com:superfaceai/service-client.git` if you have repository access).
 
-```bash
-$ yarn install
-```
+After cloning, the dependencies must be downloaded using `yarn install` or `npm install`.
 
-## Testing
+Now the repository is ready for code changes.
 
-### Run unit tests
+The `package.json` also contains scripts (runnable by calling `yarn <script-name>` or `npm run <script-name>`):
 
-```bash
-$ yarn test
-```
+- `lint` - lint the code (use `lint --fix` to run autofix)
+- `test` - run unit tests
+- `test-e2e` - run end to end tests
 
-## Run end to end tests
+Lastly, to build a local artifact run `yarn build` or `npm run build`.
 
-```bash
-$ yarn test:e2e
-```
+## Maintainers
 
-# Releasing and publishing
+- [@Jan Halama](https://github.com/janhalama)
 
-Getting your change released and published to NPM repository consist of following steps:
+## Contributing
 
-1. Proposing the change by open Pull Request -> [Opening Pull Request](#opening-pull-request)
-2. Getting approval from second developer -> [Code Review](#code-review)
-3. Merging to `main` branch
-4. Starting `Release package` Github Actions workflow -> [Release package](#release-package)
+**Please open an issue first if you want to make larger changes**
 
-### Opening Pull Request
+Feel free to contribute! Please follow the [Contribution Guide](CONTRIBUTION_GUIDE.md).
 
-You shouldn't merge directly to `main` branch, but open [Pull Request](https://github.com/superfaceai/service-client/compare). PR should have changes documented in CHANGELOG.md and passing Tests. Once it is ready review should be requested from someone.
+Licenses of node_modules are checked during CI/CD for every commit. Only the following licenses are allowed:
 
-To open not ready PR, you can either use [Draft Pull Request](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) or simply prefix PR description with `WIP`.
+- 0BDS
+- MIT
+- Apache-2.0
+- ISC
+- BSD-3-Clause
+- BSD-2-Clause
+- CC-BY-4.0
+- CC-BY-3.0;BSD
+- CC0-1.0
+- Unlicense
+- UNLICENSED
 
-### Code Review
+Note: If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
 
-The intention here is to get another pair of eyes on the code. No real process or rules applies here, just keep in mind that the goal of the review is to
+## License
 
-- share knowledge about the code
-- allow other to give feedback
-- find bugs early
-
-### Release package
-
-To release new version of package trigger manually `Release package` workflow from [Github actions](https://github.com/superfaceai/service-client/actions). Release package workflow takes `Release level` parameter which can be one of: `patch`, `minor`, `major`, `prepatch`, `preminor`, `premajor`, `prerelease` values. See [npm version](https://docs.npmjs.com/cli/v7/commands/npm-version) CLI documentation for more information. To decide which version should be bumped stick with [semver](https://semver.org/) versioning rules.
+The Superface is licensed under the [MIT](LICENSE).
+© 2021 Superface
