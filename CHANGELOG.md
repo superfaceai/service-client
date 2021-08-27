@@ -6,8 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.0.22] - 2021-08-27
 ### Added
-- `shareProfile` method shares profile 
+- `shareProfile` method shares profile
 
 ## [0.0.21] - 2021-08-26
 ### Added
@@ -141,7 +143,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.21...HEAD
+[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.22...HEAD
+[0.0.22]: https://github.com/superfaceai/service-client/compare/v0.0.21...v0.0.22
 [0.0.21]: https://github.com/superfaceai/service-client/compare/v0.0.20...v0.0.21
 [0.0.20]: https://github.com/superfaceai/service-client/compare/v0.0.19...v0.0.20
 [0.0.19]: https://github.com/superfaceai/service-client/compare/v0.0.18...v0.0.19
