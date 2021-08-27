@@ -850,6 +850,19 @@ export class ServiceClient {
     return (await response.json()) as UserResponse;
   }
 
+  public async shareProfile(profileId: string, email: string): Promise<void> {
+    const response: Response = await this.fetch(`/share/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      body: JSON.stringify({
+        profile_id: profileId,
+        email,
+      }),
+    });
+
+    await this.unwrap(response);
+  }
+
   private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
     const result = await crossfetch.fetch(verifyUrl, {
       method: 'GET',

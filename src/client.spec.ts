@@ -2336,4 +2336,45 @@ describe('client', () => {
       await expect(client.getUserInfo()).rejects.toThrowError(ServiceApiError);
     });
   });
+
+  describe('shareProfile', () => {
+    const mockResponse = {
+      ok: true,
+    };
+
+    let fetchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      fetchSpy = jest.spyOn(client, 'fetch');
+    });
+
+    it('should call fetch with correct parameters', async () => {
+      fetchSpy.mockResolvedValue(mockResponse as Response);
+
+      await client.shareProfile(
+        'starwars/character-information',
+        'test@example.com'
+      );
+
+      expect(fetchSpy).toBeCalledWith('/share/profile', {
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        body: JSON.stringify({
+          profile_id: 'starwars/character-information',
+          email: 'test@example.com',
+        }),
+      });
+    });
+
+    it('should throw error', async () => {
+      const mockErrorResponse = {
+        ok: false,
+        json: async () => 'Internal server error',
+      };
+
+      fetchSpy.mockResolvedValue(mockErrorResponse as Response);
+
+      await expect(client.getUserInfo()).rejects.toThrowError(ServiceApiError);
+    });
+  });
 });
