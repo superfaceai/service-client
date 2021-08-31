@@ -802,10 +802,16 @@ export class ServiceClient {
       fromAllDevices: boolean;
     } = { fromAllDevices: false }
   ): Promise<null> {
+    const cookie = this.getRefreshTokenCookie();
+
     const result: Response = await crossfetch.fetch(
       `${this._STORAGE.baseUrl}/auth/signout`,
       {
         method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          cookie,
+        },
         body: JSON.stringify({
           all: fromAllDevices,
         }),
