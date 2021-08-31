@@ -2070,25 +2070,43 @@ describe('client', () => {
   });
 
   describe('signOut', () => {
+    beforeEach(async () => {
+      client = new ServiceClient({ baseUrl: BASE_URL });
+
+      await client.login({
+        access_token: 'AT',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        refresh_token: 'RT',
+      });
+    });
+
     it('should set `all` option in API call when signing out from all devices', async () => {
-      const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
+
       await client.signOut({ fromAllDevices: true });
 
       expect(mock).toHaveBeenCalledWith(`${BASE_URL}/auth/signout`, {
         body: '{"all":true}',
         method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          cookie: 'user_session=RT',
+        },
       });
     });
 
     it('should not set `all` option in API call when signing out from current session', async () => {
-      const client = new ServiceClient({ baseUrl: BASE_URL });
       const mock = fetchMock.mockResponse('', { status: 204 });
       await client.signOut();
 
       expect(mock).toHaveBeenCalledWith(`${BASE_URL}/auth/signout`, {
         body: '{"all":false}',
         method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          cookie: 'user_session=RT',
+        },
       });
     });
 
