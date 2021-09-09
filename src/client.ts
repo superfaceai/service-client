@@ -717,6 +717,20 @@ export class ServiceClient {
     return (await response.json()) as ProjectResponse;
   }
 
+  public async createProject(name: string): Promise<ProjectResponse> {
+    const response: Response = await this.fetch('/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      body: JSON.stringify({
+        name,
+      }),
+    });
+
+    await this.unwrap(response);
+
+    return (await response.json()) as ProjectResponse;
+  }
+
   public async getSDKConfiguration(
     handle: string,
     projectName: string

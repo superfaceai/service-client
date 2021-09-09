@@ -1743,6 +1743,76 @@ describe('client', () => {
     });
   });
 
+  describe('createProject', () => {
+    const name = 'project-name';
+
+    const expectedPayload = {
+      name,
+    };
+
+    it('should create project', async () => {
+      const mockResult: ProjectResponse = {
+        url: `https://superface.test/projects/test-user/${name}`,
+        name,
+        sdk_auth_tokens: [
+          {
+            token: 't0k3n',
+            created_at: '2021-06-04T07:11:34.114Z',
+          },
+        ],
+        settings: {
+          email_notifications: true,
+        },
+        created_at: '2021-06-04T07:11:34.114Z',
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.createProject(name)).resolves.toEqual(mockResult);
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(`/projects`, {
+        method: 'POST',
+        body: JSON.stringify(expectedPayload),
+        headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      });
+    });
+
+    it('should throw error', async () => {
+      const payload = {
+        status: 422,
+        instance: `/projects`,
+        title: 'Project already exists',
+        detail: `Project with name '${name}' already exists.`,
+      };
+      const mockResponse = {
+        ok: false,
+        json: async () => payload,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.createProject(name)).rejects.toEqual(
+        new ServiceApiError(payload)
+      );
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith(`/projects`, {
+        method: 'POST',
+        headers: { 'Content-Type': MEDIA_TYPE_JSON },
+        body: JSON.stringify(expectedPayload),
+      });
+    });
+  });
+
   describe('getSDKConfiguration', () => {
     const accountHandle = 'username';
     const projectName = 'project-name';
