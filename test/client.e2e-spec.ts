@@ -524,6 +524,12 @@ describe('client', () => {
     beforeAll(() => {
       const projects = createExpressMock();
       projects.use(json());
+      projects.post(
+        '/projects',
+        (_req: express.Request, res: express.Response) => {
+          res.json(mockExistingProject);
+        }
+      );
       projects.get(
         '/projects',
         (_req: express.Request, res: express.Response) => {
@@ -559,6 +565,12 @@ describe('client', () => {
 
     afterAll(() => {
       identityServer.close();
+    });
+
+    test('create a project', async () => {
+      await expect(serviceClient.createProject(name)).resolves.toEqual(
+        mockExistingProject
+      );
     });
 
     test('get all projects', async () => {
