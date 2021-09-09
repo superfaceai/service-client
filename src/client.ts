@@ -719,6 +719,7 @@ export class ServiceClient {
 
   public async createProject(name: string): Promise<ProjectResponse> {
     const response: Response = await this.fetch('/projects', {
+      authenticate: true,
       method: 'POST',
       headers: { 'Content-Type': MEDIA_TYPE_JSON },
       body: JSON.stringify({

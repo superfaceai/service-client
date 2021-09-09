@@ -1779,6 +1779,7 @@ describe('client', () => {
 
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(`/projects`, {
+        authenticate: true,
         method: 'POST',
         body: JSON.stringify(expectedPayload),
         headers: { 'Content-Type': MEDIA_TYPE_JSON },
@@ -1806,6 +1807,7 @@ describe('client', () => {
 
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(`/projects`, {
+        authenticate: true,
         method: 'POST',
         headers: { 'Content-Type': MEDIA_TYPE_JSON },
         body: JSON.stringify(expectedPayload),
