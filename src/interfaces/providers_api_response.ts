@@ -1,45 +1,11 @@
-type ApiKeyHeaderSecurity = {
-  id: string;
-  type: 'apiKey';
-  in: 'header';
-  name: string;
-};
-
-type ApiKeyQueryParamSecurity = {
-  id: string;
-  type: 'apiKey';
-  in: 'query';
-  name: string;
-};
-
-type BasicAuthSecurity = {
-  id: string;
-  type: 'http';
-  scheme: 'basic';
-};
-
-type BearerTokenSecurity = {
-  id: string;
-  type: 'http';
-  scheme: 'bearer';
-  bearerFormat?: string;
-};
-
-type ProviderSecurityScheme =
-  | ApiKeyHeaderSecurity
-  | ApiKeyQueryParamSecurity
-  | BasicAuthSecurity
-  | BearerTokenSecurity;
-
 export interface ProviderResponse {
+  provider_id: string;
   url: string;
-  name: string;
-  services: Array<{
-    id: string;
-    baseUrl: string;
-  }>;
-  defaultService: string;
-  securitySchemes?: ProviderSecurityScheme[];
+  owner?: string;
+  owner_url?: string;
+  published_at?: Date;
+  published_by?: string;
+  definition: unknown;
 }
 
 export interface ProviderListResponse {
