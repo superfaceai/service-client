@@ -15,7 +15,6 @@ import {
   ProfileVersionResponse,
   ProjectResponse,
   ProjectsListResponse,
-  ProviderResponse,
   SDKConfigResponse,
   SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
@@ -179,11 +178,18 @@ describe('client', () => {
   });
 
   describe('providers', () => {
-    const mockResult: ProviderResponse = {
+    const mockResult = {
+      provider_id: 'testName',
       url: 'testUrl',
-      name: 'testName',
-      services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
-      defaultService: 'default',
+      owner: 'superface',
+      owner_url: 'ownerUrl',
+      published_at: new Date().toJSON(),
+      published_by: 'John Doe <john.doe@email.com>',
+      definition: {
+        name: 'testName',
+        services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+        defaultService: 'default',
+      },
     };
     beforeAll(() => {
       const identity = createExpressMock();

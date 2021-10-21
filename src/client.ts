@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crossfetch from 'cross-fetch';
 
 import {
@@ -256,7 +260,7 @@ export class ServiceClient {
     });
     await this.unwrap(response);
 
-    return (await response.json()) as ProviderListResponse;
+    return this.mapProvidersListResponse(await response.json());
   }
 
   async getProvider(name: string): Promise<ProviderResponse> {
@@ -269,7 +273,7 @@ export class ServiceClient {
     });
     await this.unwrap(response);
 
-    return (await response.json()) as ProviderResponse;
+    return this.mapProviderResponse(await response.json());
   }
 
   async createProfile(payload: string): Promise<void> {
@@ -1018,5 +1022,33 @@ export class ServiceClient {
     }
 
     return { json: apiResponse };
+  }
+
+  private mapProviderResponse(providerData: any): ProviderResponse {
+    if ('definition' in providerData) {
+      return providerData as ProviderResponse;
+    } else {
+      const providerJson = {
+        ...providerData,
+        url: undefined,
+      };
+
+      return {
+        provider_id: providerData.name,
+        url: providerData.url,
+        definition: providerJson,
+      };
+    }
+  }
+
+  private mapProvidersListResponse(
+    providersListData: any
+  ): ProviderListResponse {
+    return {
+      url: providersListData.url,
+      data: providersListData.data.map((provider: any) =>
+        this.mapProviderResponse(provider)
+      ),
+    };
   }
 }

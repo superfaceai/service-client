@@ -17,8 +17,6 @@ import {
   MapsListResponse,
   ProfilesListResponse,
   ProfileVersionResponse,
-  ProviderListResponse,
-  ProviderResponse,
   SDKConfigResponse,
   SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
@@ -760,7 +758,7 @@ describe('client', () => {
 
   describe('getProvidersList', () => {
     it('should find all providers', async () => {
-      const mockResult: ProviderListResponse = {
+      const mockResult = {
         url: '/providers',
         data: [
           {
@@ -778,7 +776,22 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.getProvidersList()).resolves.toEqual(mockResult);
+      await expect(client.getProvidersList()).resolves.toEqual({
+        url: '/providers',
+        data: [
+          {
+            provider_id: 'testName',
+            url: 'testUrl',
+            definition: {
+              name: 'testName',
+              services: [
+                { id: 'default', baseUrl: 'http://superface.test/api' },
+              ],
+              defaultService: 'default',
+            },
+          },
+        ],
+      });
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
         authenticate: false,
@@ -792,7 +805,13 @@ describe('client', () => {
     it('should use query params to filter providers (if provided)', async () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
-        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+        .mockReset()
+        .mockResolvedValue({
+          ok: true,
+          json: async () => {
+            return { url: '/providers', data: [] };
+          },
+        } as Response);
 
       await client.getProvidersList({
         profile: 'scope/profile-name',
@@ -842,12 +861,53 @@ describe('client', () => {
   });
 
   describe('getProvider', () => {
-    it('should get one provider', async () => {
-      const mockResult: ProviderResponse = {
+    it('should get provider in flat format', async () => {
+      const mockResult = {
         url: 'testUrl',
         name: 'testName',
         services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
         defaultService: 'default',
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(client.getProvider('test')).resolves.toEqual({
+        provider_id: 'testName',
+        url: 'testUrl',
+        definition: {
+          name: 'testName',
+          services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+          defaultService: 'default',
+        },
+      });
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers/test', {
+        authenticate: false,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
+    it('should get provider in nested format', async () => {
+      const mockResult = {
+        provider_id: 'testName',
+        url: 'testUrl',
+        owner: 'superface',
+        owner_url: 'ownerUrl',
+        published_at: new Date(),
+        published_by: 'John Doe <john.doe@email.com>',
+        definition: {
+          name: 'testName',
+          services: [{ id: 'default', baseUrl: 'http://superface.test/api' }],
+          defaultService: 'default',
+        },
       };
 
       const mockResponse = {
