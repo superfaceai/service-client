@@ -897,6 +897,7 @@ describe('client', () => {
 
     it('should get provider in nested format', async () => {
       const mockResult = {
+        provider_id: 'testName',
         url: 'testUrl',
         owner: 'superface',
         owner_url: 'ownerUrl',
