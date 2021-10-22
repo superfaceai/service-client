@@ -876,7 +876,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.getProvider('test')).resolves.toEqual({
+      await expect(client.getProvider('test')).resolves.toStrictEqual({
         provider_id: 'testName',
         url: 'testUrl',
         definition: {
@@ -917,7 +917,7 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.getProvider('test')).resolves.toEqual(mockResult);
+      await expect(client.getProvider('test')).resolves.toStrictEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
         authenticate: false,
