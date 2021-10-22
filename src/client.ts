@@ -1028,14 +1028,11 @@ export class ServiceClient {
     if ('definition' in providerData) {
       return providerData as ProviderResponse;
     } else {
-      const providerJson = {
-        ...providerData,
-        url: undefined,
-      };
-
+      const { url, ...providerJson } = providerData;
+      
       return {
         provider_id: providerData.name,
-        url: providerData.url,
+        url,
         definition: providerJson,
       };
     }
