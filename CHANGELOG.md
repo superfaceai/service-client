@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `getProvider` and `getProvidersList` correctly map older flat provider API response by removing the `url` param from the definition
+
 ## [0.0.25] - 2021-10-21
 ### Changed
 - **BREAKING CHANGE** removed `Provider` interface
