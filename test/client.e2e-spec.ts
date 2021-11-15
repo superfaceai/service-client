@@ -773,9 +773,10 @@ function runMockedPasswordlessIdentityServer(
       if (email) {
         res.status(200).send({
           verify_url: `${baseUrl}/auth/passwordless/verify?email=${encodeURIComponent(
-            email
+            email as unknown as string
           )}&token=${TOKEN_VALUE}`,
-          expires_at: identityServerState.verificationTokenExpiresAt.toISOString(),
+          expires_at:
+            identityServerState.verificationTokenExpiresAt.toISOString(),
         });
       } else {
         res.status(400);
