@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **BREAKING CHANGE** `getProfile`, `getProfileAST`, `getProfileSource` arguments changed
 - parameters `scope` and `version` are  optional in `getProfile`, `getProfileAST`, `getProfileSource` functions
+- **BREAKING CHANGE** `getMap`, `getMapAST`, `getMapSource` arguments changed
+- parameter `scope` and `version` are optional in `getMap`, `getMapAST`, `getMapSource` functions
 
 ## [0.0.26] - 2021-10-22
 ### Fixed

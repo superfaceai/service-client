@@ -509,7 +509,12 @@ describe('client', () => {
 
     test('get map', async () => {
       await expect(
-        serviceClient.getMap('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMap({
+          scope: 'vcs',
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+        })
       ).resolves.toEqual({
         ...mockResult,
         published_at: mockResult.published_at.toJSON(),
@@ -518,12 +523,22 @@ describe('client', () => {
 
     test('get map source', async () => {
       await expect(
-        serviceClient.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMapSource({
+          scope: 'vcs',
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+        })
       ).resolves.toEqual(mockMapSource);
     });
     test('get map AST', async () => {
       await expect(
-        serviceClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMapAST({
+          scope: 'vcs',
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+        })
       ).resolves.toEqual(JSON.stringify(mockMapAST));
     });
 

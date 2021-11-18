@@ -49,11 +49,13 @@ import {
   PasswordlessLoginResponse,
   UnsuccessfulLogin,
 } from './interfaces/login_api_response';
+import { MapId } from './interfaces/map_id';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,
   ProjectsListResponse,
 } from './interfaces/projects_api_response';
+import { buildMapUrl } from './utils/buildMapUrl';
 import { buildProfileUrl } from './utils/buildProfileUrl';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -385,16 +387,8 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getMap(
-    scope: string,
-    version: string,
-    name: string,
-    provider: string,
-    variant?: string
-  ): Promise<MapRevisionResponse> {
-    const url = variant
-      ? `/${scope}/${name}.${provider}.${variant}@${version}`
-      : `/${scope}/${name}.${provider}@${version}`;
+  async getMap(mapId: MapId): Promise<MapRevisionResponse> {
+    const url = buildMapUrl(mapId);
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
@@ -408,16 +402,8 @@ export class ServiceClient {
     return (await response.json()) as MapRevisionResponse;
   }
 
-  async getMapSource(
-    scope: string,
-    version: string,
-    name: string,
-    provider: string,
-    variant?: string
-  ): Promise<string> {
-    const url = variant
-      ? `/${scope}/${name}.${provider}.${variant}@${version}`
-      : `/${scope}/${name}.${provider}@${version}`;
+  async getMapSource(mapId: MapId): Promise<string> {
+    const url = buildMapUrl(mapId);
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
@@ -429,16 +415,8 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getMapAST(
-    scope: string,
-    version: string,
-    name: string,
-    provider: string,
-    variant?: string
-  ): Promise<string> {
-    const url = variant
-      ? `/${scope}/${name}.${provider}.${variant}@${version}`
-      : `/${scope}/${name}.${provider}@${version}`;
+  async getMapAST(mapId: MapId): Promise<string> {
+    const url = buildMapUrl(mapId);
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
