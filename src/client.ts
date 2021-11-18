@@ -22,6 +22,7 @@ import {
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
+  ProfileId,
   ProfilesListOptions,
   ProfilesListResponse,
   ProfileVersionResponse,
@@ -53,6 +54,7 @@ import {
   ProjectResponse,
   ProjectsListResponse,
 } from './interfaces/projects_api_response';
+import { buildProfileUrl } from './utils/buildProfileUrl';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -301,60 +303,39 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getProfile(
-    scope: string,
-    version: string,
-    name: string
-  ): Promise<ProfileVersionResponse> {
-    const response: Response = await this.fetch(
-      `/${scope}/${name}@${version}`,
-      {
-        authenticate: false,
-        method: 'GET',
-        headers: {
-          Accept: MEDIA_TYPE_JSON,
-        },
-      }
-    );
+  async getProfile(profileId: ProfileId): Promise<ProfileVersionResponse> {
+    const response: Response = await this.fetch(buildProfileUrl(profileId), {
+      authenticate: false,
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_JSON,
+      },
+    });
     await this.unwrap(response);
 
     return (await response.json()) as ProfileVersionResponse;
   }
 
-  async getProfileSource(
-    scope: string,
-    version: string,
-    name: string
-  ): Promise<string> {
-    const response: Response = await this.fetch(
-      `/${scope}/${name}@${version}`,
-      {
-        authenticate: false,
-        method: 'GET',
-        headers: {
-          Accept: MEDIA_TYPE_PROFILE,
-        },
-      }
-    );
+  async getProfileSource(profileId: ProfileId): Promise<string> {
+    const response: Response = await this.fetch(buildProfileUrl(profileId), {
+      authenticate: false,
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_PROFILE,
+      },
+    });
 
     return (await this.unwrap(response)).text();
   }
 
-  async getProfileAST(
-    scope: string,
-    version: string,
-    name: string
-  ): Promise<string> {
-    const response: Response = await this.fetch(
-      `/${scope}/${name}@${version}`,
-      {
-        authenticate: false,
-        method: 'GET',
-        headers: {
-          Accept: MEDIA_TYPE_PROFILE_AST,
-        },
-      }
-    );
+  async getProfileAST(profileId: ProfileId): Promise<string> {
+    const response: Response = await this.fetch(buildProfileUrl(profileId), {
+      authenticate: false,
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_PROFILE_AST,
+      },
+    });
 
     return (await this.unwrap(response)).text();
   }
