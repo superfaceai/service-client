@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crossfetch from 'cross-fetch';
+import { URL } from 'url';
 
 import {
   MEDIA_TYPE_JSON,
@@ -488,20 +489,21 @@ export class ServiceClient {
 
   public async passwordlessLogin(
     email: string,
-    mode: 'login' | 'register' = 'login'
+    mode: 'login' | 'register' = 'login',
+    customQueryParams: Record<string, any> = {}
   ): Promise<PasswordlessLoginResponse> {
-    const response: Response = await crossfetch.fetch(
-      `${this._STORAGE.baseUrl}/auth/passwordless?mode=${mode}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-        }),
-      }
-    );
+    const url = new URL(`${this._STORAGE.baseUrl}/auth/passwordless`);
+    url.search = new URLSearchParams({ mode, ...customQueryParams }).toString();
+
+    const response: Response = await crossfetch.fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+      }),
+    });
     if (response.status === 200) {
       const apiResponse = await this.tryParseLoginResponseJson<{
         verify_url: string;

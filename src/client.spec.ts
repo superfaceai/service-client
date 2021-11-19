@@ -386,6 +386,15 @@ describe('client', () => {
             'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token B in JSON at position 4',
         });
       });
+
+      it('should send custom query parameters', async () => {
+        await client.passwordlessLogin('mail@mydomain.com', 'register', {
+          utm_content: 'test',
+        });
+        expect(fetchMock.mock.calls[0][0]).toBe(
+          'https://superface.ai/auth/passwordless?mode=register&utm_content=test'
+        );
+      });
     });
 
     describe('verifyPasswordlessLogin', () => {
