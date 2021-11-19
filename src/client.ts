@@ -848,20 +848,29 @@ export class ServiceClient {
     }
   }
 
-  public getGithubLoginUrl(returnTo?: string, mode?: 'register'): string {
-    const urlWithoutParams = `${this._STORAGE.baseUrl}/auth/github`;
-    const queryParams = [];
+  public getGithubLoginUrl(
+    returnTo?: string,
+    mode?: 'register',
+    customQueryParams: Record<string, any> = {}
+  ): string {
+    const url = new URL(`${this._STORAGE.baseUrl}/auth/github`);
+    let queryParams: Record<string, any> = {};
+
     if (returnTo) {
-      queryParams.push(`return_to=${encodeURIComponent(returnTo)}`);
-    }
-    if (mode) {
-      queryParams.push(`mode=${mode}`);
-    }
-    if (queryParams.length > 0) {
-      return urlWithoutParams + `?${queryParams.join('&')}`;
+      queryParams.return_to = returnTo;
     }
 
-    return urlWithoutParams;
+    if (mode) {
+      queryParams.mode = mode;
+    }
+
+    if (customQueryParams) {
+      queryParams = { ...queryParams, ...customQueryParams };
+    }
+
+    url.search = new URLSearchParams(queryParams).toString();
+
+    return url.toString();
   }
 
   public async getUserInfo(): Promise<UserResponse> {
@@ -1029,7 +1038,7 @@ export class ServiceClient {
       return providerData as ProviderResponse;
     } else {
       const { url, ...providerJson } = providerData;
-      
+
       return {
         provider_id: providerData.name,
         url,
