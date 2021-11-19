@@ -386,6 +386,15 @@ describe('client', () => {
             'Cannot deserialize login API response: FetchError: invalid json response body at  reason: Unexpected token B in JSON at position 4',
         });
       });
+
+      it('should send custom query parameters', async () => {
+        await client.passwordlessLogin('mail@mydomain.com', 'register', {
+          utm_content: 'test',
+        });
+        expect(fetchMock.mock.calls[0][0]).toBe(
+          'https://superface.ai/auth/passwordless?mode=register&utm_content=test'
+        );
+      });
     });
 
     describe('verifyPasswordlessLogin', () => {
@@ -707,6 +716,17 @@ describe('client', () => {
         )}&mode=register`
       );
     });
+
+    it('should return github login url with utm_source query prameter', () => {
+      const returnTo = 'https://superface.dev/login/callback';
+      expect(
+        client.getGithubLoginUrl(returnTo, 'register', { utm_source: 'test' })
+      ).toBe(
+        `${BASE_URL}/auth/github?return_to=${encodeURIComponent(
+          returnTo
+        )}&mode=register&utm_source=test`
+      );
+    });
   });
 
   describe('createProvider', () => {
@@ -917,7 +937,9 @@ describe('client', () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
-      await expect(client.getProvider('test')).resolves.toStrictEqual(mockResult);
+      await expect(client.getProvider('test')).resolves.toStrictEqual(
+        mockResult
+      );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers/test', {
         authenticate: false,
@@ -1912,9 +1934,7 @@ describe('client', () => {
       ).resolves.toEqual(mockResult);
 
       expect(fetchMock).toBeCalledTimes(1);
-      expect(
-        fetchMock
-      ).toBeCalledWith(
+      expect(fetchMock).toBeCalledWith(
         `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
         { method: 'GET', headers: { 'Content-Type': 'application/json' } }
       );
@@ -1941,9 +1961,7 @@ describe('client', () => {
 
       expect(fetchMock).toBeCalledTimes(1);
 
-      expect(
-        fetchMock
-      ).toBeCalledWith(
+      expect(fetchMock).toBeCalledWith(
         `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
         { method: 'GET', headers: { 'Content-Type': 'application/json' } }
       );
