@@ -811,7 +811,7 @@ export class ServiceClient {
 
   public getGithubLoginUrl(
     returnTo?: string,
-    mode?: 'register',
+    mode: 'login' | 'register' = 'login',
     customQueryParams: Record<string, any> = {}
   ): string {
     const url = new URL(`${this._STORAGE.baseUrl}/auth/github`);
