@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Do not use URL and URLSearchParams to allow running in browser
+
 ## [1.0.0] - 2021-11-22
 ### Added
 - new argument to `passwordless` and `getGithubLoginUrl` to be able to pass any query parameters

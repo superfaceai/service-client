@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crossfetch from 'cross-fetch';
-import { URL } from 'url';
 
 import {
   MEDIA_TYPE_JSON,
@@ -57,6 +56,7 @@ import {
 } from './interfaces/projects_api_response';
 import { buildMapUrl } from './utils/buildMapUrl';
 import { buildProfileUrl } from './utils/buildProfileUrl';
+import { createQueryParams } from './utils/createQueryParams';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -451,10 +451,16 @@ export class ServiceClient {
     mode: 'login' | 'register' = 'login',
     customQueryParams: Record<string, any> = {}
   ): Promise<PasswordlessLoginResponse> {
-    const url = new URL(`${this._STORAGE.baseUrl}/auth/passwordless`);
-    url.search = new URLSearchParams({ mode, ...customQueryParams }).toString();
+    const queryParamsString = createQueryParams({
+      mode,
+      ...customQueryParams,
+    });
 
-    const response: Response = await crossfetch.fetch(url.toString(), {
+    const url = `${this._STORAGE.baseUrl}/auth/passwordless${
+      queryParamsString ? '?' + queryParamsString : ''
+    }`;
+
+    const response: Response = await crossfetch.fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -814,7 +820,6 @@ export class ServiceClient {
     mode?: 'register',
     customQueryParams: Record<string, any> = {}
   ): string {
-    const url = new URL(`${this._STORAGE.baseUrl}/auth/github`);
     let queryParams: Record<string, any> = {};
 
     if (returnTo) {
@@ -829,9 +834,11 @@ export class ServiceClient {
       queryParams = { ...queryParams, ...customQueryParams };
     }
 
-    url.search = new URLSearchParams(queryParams).toString();
+    const queryParamsString = createQueryParams(queryParams);
 
-    return url.toString();
+    return `${this._STORAGE.baseUrl}/auth/github${
+      queryParamsString ? '?' + queryParamsString : ''
+    }`;
   }
 
   public async getUserInfo(): Promise<UserResponse> {
