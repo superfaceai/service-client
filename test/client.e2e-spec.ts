@@ -323,6 +323,23 @@ describe('client', () => {
           res.json(mockResult);
         }
       );
+      identity.get(
+        '/vcs/user-repos',
+        (req: express.Request, res: express.Response) => {
+          switch (req.headers?.accept) {
+            case MEDIA_TYPE_JSON:
+            case MEDIA_TYPE_PROFILE:
+            case MEDIA_TYPE_PROFILE_AST:
+              res.setHeader('location', '/vcs/user-repos@1.0.0');
+              res.sendStatus(302);
+              break;
+            default:
+              res.sendStatus(400);
+              break;
+          }
+          res.json(mockResult);
+        }
+      );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
       serviceClient = new ServiceClient();
       serviceClient.setOptions({
@@ -349,7 +366,20 @@ describe('client', () => {
 
     test('get profile', async () => {
       await expect(
-        serviceClient.getProfile('vcs', '1.0.0', 'user-repos')
+        serviceClient.getProfile({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
+      ).resolves.toEqual({
+        ...mockResult,
+        published_at: mockResult.published_at.toJSON(),
+      });
+    });
+
+    test('get profile without version', async () => {
+      await expect(
+        serviceClient.getProfile({ name: 'user-repos', scope: 'vcs' })
       ).resolves.toEqual({
         ...mockResult,
         published_at: mockResult.published_at.toJSON(),
@@ -358,12 +388,21 @@ describe('client', () => {
 
     test('get profile source', async () => {
       await expect(
-        serviceClient.getProfileSource('vcs', '1.0.0', 'user-repos')
+        serviceClient.getProfileSource({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual(mockProfileSource);
     });
+
     test('get profile AST', async () => {
       await expect(
-        serviceClient.getProfileAST('vcs', '1.0.0', 'user-repos')
+        serviceClient.getProfileAST({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual(JSON.stringify(mockProfileAST));
     });
 
@@ -470,7 +509,12 @@ describe('client', () => {
 
     test('get map', async () => {
       await expect(
-        serviceClient.getMap('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMap({
+          scope: 'vcs',
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+        })
       ).resolves.toEqual({
         ...mockResult,
         published_at: mockResult.published_at.toJSON(),
@@ -479,12 +523,22 @@ describe('client', () => {
 
     test('get map source', async () => {
       await expect(
-        serviceClient.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMapSource({
+          scope: 'vcs',
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+        })
       ).resolves.toEqual(mockMapSource);
     });
     test('get map AST', async () => {
       await expect(
-        serviceClient.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+        serviceClient.getMapAST({
+          scope: 'vcs',
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+        })
       ).resolves.toEqual(JSON.stringify(mockMapAST));
     });
 
@@ -773,9 +827,10 @@ function runMockedPasswordlessIdentityServer(
       if (email) {
         res.status(200).send({
           verify_url: `${baseUrl}/auth/passwordless/verify?email=${encodeURIComponent(
-            email
+            email as unknown as string
           )}&token=${TOKEN_VALUE}`,
-          expires_at: identityServerState.verificationTokenExpiresAt.toISOString(),
+          expires_at:
+            identityServerState.verificationTokenExpiresAt.toISOString(),
         });
       } else {
         res.status(400);

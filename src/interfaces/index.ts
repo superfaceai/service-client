@@ -6,6 +6,7 @@ export * from './login_api_response';
 export * from './maps_api_response';
 export * from './maps_api_options';
 export * from './refresh_access_token_options';
+export * from './profile_id';
 export * from './profiles_api_response';
 export * from './profiles_api_options';
 export * from './projects_api_response';

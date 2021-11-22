@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- **BREAKING CHANGE** `getProfile`, `getProfileAST`, `getProfileSource` arguments changed
+- parameters `scope` and `version` are  optional in `getProfile`, `getProfileAST`, `getProfileSource` functions
+- **BREAKING CHANGE** `getMap`, `getMapAST`, `getMapSource` arguments changed
+- parameter `scope` and `version` are optional in `getMap`, `getMapAST`, `getMapSource` functions
 
 ## [0.0.26] - 2021-10-22
 ### Fixed

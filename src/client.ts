@@ -22,6 +22,7 @@ import {
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
+  ProfileId,
   ProfilesListOptions,
   ProfilesListResponse,
   ProfileVersionResponse,
@@ -48,11 +49,14 @@ import {
   PasswordlessLoginResponse,
   UnsuccessfulLogin,
 } from './interfaces/login_api_response';
+import { MapId } from './interfaces/map_id';
 import { ProjectUpdateBody } from './interfaces/projects_api_options';
 import {
   ProjectResponse,
   ProjectsListResponse,
 } from './interfaces/projects_api_response';
+import { buildMapUrl } from './utils/buildMapUrl';
+import { buildProfileUrl } from './utils/buildProfileUrl';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -301,60 +305,39 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getProfile(
-    scope: string,
-    version: string,
-    name: string
-  ): Promise<ProfileVersionResponse> {
-    const response: Response = await this.fetch(
-      `/${scope}/${name}@${version}`,
-      {
-        authenticate: false,
-        method: 'GET',
-        headers: {
-          Accept: MEDIA_TYPE_JSON,
-        },
-      }
-    );
+  async getProfile(profileId: ProfileId): Promise<ProfileVersionResponse> {
+    const response: Response = await this.fetch(buildProfileUrl(profileId), {
+      authenticate: false,
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_JSON,
+      },
+    });
     await this.unwrap(response);
 
     return (await response.json()) as ProfileVersionResponse;
   }
 
-  async getProfileSource(
-    scope: string,
-    version: string,
-    name: string
-  ): Promise<string> {
-    const response: Response = await this.fetch(
-      `/${scope}/${name}@${version}`,
-      {
-        authenticate: false,
-        method: 'GET',
-        headers: {
-          Accept: MEDIA_TYPE_PROFILE,
-        },
-      }
-    );
+  async getProfileSource(profileId: ProfileId): Promise<string> {
+    const response: Response = await this.fetch(buildProfileUrl(profileId), {
+      authenticate: false,
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_PROFILE,
+      },
+    });
 
     return (await this.unwrap(response)).text();
   }
 
-  async getProfileAST(
-    scope: string,
-    version: string,
-    name: string
-  ): Promise<string> {
-    const response: Response = await this.fetch(
-      `/${scope}/${name}@${version}`,
-      {
-        authenticate: false,
-        method: 'GET',
-        headers: {
-          Accept: MEDIA_TYPE_PROFILE_AST,
-        },
-      }
-    );
+  async getProfileAST(profileId: ProfileId): Promise<string> {
+    const response: Response = await this.fetch(buildProfileUrl(profileId), {
+      authenticate: false,
+      method: 'GET',
+      headers: {
+        Accept: MEDIA_TYPE_PROFILE_AST,
+      },
+    });
 
     return (await this.unwrap(response)).text();
   }
@@ -404,16 +387,8 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getMap(
-    scope: string,
-    version: string,
-    name: string,
-    provider: string,
-    variant?: string
-  ): Promise<MapRevisionResponse> {
-    const url = variant
-      ? `/${scope}/${name}.${provider}.${variant}@${version}`
-      : `/${scope}/${name}.${provider}@${version}`;
+  async getMap(mapId: MapId): Promise<MapRevisionResponse> {
+    const url = buildMapUrl(mapId);
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
@@ -427,16 +402,8 @@ export class ServiceClient {
     return (await response.json()) as MapRevisionResponse;
   }
 
-  async getMapSource(
-    scope: string,
-    version: string,
-    name: string,
-    provider: string,
-    variant?: string
-  ): Promise<string> {
-    const url = variant
-      ? `/${scope}/${name}.${provider}.${variant}@${version}`
-      : `/${scope}/${name}.${provider}@${version}`;
+  async getMapSource(mapId: MapId): Promise<string> {
+    const url = buildMapUrl(mapId);
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',
@@ -448,16 +415,8 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getMapAST(
-    scope: string,
-    version: string,
-    name: string,
-    provider: string,
-    variant?: string
-  ): Promise<string> {
-    const url = variant
-      ? `/${scope}/${name}.${provider}.${variant}@${version}`
-      : `/${scope}/${name}.${provider}@${version}`;
+  async getMapAST(mapId: MapId): Promise<string> {
+    const url = buildMapUrl(mapId);
     const response: Response = await this.fetch(url, {
       authenticate: false,
       method: 'GET',

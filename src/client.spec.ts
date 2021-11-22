@@ -1096,7 +1096,11 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getProfile('vcs', '1.0.0', 'user-repos')
+        client.getProfile({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
@@ -1123,7 +1127,11 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getProfile('vcs', '1.0.0', 'user-repos')
+        client.getProfile({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
@@ -1220,7 +1228,11 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getProfileSource('vcs', '1.0.0', 'user-repos')
+        client.getProfileSource({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual('profileSource');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
@@ -1247,7 +1259,11 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getProfileSource('vcs', '1.0.0', 'user-repos')
+        client.getProfileSource({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
@@ -1270,7 +1286,11 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getProfileAST('vcs', '1.0.0', 'user-repos')
+        client.getProfileAST({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual('profileAST');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
@@ -1297,7 +1317,11 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getProfileAST('vcs', '1.0.0', 'user-repos')
+        client.getProfileAST({
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
@@ -1433,7 +1457,12 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getMap('vcs', '1.0.0', 'user-repos', 'github')
+        client.getMap({
+          name: 'user-repos',
+          provider: 'github',
+          scope: 'vcs',
+          version: '1.0.0',
+        })
       ).resolves.toEqual(mockResult);
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
@@ -1460,7 +1489,12 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getMap('vcs', '1.0.0', 'user-repos', 'github')
+        client.getMap({
+          name: 'user-repos',
+          provider: 'github',
+          scope: 'vcs',
+          version: '1.0.0',
+        })
       ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
@@ -1559,7 +1593,12 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+        client.getMapSource({
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual('mapSource');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
@@ -1586,7 +1625,12 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getMapSource('vcs', '1.0.0', 'user-repos', 'github')
+        client.getMapSource({
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
@@ -1609,7 +1653,12 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+        client.getMapAST({
+          name: 'user-repos',
+          provider: 'github',
+          version: '1.0.0',
+          scope: 'vcs',
+        })
       ).resolves.toEqual('mapAST');
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
@@ -1636,7 +1685,12 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(
-        client.getMapAST('vcs', '1.0.0', 'user-repos', 'github')
+        client.getMapAST({
+          name: 'user-repos',
+          provider: 'github',
+          scope: 'vcs',
+          version: '1.0.0',
+        })
       ).rejects.toEqual(new ServiceApiError(payload));
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos.github@1.0.0', {
