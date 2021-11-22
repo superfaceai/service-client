@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as crossfetch from 'cross-fetch';
-import { URL } from 'url';
 
 import {
   MEDIA_TYPE_JSON,
