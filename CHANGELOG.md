@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0] - 2021-11-22
 ### Added
 - new argument to `passwordless` and `getGithubLoginUrl` to be able to pass any query parameters
 
@@ -169,7 +171,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[Unreleased]: https://github.com/superfaceai/service-client/compare/v0.0.26...HEAD
+[Unreleased]: https://github.com/superfaceai/service-client/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/superfaceai/service-client/compare/v0.0.26...v1.0.0
 [0.0.26]: https://github.com/superfaceai/service-client/compare/v0.0.25...v0.0.26
 [0.0.25]: https://github.com/superfaceai/service-client/compare/v0.0.24...v0.0.25
 [0.0.24]: https://github.com/superfaceai/service-client/compare/v0.0.23...v0.0.24
