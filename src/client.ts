@@ -22,6 +22,7 @@ import {
   MapsListOptions,
   MapsListResponse,
   ProfileId,
+  ProfileOptions,
   ProfilesListOptions,
   ProfilesListResponse,
   ProfileVersionResponse,
@@ -304,9 +305,12 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getProfile(profileId: ProfileId): Promise<ProfileVersionResponse> {
+  async getProfile(
+    profileId: ProfileId,
+    options?: ProfileOptions
+  ): Promise<ProfileVersionResponse> {
     const response: Response = await this.fetch(buildProfileUrl(profileId), {
-      authenticate: false,
+      authenticate: options?.authenticate ?? false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_JSON,
@@ -317,9 +321,12 @@ export class ServiceClient {
     return (await response.json()) as ProfileVersionResponse;
   }
 
-  async getProfileSource(profileId: ProfileId): Promise<string> {
+  async getProfileSource(
+    profileId: ProfileId,
+    options?: ProfileOptions
+  ): Promise<string> {
     const response: Response = await this.fetch(buildProfileUrl(profileId), {
-      authenticate: false,
+      authenticate: options?.authenticate ?? false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_PROFILE,
@@ -329,9 +336,12 @@ export class ServiceClient {
     return (await this.unwrap(response)).text();
   }
 
-  async getProfileAST(profileId: ProfileId): Promise<string> {
+  async getProfileAST(
+    profileId: ProfileId,
+    options?: ProfileOptions
+  ): Promise<string> {
     const response: Response = await this.fetch(buildProfileUrl(profileId), {
-      authenticate: false,
+      authenticate: options?.authenticate ?? false,
       method: 'GET',
       headers: {
         Accept: MEDIA_TYPE_PROFILE_AST,
@@ -352,7 +362,7 @@ export class ServiceClient {
     });
 
     const response: Response = await this.fetch(url, {
-      authenticate: false,
+      authenticate: options?.authenticate ?? false,
       method: 'GET',
       headers: { Accept: 'application/json' },
     });

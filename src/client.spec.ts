@@ -1076,22 +1076,22 @@ describe('client', () => {
     });
   });
   describe('getProfile', () => {
-    it('should get one profile', async () => {
-      const mockResult: ProfileVersionResponse = {
-        profile_id: 'testId',
-        profile_name: 'testName',
-        profile_version: '1.0.0',
-        url: 'testUrl',
-        published_at: new Date(),
-        published_by: 'test',
-        owner: 'testOwner',
-        owner_url: 'testOwnerUrl',
-      };
+    const mockResult: ProfileVersionResponse = {
+      profile_id: 'testId',
+      profile_name: 'testName',
+      profile_version: '1.0.0',
+      url: 'testUrl',
+      published_at: new Date(),
+      published_by: 'test',
+      owner: 'testOwner',
+      owner_url: 'testOwnerUrl',
+    };
+    const mockResponse = {
+      ok: true,
+      json: async () => mockResult,
+    };
 
-      const mockResponse = {
-        ok: true,
-        json: async () => mockResult,
-      };
+    it('should get one profile', async () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
@@ -1105,6 +1105,29 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_JSON,
+        },
+      });
+    });
+
+    it('should authenticate user', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await client.getProfile(
+        {
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        },
+        {
+          authenticate: true,
+        }
+      );
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: true,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_JSON,
@@ -1145,21 +1168,21 @@ describe('client', () => {
   });
 
   describe('getProfilesList', () => {
-    it('should get list of profiles', async () => {
-      const mockResult: ProfilesListResponse = {
-        url: '/profiles',
-        data: [
-          {
-            id: 'scope/profile-name',
-            url: 'https://superface.test/scope/profile-name',
-          },
-        ],
-      };
+    const mockResult: ProfilesListResponse = {
+      url: '/profiles',
+      data: [
+        {
+          id: 'scope/profile-name',
+          url: 'https://superface.test/scope/profile-name',
+        },
+      ],
+    };
+    const mockResponse = {
+      ok: true,
+      json: async () => mockResult,
+    };
 
-      const mockResponse = {
-        ok: true,
-        json: async () => mockResult,
-      };
+    it('should get list of profiles', async () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
@@ -1192,6 +1215,18 @@ describe('client', () => {
       );
     });
 
+    it('should authenticate user', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await client.getProfilesList({ authenticate: true });
+      expect(fetchMock).toBeCalledWith('/profiles', {
+        authenticate: true,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+
     it('should throw error', async () => {
       const payload = {
         status: 400,
@@ -1219,11 +1254,12 @@ describe('client', () => {
   });
 
   describe('getProfileSource', () => {
+    const mockResponse = {
+      ok: true,
+      text: async () => 'profileSource',
+    };
+
     it('should get profile source', async () => {
-      const mockResponse = {
-        ok: true,
-        text: async () => 'profileSource',
-      };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
@@ -1237,6 +1273,27 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE,
+        },
+      });
+    });
+
+    it('should authenticate user', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await client.getProfileSource(
+        {
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        },
+        { authenticate: true }
+      );
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: true,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE,
@@ -1277,11 +1334,12 @@ describe('client', () => {
   });
 
   describe('getProfileAST', () => {
+    const mockResponse = {
+      ok: true,
+      text: async () => 'profileAST',
+    };
+
     it('should get profile AST', async () => {
-      const mockResponse = {
-        ok: true,
-        text: async () => 'profileAST',
-      };
       const fetchMock = jest
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
@@ -1295,6 +1353,27 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
         authenticate: false,
+        method: 'GET',
+        headers: {
+          Accept: MEDIA_TYPE_PROFILE_AST,
+        },
+      });
+    });
+
+    it('should authenticate user', async () => {
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await client.getProfileAST(
+        {
+          name: 'user-repos',
+          version: '1.0.0',
+          scope: 'vcs',
+        },
+        { authenticate: true }
+      );
+      expect(fetchMock).toBeCalledWith('/vcs/user-repos@1.0.0', {
+        authenticate: true,
         method: 'GET',
         headers: {
           Accept: MEDIA_TYPE_PROFILE_AST,
