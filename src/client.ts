@@ -18,14 +18,15 @@ import {
   ClientOptions,
   DEFAULT_POLLING_INTERVAL_SECONDS,
   DEFAULT_POLLING_TIMEOUT_SECONDS,
+  isProfileMinimalReponse,
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
   ProfileId,
   ProfileOptions,
+  ProfileResponse,
   ProfilesListOptions,
   ProfilesListResponse,
-  ProfileVersionResponse,
   ProviderListResponse,
   ProviderResponse,
   ProvidersListOptions,
@@ -308,7 +309,7 @@ export class ServiceClient {
   async getProfile(
     profileId: ProfileId,
     options?: ProfileOptions
-  ): Promise<ProfileVersionResponse> {
+  ): Promise<ProfileResponse> {
     const response: Response = await this.fetch(buildProfileUrl(profileId), {
       authenticate: options?.authenticate ?? false,
       method: 'GET',
@@ -318,7 +319,7 @@ export class ServiceClient {
     });
     await this.unwrap(response);
 
-    return (await response.json()) as ProfileVersionResponse;
+    return (await response.json()) as ProfileResponse;
   }
 
   async getProfileSource(
@@ -354,10 +355,12 @@ export class ServiceClient {
   async getProfilesList(
     options?: ProfilesListOptions
   ): Promise<ProfilesListResponse> {
-    const { accountHandle, limit } = options || {};
+    const { accountHandle, limit, page, scope } = options || {};
 
     const url = this.makePathWithQueryParams('/profiles', {
       account_handle: accountHandle,
+      scope,
+      page,
       limit,
     });
 
@@ -366,9 +369,28 @@ export class ServiceClient {
       method: 'GET',
       headers: { Accept: 'application/json' },
     });
-    await this.unwrap(response);
 
-    return (await response.json()) as ProfilesListResponse;
+    await this.unwrap(response);
+    const json = await response.json();
+
+    return {
+      ...json,
+      data: json.data.map((profile: unknown) => {
+        if (isProfileMinimalReponse(profile)) {
+          return {
+            profile_id: profile.id,
+            profile_version: [0, 0, 0],
+            url: profile.url,
+            published_at: '',
+            published_by: '',
+            owner: '',
+            owner_url: '',
+          };
+        } else {
+          return profile;
+        }
+      }),
+    } as ProfilesListResponse;
   }
 
   async createMap(payload: string): Promise<void> {
