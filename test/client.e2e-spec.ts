@@ -12,7 +12,6 @@ import {
   MEDIA_TYPE_PROFILE,
   MEDIA_TYPE_PROFILE_AST,
   ProfileResponse,
-  ProfileVersionResponse,
   ProjectResponse,
   ProjectsListResponse,
   SDKConfigResponse,
@@ -257,19 +256,15 @@ describe('client', () => {
     };
 
     const mockProfile: ProfileResponse = {
-      id: 'vcs/user-repos',
+      profile_id: 'vcs/user-repos',
+      profile_name: 'Profile Name',
+      profile_description: 'This is profile for unit test',
+      profile_version: '1.0.1',
       url: 'https://superface.test/vcs/user-repos',
-    };
-
-    const mockResult: ProfileVersionResponse = {
-      profile_id: 'testId',
-      profile_name: 'testName',
-      profile_version: '1.0.0',
-      url: 'testUrl',
-      published_at: new Date(),
-      published_by: 'test',
-      owner: 'testOwner',
-      owner_url: 'testOwnerUrl',
+      published_at: new Date('2022-04-05T06:36:01.854Z'),
+      published_by: 'Test User <test@superface.ai>',
+      owner: 'testaccount',
+      owner_url: '',
     };
 
     beforeAll(() => {
@@ -308,7 +303,7 @@ describe('client', () => {
         (req: express.Request, res: express.Response) => {
           switch (req.headers?.accept) {
             case MEDIA_TYPE_JSON:
-              res.json(mockResult);
+              res.json(mockProfile);
               break;
             case MEDIA_TYPE_PROFILE:
               res.send(mockProfileSource);
@@ -320,7 +315,7 @@ describe('client', () => {
               res.sendStatus(400);
               break;
           }
-          res.json(mockResult);
+          res.json(mockProfile);
         }
       );
       identity.get(
@@ -337,7 +332,7 @@ describe('client', () => {
               res.sendStatus(400);
               break;
           }
-          res.json(mockResult);
+          res.json(mockProfile);
         }
       );
       identityServer = identity.listen(IDENTITY_PROVIDER_PORT);
@@ -372,8 +367,8 @@ describe('client', () => {
           scope: 'vcs',
         })
       ).resolves.toEqual({
-        ...mockResult,
-        published_at: mockResult.published_at.toJSON(),
+        ...mockProfile,
+        published_at: mockProfile.published_at.toJSON(),
       });
     });
 
@@ -381,8 +376,8 @@ describe('client', () => {
       await expect(
         serviceClient.getProfile({ name: 'user-repos', scope: 'vcs' })
       ).resolves.toEqual({
-        ...mockResult,
-        published_at: mockResult.published_at.toJSON(),
+        ...mockProfile,
+        published_at: mockProfile.published_at.toJSON(),
       });
     });
 
@@ -409,7 +404,12 @@ describe('client', () => {
     test('get profiles list', async () => {
       await expect(serviceClient.getProfilesList()).resolves.toEqual({
         url: '/profiles',
-        data: [mockProfile],
+        data: [
+          {
+            ...mockProfile,
+            published_at: mockProfile.published_at.toJSON(),
+          },
+        ],
       });
     });
   });

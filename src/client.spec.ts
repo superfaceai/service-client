@@ -15,8 +15,8 @@ import {
   LoginConfirmationErrorCode,
   MapRevisionResponse,
   MapsListResponse,
+  ProfileResponse,
   ProfilesListResponse,
-  ProfileVersionResponse,
   SDKConfigResponse,
   SDKPerformStatisticsResponse,
   SDKProviderChangesListResponse,
@@ -1076,7 +1076,7 @@ describe('client', () => {
     });
   });
   describe('getProfile', () => {
-    const mockResult: ProfileVersionResponse = {
+    const mockResult: ProfileResponse = {
       profile_id: 'testId',
       profile_name: 'testName',
       profile_version: '1.0.0',
@@ -1172,8 +1172,15 @@ describe('client', () => {
       url: '/profiles',
       data: [
         {
-          id: 'scope/profile-name',
+          profile_id: 'scope/profile-name',
+          profile_name: 'Profile Name',
+          profile_description: 'This is profile for unit test',
+          profile_version: '1.0.1',
           url: 'https://superface.test/scope/profile-name',
+          published_at: new Date('2022-04-05T06:36:01.854Z'),
+          published_by: 'Test User <test@superface.ai>',
+          owner: 'testaccount',
+          owner_url: '',
         },
       ],
     };
@@ -1198,15 +1205,20 @@ describe('client', () => {
     it('should use query params to filter profiles (if provided)', async () => {
       const fetchMock = jest
         .spyOn(client, 'fetch')
-        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+        .mockResolvedValue({
+          ok: true,
+          json: async () => mockResult,
+        } as Response);
 
       await client.getProfilesList({
         accountHandle: 'username',
+        scope: 'test',
         limit: 100,
+        page: 2,
       });
 
       expect(fetchMock).toBeCalledWith(
-        '/profiles?account_handle=username&limit=100',
+        '/profiles?account_handle=username&scope=test&page=2&limit=100',
         {
           authenticate: false,
           method: 'GET',
