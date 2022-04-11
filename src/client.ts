@@ -379,13 +379,14 @@ export class ServiceClient {
         if (isProfileMinimalReponse(profile)) {
           return {
             profile_id: profile.id,
-            profile_version: [0, 0, 0],
+            profile_name: profile.id,
+            profile_version: '0.0.0',
             url: profile.url,
-            published_at: '',
+            published_at: new Date(),
             published_by: '',
             owner: '',
             owner_url: '',
-          };
+          } as ProfileResponse;
         } else {
           return profile;
         }
