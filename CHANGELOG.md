@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `createProvider` throws `CreateProviderApiError`
 - `createProfile` throws `CreateProfileApiError`
 
+### Added
+- `createProvider`, `createProfile`, `createMap` dry run option
 
 ## [2.0.0] - 2022-04-12
 ### Changed
