@@ -9,7 +9,12 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
-import { CreateProfileApiError, CreateProviderApiError, ServiceApiError, ServiceClientError } from './errors';
+import {
+  CreateProfileApiError,
+  CreateProviderApiError,
+  ServiceApiError,
+  ServiceClientError,
+} from './errors';
 import {
   CancellationToken,
   LoginConfirmationErrorCode,
@@ -755,7 +760,7 @@ describe('client', () => {
         title: 'Already exists',
         detail: 'Provider already exists',
         provider_json_equals: true,
-        valid_provider_names: ['valid-provider-name']
+        valid_provider_names: ['valid-provider-name'],
       };
       const mockResponse = {
         ok: false,
@@ -1006,7 +1011,7 @@ describe('client', () => {
         title: 'Already exists',
         detail: 'Profile already exists',
         content_is_equal: true,
-        suggested_version: '2.0.0'
+        suggested_version: '2.0.0',
       };
       const mockResponse = {
         ok: false,
@@ -1207,12 +1212,10 @@ describe('client', () => {
     });
 
     it('should use query params to filter profiles (if provided)', async () => {
-      const fetchMock = jest
-        .spyOn(client, 'fetch')
-        .mockResolvedValue({
-          ok: true,
-          json: async () => mockResult,
-        } as Response);
+      const fetchMock = jest.spyOn(client, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => mockResult,
+      } as Response);
 
       await client.getProfilesList({
         accountHandle: 'username',
