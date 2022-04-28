@@ -753,6 +753,26 @@ describe('client', () => {
       });
     });
 
+    it('should pass dry run query parameter', async () => {
+      const mockResponse = {
+        ok: true,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.createProvider('test', { dryRun: true })
+      ).resolves.toBeUndefined();
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/providers?dry_run=true', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    });
+
     it('should throw error', async () => {
       const payload = {
         status: 400,
@@ -996,6 +1016,26 @@ describe('client', () => {
       await expect(client.createProfile('test')).resolves.toBeUndefined();
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/profiles', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': MEDIA_TYPE_TEXT,
+        },
+      });
+    });
+
+    it('should pass dry run query parameter', async () => {
+      const mockResponse = {
+        ok: true,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.createProfile('test', { dryRun: true })
+      ).resolves.toBeUndefined();
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/profiles?dry_run=true', {
         method: 'POST',
         body: 'test',
         headers: {
@@ -1443,6 +1483,26 @@ describe('client', () => {
       await expect(client.createMap('test')).resolves.toBeUndefined();
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/maps', {
+        method: 'POST',
+        body: 'test',
+        headers: {
+          'Content-Type': MEDIA_TYPE_TEXT,
+        },
+      });
+    });
+
+    it('should pass dry run query parameter', async () => {
+      const mockResponse = {
+        ok: true,
+      };
+      const fetchMock = jest
+        .spyOn(client, 'fetch')
+        .mockResolvedValue(mockResponse as Response);
+      await expect(
+        client.createMap('test', { dryRun: true })
+      ).resolves.toBeUndefined();
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps?dry_run=true', {
         method: 'POST',
         body: 'test',
         headers: {

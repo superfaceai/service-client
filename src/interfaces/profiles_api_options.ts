@@ -8,3 +8,7 @@ export interface ProfilesListOptions extends ProfileOptions {
 export interface ProfileOptions {
   authenticate?: boolean;
 }
+
+export interface ProfileCreateOptions {
+  dryRun?: boolean
+}
