@@ -12,7 +12,12 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
-import { ServiceApiError, ServiceClientError } from './errors';
+import {
+  CreateProfileApiError,
+  CreateProviderApiError,
+  ServiceApiError,
+  ServiceClientError,
+} from './errors';
 import {
   AuthToken,
   ClientOptions,
@@ -42,6 +47,8 @@ import {
   VerifyOptions,
   VerifyResponse,
 } from './interfaces';
+import { CreateProfileApiErrorResponse } from './interfaces/create_profile_api_error_response';
+import { CreateProviderApiErrorResponse } from './interfaces/create_provider_api_error_response';
 import { UserResponse } from './interfaces/identity_api_response';
 import {
   CLILoginResponse,
@@ -243,7 +250,12 @@ export class ServiceClient {
         'Content-Type': 'application/json',
       },
     });
-    await this.unwrap(response);
+    await this.unwrap<CreateProviderApiErrorResponse>(
+      response,
+      errorResponse => {
+        throw new CreateProviderApiError(errorResponse);
+      }
+    );
   }
 
   async getProvidersList(
@@ -290,7 +302,12 @@ export class ServiceClient {
         'Content-Type': MEDIA_TYPE_TEXT,
       },
     });
-    await this.unwrap(response);
+    await this.unwrap<CreateProfileApiErrorResponse>(
+      response,
+      errorResponse => {
+        throw new CreateProfileApiError(errorResponse);
+      }
+    );
   }
 
   async parseProfile(payload: string): Promise<string> {
@@ -925,10 +942,18 @@ export class ServiceClient {
     return Math.floor(Date.now() / 1000);
   }
 
-  private async unwrap(response: Response): Promise<Response> {
+  private async unwrap<ApiErrorResponse extends ServiceApiErrorResponse>(
+    response: Response,
+    throwCustomError?: (errorResponse: ApiErrorResponse) => void
+  ): Promise<Response> {
     if (!response.ok) {
-      const errorResponse = (await response.json()) as ServiceApiErrorResponse;
-      throw new ServiceApiError(errorResponse);
+      if (throwCustomError) {
+        throwCustomError((await response.json()) as ApiErrorResponse);
+      } else {
+        const errorResponse =
+          (await response.json()) as ServiceApiErrorResponse;
+        throw new ServiceApiError(errorResponse);
+      }
     }
 
     return response;
