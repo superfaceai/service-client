@@ -9,7 +9,7 @@ import {
   MEDIA_TYPE_PROFILE_AST,
   MEDIA_TYPE_TEXT,
 } from './constants';
-import { ServiceApiError, ServiceClientError } from './errors';
+import { CreateProfileApiError, CreateProviderApiError, ServiceApiError, ServiceClientError } from './errors';
 import {
   CancellationToken,
   LoginConfirmationErrorCode,
@@ -754,6 +754,8 @@ describe('client', () => {
         instance: '/providers',
         title: 'Already exists',
         detail: 'Provider already exists',
+        provider_json_equals: true,
+        valid_provider_names: ['valid-provider-name']
       };
       const mockResponse = {
         ok: false,
@@ -763,7 +765,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createProvider('test')).rejects.toEqual(
-        new ServiceApiError(payload)
+        new CreateProviderApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/providers', {
@@ -1003,6 +1005,8 @@ describe('client', () => {
         instance: '/profiles',
         title: 'Already exists',
         detail: 'Profile already exists',
+        content_is_equal: true,
+        suggested_version: '2.0.0'
       };
       const mockResponse = {
         ok: false,
@@ -1012,7 +1016,7 @@ describe('client', () => {
         .spyOn(client, 'fetch')
         .mockResolvedValue(mockResponse as Response);
       await expect(client.createProfile('test')).rejects.toEqual(
-        new ServiceApiError(payload)
+        new CreateProfileApiError(payload)
       );
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/profiles', {
