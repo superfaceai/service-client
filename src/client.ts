@@ -24,14 +24,17 @@ import {
   DEFAULT_POLLING_INTERVAL_SECONDS,
   DEFAULT_POLLING_TIMEOUT_SECONDS,
   isProfileMinimalReponse,
+  MapCreateOptions,
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
+  ProfileCreateOptions,
   ProfileId,
   ProfileOptions,
   ProfileResponse,
   ProfilesListOptions,
   ProfilesListResponse,
+  ProviderCreateOptions,
   ProviderListResponse,
   ProviderResponse,
   ProvidersListOptions,
@@ -242,8 +245,15 @@ export class ServiceClient {
     return res;
   }
 
-  async createProvider(payload: string): Promise<void> {
-    const response: Response = await this.fetch('/providers', {
+  async createProvider(
+    payload: string,
+    options?: ProviderCreateOptions
+  ): Promise<void> {
+    const url = this.makePathWithQueryParams('/providers', {
+      dry_run: options?.dryRun,
+    });
+
+    const response: Response = await this.fetch(url, {
       method: 'POST',
       body: payload,
       headers: {
@@ -294,8 +304,15 @@ export class ServiceClient {
     return this.mapProviderResponse(await response.json());
   }
 
-  async createProfile(payload: string): Promise<void> {
-    const response: Response = await this.fetch('/profiles', {
+  async createProfile(
+    payload: string,
+    options?: ProfileCreateOptions
+  ): Promise<void> {
+    const url = this.makePathWithQueryParams('/profiles', {
+      dry_run: options?.dryRun,
+    });
+
+    const response: Response = await this.fetch(url, {
       method: 'POST',
       body: payload,
       headers: {
@@ -411,8 +428,12 @@ export class ServiceClient {
     } as ProfilesListResponse;
   }
 
-  async createMap(payload: string): Promise<void> {
-    const response: Response = await this.fetch('/maps', {
+  async createMap(payload: string, options?: MapCreateOptions): Promise<void> {
+    const url = this.makePathWithQueryParams('/maps', {
+      dry_run: options?.dryRun,
+    });
+
+    const response: Response = await this.fetch(url, {
       method: 'POST',
       body: payload,
       headers: {

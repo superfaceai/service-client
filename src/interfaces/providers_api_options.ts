@@ -3,3 +3,7 @@ export interface ProvidersListOptions {
   accountHandle?: string;
   profile?: string;
 }
+
+export interface ProviderCreateOptions {
+  dryRun?: boolean;
+}
