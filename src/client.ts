@@ -23,8 +23,10 @@ import {
   ClientOptions,
   DEFAULT_POLLING_INTERVAL_SECONDS,
   DEFAULT_POLLING_TIMEOUT_SECONDS,
+  isMapMinimalReponse,
   isProfileMinimalReponse,
   MapCreateOptions,
+  MapResponse,
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
@@ -499,11 +501,12 @@ export class ServiceClient {
   }
 
   async getMapsList(options?: MapsListOptions): Promise<MapsListResponse> {
-    const { accountHandle, limit } = options || {};
+    const { accountHandle, limit, profileId } = options || {};
 
     const url = this.makePathWithQueryParams('/maps', {
       account_handle: accountHandle,
       limit,
+      profile_id: profileId,
     });
 
     const response: Response = await this.fetch(url, {
@@ -512,8 +515,32 @@ export class ServiceClient {
       headers: { Accept: 'application/json' },
     });
     await this.unwrap(response);
+    const json = await response.json();
 
-    return (await response.json()) as MapsListResponse;
+    return {
+      ...json,
+      data: json.data.map((map: unknown) => {
+        if (isMapMinimalReponse(map)) {
+          return {
+            map_id: map.id,
+            map_provider: '',
+            map_provider_url: '',
+            map_revision: 0,
+            map_variant: null,
+            profile_id: '',
+            profile_url: '',
+            profile_version: '',
+            url: map.url,
+            published_at: new Date(),
+            published_by: '',
+            owner: '',
+            owner_url: '',
+          } as MapResponse;
+        } else {
+          return map;
+        }
+      }),
+    } as MapsListResponse;
   }
 
   public async passwordlessLogin(
