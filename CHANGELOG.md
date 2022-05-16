@@ -6,11 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Changed
-- **BREAKING CHANGE** `getMapsList` result with more information
 
+## [3.0.0] - 2022-05-16
 ### Added
 - option `profile` added to `getMapsList`
+
+### Changed
+- **BREAKING CHANGE** `getMapsList` result with more information
 
 ## [2.1.0] - 2022-04-29
 ### Added
@@ -196,7 +198,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `verifyPasswordlessLogin` method to `BrainClient` which checks status of passwordless login
 - `getGithubLoginUrl` method to `BrainClient`
 
-[Unreleased]: https://github.com/superfaceai/service-client/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/superfaceai/service-client/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/superfaceai/service-client/compare/v2.1.0...v3.0.0
 [2.1.0]: https://github.com/superfaceai/service-client/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/superfaceai/service-client/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/superfaceai/service-client/compare/v1.0.1...v1.1.0
