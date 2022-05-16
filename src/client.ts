@@ -26,7 +26,6 @@ import {
   isMapMinimalReponse,
   isProfileMinimalReponse,
   MapCreateOptions,
-  MapResponse,
   MapRevisionResponse,
   MapsListOptions,
   MapsListResponse,
@@ -535,7 +534,7 @@ export class ServiceClient {
             published_by: '',
             owner: '',
             owner_url: '',
-          } as MapResponse;
+          }
         } else {
           return map;
         }
