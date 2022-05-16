@@ -421,7 +421,18 @@ describe('client', () => {
     };
 
     const mockMap: MapResponse = {
-      id: 'vcs/user-repos.provider@1.0',
+      map_id: 'vcs/user-repos.provider@1.0',
+      profile_name: 'testName',
+      profile_version: '1.0.0',
+      published_at: new Date(),
+      published_by: 'test',
+      owner: 'testOwner',
+      owner_url: '',
+      profile_url: 'https://superface.test/vcs/user-repos',
+      map_provider: 'provider',
+      map_provider_url: 'https://superface.test/providers/provider',
+      map_variant: 'generated',
+      map_revision: '1',
       url: 'https://superface.test/vcs/user-repos.provider@1.0',
     };
 
@@ -545,7 +556,12 @@ describe('client', () => {
     test('get maps list', async () => {
       await expect(serviceClient.getMapsList()).resolves.toEqual({
         url: '/maps',
-        data: [mockMap],
+        data: [
+          {
+            ...mockMap,
+            published_at: mockMap.published_at.toJSON(),
+          },
+        ],
       });
     });
   });

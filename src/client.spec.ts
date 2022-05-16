@@ -18,6 +18,7 @@ import {
 import {
   CancellationToken,
   LoginConfirmationErrorCode,
+  MapMinimalResponse,
   MapRevisionResponse,
   MapsListResponse,
   ProfileResponse,
@@ -1671,8 +1672,19 @@ describe('client', () => {
         url: '/maps',
         data: [
           {
-            id: 'scope/profile-name.provider@1.0',
-            url: 'https://superface.test/scope/profile-name.provider@1.0',
+            map_id: 'scope/profile-name.provider.generated@1.0',
+            map_provider: 'provider',
+            map_provider_url: 'https://superface.test/providers/provider',
+            map_revision: '0',
+            map_variant: 'generated',
+            owner: 'testuser',
+            owner_url: '',
+            profile_name: 'scope/profile-name',
+            profile_url: 'https://superface.test/scope/profile-name@1.0.0',
+            profile_version: '1.0.0',
+            url: 'https://superface.test/scope/profile-name.provider.generated@1.0',
+            published_at: new Date(),
+            published_by: 'Test User <test@superface.ai>',
           },
         ],
       };
@@ -1695,18 +1707,71 @@ describe('client', () => {
       });
     });
 
-    it('should use query params to filter maps (if provided)', async () => {
+    it('should support minimal map list response', async () => {
+      const mockResult: { url: string; data: MapMinimalResponse[] } = {
+        url: '/maps',
+        data: [
+          {
+            id: 'scope/profile-name.provider.generated@1.0',
+            url: 'https://superface.test/scope/profile-name.provider.generated@1.0',
+          },
+        ],
+      };
+
+      const mockResponse = {
+        ok: true,
+        json: async () => mockResult,
+      };
       const fetchMock = jest
         .spyOn(client, 'fetch')
-        .mockResolvedValue({ ok: true, json: async () => {} } as Response);
+        .mockResolvedValue(mockResponse as Response);
+
+      await expect(client.getMapsList()).resolves.toEqual({
+        url: '/maps',
+        data: [
+          {
+            map_id: 'scope/profile-name.provider.generated@1.0',
+            map_provider: '',
+            map_provider_url: '',
+            map_revision: '',
+            map_variant: null,
+            profile_name: '',
+            profile_url: '',
+            profile_version: '',
+            url: 'https://superface.test/scope/profile-name.provider.generated@1.0',
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            published_at: expect.any(Date),
+            published_by: '',
+            owner: '',
+            owner_url: '',
+          },
+        ],
+      });
+
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledWith('/maps', {
+        authenticate: false,
+        method: 'GET',
+        headers: { Accept: MEDIA_TYPE_JSON },
+      });
+    });
+
+    it('should use query params to filter maps (if provided)', async () => {
+      const fetchMock = jest.spyOn(client, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => {
+          return { url: '/maps', data: [] };
+        },
+      } as Response);
 
       await client.getMapsList({
         accountHandle: 'username',
         limit: 100,
+        profile: 'profile-name',
       });
 
       expect(fetchMock).toBeCalledWith(
-        '/maps?account_handle=username&limit=100',
+        '/maps?account_handle=username&limit=100&profile=profile-name',
         {
           authenticate: false,
           method: 'GET',
