@@ -1767,10 +1767,11 @@ describe('client', () => {
       await client.getMapsList({
         accountHandle: 'username',
         limit: 100,
+        profile: 'profile-name',
       });
 
       expect(fetchMock).toBeCalledWith(
-        '/maps?account_handle=username&limit=100',
+        '/maps?account_handle=username&limit=100&profile=profile-name',
         {
           authenticate: false,
           method: 'GET',

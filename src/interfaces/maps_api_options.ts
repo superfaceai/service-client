@@ -1,7 +1,7 @@
 export interface MapsListOptions {
   limit?: number;
   accountHandle?: string;
-  profileId?: string;
+  profile?: string;
 }
 
 export interface MapCreateOptions {

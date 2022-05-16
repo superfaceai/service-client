@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING CHANGE** `getMapsList` result with more information
 
 ### Added
-- option `profileId` added to `getMapsList`
+- option `profile` added to `getMapsList`
 
 ## [2.1.0] - 2022-04-29
 ### Added

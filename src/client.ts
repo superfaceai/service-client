@@ -501,12 +501,12 @@ export class ServiceClient {
   }
 
   async getMapsList(options?: MapsListOptions): Promise<MapsListResponse> {
-    const { accountHandle, limit, profileId } = options || {};
+    const { accountHandle, limit, profile } = options || {};
 
     const url = this.makePathWithQueryParams('/maps', {
       account_handle: accountHandle,
       limit,
-      profile_id: profileId,
+      profile: profile,
     });
 
     const response: Response = await this.fetch(url, {
