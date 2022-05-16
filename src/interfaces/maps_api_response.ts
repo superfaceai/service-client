@@ -11,9 +11,9 @@ export interface MapResponse {
   map_id: string;
   map_provider: string;
   map_provider_url: string;
-  map_revision: number;
+  map_revision: string;
   map_variant: string | null;
-  profile_id: string;
+  profile_name: string;
   profile_version: string;
   profile_url: string;
   url: string;

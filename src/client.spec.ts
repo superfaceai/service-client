@@ -1675,11 +1675,11 @@ describe('client', () => {
             map_id: 'scope/profile-name.provider.generated@1.0',
             map_provider: 'provider',
             map_provider_url: 'https://superface.test/providers/provider',
-            map_revision: 0,
+            map_revision: '0',
             map_variant: 'generated',
-            owner:'testuser',
-            owner_url:'',
-            profile_id: 'scope/profile-name',
+            owner: 'testuser',
+            owner_url: '',
+            profile_name: 'scope/profile-name',
             profile_url: 'https://superface.test/scope/profile-name@1.0.0',
             profile_version: '1.0.0',
             url: 'https://superface.test/scope/profile-name.provider.generated@1.0',
@@ -1708,7 +1708,7 @@ describe('client', () => {
     });
 
     it('should support minimal map list response', async () => {
-      const mockResult: {url: string, data: MapMinimalResponse[]} = {
+      const mockResult: { url: string; data: MapMinimalResponse[] } = {
         url: '/maps',
         data: [
           {
@@ -1728,13 +1728,14 @@ describe('client', () => {
 
       await expect(client.getMapsList()).resolves.toEqual({
         url: '/maps',
-        data: [{
+        data: [
+          {
             map_id: 'scope/profile-name.provider.generated@1.0',
             map_provider: '',
             map_provider_url: '',
-            map_revision: 0,
+            map_revision: '',
             map_variant: null,
-            profile_id: '',
+            profile_name: '',
             profile_url: '',
             profile_version: '',
             url: 'https://superface.test/scope/profile-name.provider.generated@1.0',
@@ -1743,8 +1744,9 @@ describe('client', () => {
             published_by: '',
             owner: '',
             owner_url: '',
-      }]
-    });
+          },
+        ],
+      });
 
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/maps', {
@@ -1755,9 +1757,12 @@ describe('client', () => {
     });
 
     it('should use query params to filter maps (if provided)', async () => {
-      const fetchMock = jest
-        .spyOn(client, 'fetch')
-        .mockResolvedValue({ ok: true, json: async () => { return { url: '/maps', data:[]}} } as Response);
+      const fetchMock = jest.spyOn(client, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => {
+          return { url: '/maps', data: [] };
+        },
+      } as Response);
 
       await client.getMapsList({
         accountHandle: 'username',
