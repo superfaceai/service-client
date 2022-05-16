@@ -506,7 +506,7 @@ export class ServiceClient {
     const url = this.makePathWithQueryParams('/maps', {
       account_handle: accountHandle,
       limit,
-      profile: profile,
+      profile,
     });
 
     const response: Response = await this.fetch(url, {
