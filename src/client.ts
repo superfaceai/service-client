@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import * as crossfetch from 'cross-fetch';
+import fetch from 'cross-fetch';
 
 import {
   MEDIA_TYPE_JSON,
@@ -195,10 +195,7 @@ export class ServiceClient {
       },
     } as RequestInit;
 
-    const res = await crossfetch.fetch(
-      `${this._STORAGE.baseUrl}/auth/token`,
-      init
-    );
+    const res = await fetch(`${this._STORAGE.baseUrl}/auth/token`, init);
 
     if (res.status !== 201) {
       return null;
@@ -233,7 +230,7 @@ export class ServiceClient {
       );
       opts.credentials = 'include';
 
-      return crossfetch.fetch(`${this._STORAGE.baseUrl}${url}`, opts);
+      return fetch(`${this._STORAGE.baseUrl}${url}`, opts);
     };
 
     let res = await _fetch();
@@ -534,7 +531,7 @@ export class ServiceClient {
             published_by: '',
             owner: '',
             owner_url: '',
-          }
+          };
         } else {
           return map;
         }
@@ -550,7 +547,7 @@ export class ServiceClient {
     const url = new URL(`${this._STORAGE.baseUrl}/auth/passwordless`);
     url.search = new URLSearchParams({ mode, ...customQueryParams }).toString();
 
-    const response: Response = await crossfetch.fetch(url.toString(), {
+    const response: Response = await fetch(url.toString(), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -645,7 +642,7 @@ export class ServiceClient {
   }
 
   public async cliLogin(): Promise<CLILoginResponse> {
-    const response: Response = await crossfetch.fetch(
+    const response: Response = await fetch(
       `${this._STORAGE.baseUrl}/auth/cli`,
       {
         method: 'POST',
@@ -880,7 +877,7 @@ export class ServiceClient {
   ): Promise<null> {
     const cookie = this.getRefreshTokenCookie();
 
-    const result: Response = await crossfetch.fetch(
+    const result: Response = await fetch(
       `${this._STORAGE.baseUrl}/auth/signout`,
       {
         method: 'DELETE',
@@ -955,7 +952,7 @@ export class ServiceClient {
   }
 
   private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
-    const result = await crossfetch.fetch(verifyUrl, {
+    const result = await fetch(verifyUrl, {
       method: 'GET',
     });
     if (result.status === 200) {
