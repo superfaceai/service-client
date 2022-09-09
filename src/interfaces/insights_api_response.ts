@@ -6,11 +6,11 @@ export interface SDKConfigResponse {
   configuration: {
     profiles: {
       [profile: string]: {
-        version: string;
+        version: string | null;
         providers: Array<{
           provider: string;
-          version: string;
-          priority: number;
+          version: string | null;
+          priority: number | null;
         }>;
       };
     };
