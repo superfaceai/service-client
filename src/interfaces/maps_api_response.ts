@@ -9,8 +9,8 @@ export interface MapMinimalResponse {
 
 export interface MapResponse {
   map_id: string;
-  map_provider: string;
-  map_provider_url: string;
+  map_provider: string | null;
+  map_provider_url: string | null;
   map_revision: string;
   map_variant: string | null;
   profile_name: string;
@@ -34,8 +34,8 @@ export interface MapRevisionResponse {
   profile_version: string;
   profile_url: string;
   map_revision: string;
-  map_provider: string;
-  map_provider_url: string;
+  map_provider: string | null;
+  map_provider_url: string | null;
   map_variant: string;
   url: string;
   published_at: Date;
