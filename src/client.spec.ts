@@ -338,11 +338,11 @@ describe('client', () => {
         result = await client.getAccessToken();
       });
 
-      it(`returns token`, async () => {
+      it('returns token', async () => {
         expect(result).toStrictEqual(stubToken);
       });
 
-      it(`doesn't call refreshAccessToken`, async () => {
+      it("doesn't call refreshAccessToken", async () => {
         expect(refreshAccessTokenMock).toBeCalledTimes(0);
       });
     });
@@ -354,7 +354,7 @@ describe('client', () => {
         result = await client.getAccessToken();
       });
 
-      it('calls refreshAccessToken & returns new token', async () => {
+      it('calls refreshAccessToken', async () => {
         expect(refreshAccessTokenMock).toBeCalledTimes(1);
       });
 
