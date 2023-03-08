@@ -207,6 +207,24 @@ export class ServiceClient {
     return authToken;
   }
 
+  /**
+   * Returns current access token. If the access token is expired, the token
+   * is automatically refreshed and new token is returned.
+   * 
+   * @returns AuthToken | null
+   */
+  public async getAccessToken(): Promise<AuthToken | null> {
+    if (!this._STORAGE?.authToken) {
+      return null;
+    }
+
+    if (this.isAccessTokenExpired()) {
+      return await this.refreshAccessToken();
+    }
+
+    return this._STORAGE.authToken;
+  }
+
   public async fetch(
     url: string,
     opts: RequestOptions = {}
