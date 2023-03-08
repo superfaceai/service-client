@@ -16,6 +16,7 @@ import {
   ServiceClientError,
 } from './errors';
 import {
+  AuthToken,
   CancellationToken,
   LoginConfirmationErrorCode,
   MapMinimalResponse,
@@ -307,6 +308,59 @@ describe('client', () => {
         refresh_token: 'RT',
       });
       expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, 'RT');
+    });
+  });
+
+  describe('getAccessToken', () => {
+    const stubToken: AuthToken = {
+      access_token: 'AT',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      refresh_token: 'RT',
+    };
+    let result: AuthToken | null;
+    const refreshAccessTokenMock = jest.fn().mockResolvedValue(stubToken);
+
+    describe('when client is logged out (there is no token)', () => {
+      beforeEach(async () => {
+        result = await client.getAccessToken();
+      });
+
+      it('returns null', async () => {
+        expect(result).toBe(null);
+      });
+    });
+
+    describe('when client is logged in and token is valid', () => {
+      beforeEach(async () => {
+        await client.login(stubToken);
+        client.refreshAccessToken = refreshAccessTokenMock;
+        result = await client.getAccessToken();
+      });
+
+      it(`returns token`, async () => {
+        expect(result).toStrictEqual(stubToken);
+      });
+
+      it(`doesn't call refreshAccessToken`, async () => {
+        expect(refreshAccessTokenMock).toBeCalledTimes(0);
+      });
+    });
+
+    describe('when client is logged in but token is expired', () => {
+      beforeEach(async () => {
+        await client.login({ ...stubToken, expires_in: -1 });
+        client.refreshAccessToken = refreshAccessTokenMock;
+        result = await client.getAccessToken();
+      });
+
+      it('calls refreshAccessToken & returns new token', async () => {
+        expect(refreshAccessTokenMock).toBeCalledTimes(1);
+      });
+
+      it('returns new token', async () => {
+        expect(result).toStrictEqual(stubToken);
+      });
     });
   });
 

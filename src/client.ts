@@ -207,6 +207,18 @@ export class ServiceClient {
     return authToken;
   }
 
+  public async getAccessToken(): Promise<AuthToken | null> {
+    if (!this._STORAGE?.authToken) {
+      return null;
+    }
+
+    if (this.isAccessTokenExpired()) {
+      return await this.refreshAccessToken();
+    }
+
+    return this._STORAGE.authToken;
+  }
+
   public async fetch(
     url: string,
     opts: RequestOptions = {}
