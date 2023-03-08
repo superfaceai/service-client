@@ -180,6 +180,37 @@ describe('client', () => {
       });
     });
 
+    it('should use internal base URL as default', async () => {
+      client.setOptions({
+        baseUrl: BASE_URL,
+      });
+
+      await client.fetch('/test', { authenticate: false });
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/test`, {
+        credentials: 'include',
+        headers: {},
+      });
+    });
+
+    it('should use custom base URL when one is provided', async () => {
+      const customBaseUrl = 'https://custom.base.url.com';
+
+      client.setOptions({
+        baseUrl: BASE_URL, // this will not be used!
+      });
+
+      await client.fetch('/test', {
+        authenticate: false,
+        baseUrl: customBaseUrl,
+      });
+
+      expect(fetchMock).toBeCalledWith(`${customBaseUrl}/test`, {
+        credentials: 'include',
+        headers: {},
+      });
+    });
+
     it('should not require common headers', async () => {
       client.setOptions({
         baseUrl: BASE_URL,

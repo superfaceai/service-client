@@ -81,7 +81,7 @@ interface ClientStorage {
   refreshTokenUpdatedHandler?: RefreshTokenUpdatedHandler;
 }
 
-type FetchOptions = { authenticate?: boolean };
+type FetchOptions = { authenticate?: boolean; baseUrl?: string };
 type RequestOptions = RequestInit & FetchOptions;
 
 export class ServiceClient {
@@ -210,7 +210,7 @@ export class ServiceClient {
   /**
    * Returns current access token. If the access token is expired, the token
    * is automatically refreshed and new token is returned.
-   * 
+   *
    * @returns AuthToken | null
    */
   public async getAccessToken(): Promise<AuthToken | null> {
@@ -232,6 +232,9 @@ export class ServiceClient {
     const useAuthentication = opts.authenticate ?? true;
     if ('authenticate' in opts) delete opts['authenticate'];
 
+    const requestBaseUrl = opts.baseUrl ?? this._STORAGE.baseUrl;
+    if ('baseUrl' in opts) delete opts['baseUrl'];
+
     if (useAuthentication && this.isAccessTokenExpired()) {
       // Try to get access token
       await this.refreshAccessToken();
@@ -248,7 +251,7 @@ export class ServiceClient {
       );
       opts.credentials = 'include';
 
-      return fetch(`${this._STORAGE.baseUrl}${url}`, opts);
+      return fetch(`${requestBaseUrl}${url}`, opts);
     };
 
     let res = await _fetch();
