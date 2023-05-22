@@ -81,7 +81,7 @@ interface ClientStorage {
   refreshTokenUpdatedHandler?: RefreshTokenUpdatedHandler;
 }
 
-type FetchOptions = { authenticate?: boolean };
+type FetchOptions = { authenticate?: boolean; baseUrl?: string };
 type RequestOptions = RequestInit & FetchOptions;
 
 export class ServiceClient {
@@ -207,12 +207,33 @@ export class ServiceClient {
     return authToken;
   }
 
+  /**
+   * Returns current access token. If the access token is expired, the token
+   * is automatically refreshed and new token is returned.
+   *
+   * @returns AuthToken | null
+   */
+  public async getAccessToken(): Promise<AuthToken | null> {
+    if (!this._STORAGE?.authToken) {
+      return null;
+    }
+
+    if (this.isAccessTokenExpired()) {
+      return await this.refreshAccessToken();
+    }
+
+    return this._STORAGE.authToken;
+  }
+
   public async fetch(
     url: string,
     opts: RequestOptions = {}
   ): Promise<Response> {
     const useAuthentication = opts.authenticate ?? true;
     if ('authenticate' in opts) delete opts['authenticate'];
+
+    const requestBaseUrl = opts.baseUrl ?? this._STORAGE.baseUrl;
+    if ('baseUrl' in opts) delete opts['baseUrl'];
 
     if (useAuthentication && this.isAccessTokenExpired()) {
       // Try to get access token
@@ -230,7 +251,7 @@ export class ServiceClient {
       );
       opts.credentials = 'include';
 
-      return fetch(`${this._STORAGE.baseUrl}${url}`, opts);
+      return fetch(`${requestBaseUrl}${url}`, opts);
     };
 
     let res = await _fetch();
@@ -281,7 +302,7 @@ export class ServiceClient {
       authenticate: false,
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
     await this.unwrap(response);
@@ -294,7 +315,7 @@ export class ServiceClient {
       authenticate: false,
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
     await this.unwrap(response);
@@ -733,7 +754,7 @@ export class ServiceClient {
   public async getProjectsList(): Promise<ProjectsListResponse> {
     const response: Response = await this.fetch('/projects', {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -749,7 +770,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(projectUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -798,7 +819,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(configUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -830,7 +851,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(statisticsUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -860,7 +881,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(providerChangesUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -930,7 +951,7 @@ export class ServiceClient {
   public async getUserInfo(): Promise<UserResponse> {
     const response: Response = await this.fetch(`/id/user`, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -954,6 +975,7 @@ export class ServiceClient {
   private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
     const result = await fetch(verifyUrl, {
       method: 'GET',
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
     if (result.status === 200) {
       const authToken = (await result.json()) as AuthToken;

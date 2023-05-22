@@ -16,6 +16,7 @@ import {
   ServiceClientError,
 } from './errors';
 import {
+  AuthToken,
   CancellationToken,
   LoginConfirmationErrorCode,
   MapMinimalResponse,
@@ -179,6 +180,37 @@ describe('client', () => {
       });
     });
 
+    it('should use internal base URL as default', async () => {
+      client.setOptions({
+        baseUrl: BASE_URL,
+      });
+
+      await client.fetch('/test', { authenticate: false });
+
+      expect(fetchMock).toBeCalledWith(`${BASE_URL}/test`, {
+        credentials: 'include',
+        headers: {},
+      });
+    });
+
+    it('should use custom base URL when one is provided', async () => {
+      const customBaseUrl = 'https://custom.base.url.com';
+
+      client.setOptions({
+        baseUrl: BASE_URL, // this will not be used!
+      });
+
+      await client.fetch('/test', {
+        authenticate: false,
+        baseUrl: customBaseUrl,
+      });
+
+      expect(fetchMock).toBeCalledWith(`${customBaseUrl}/test`, {
+        credentials: 'include',
+        headers: {},
+      });
+    });
+
     it('should not require common headers', async () => {
       client.setOptions({
         baseUrl: BASE_URL,
@@ -307,6 +339,59 @@ describe('client', () => {
         refresh_token: 'RT',
       });
       expect(refreshTokenUpdatedHandlerMock).toBeCalledWith(BASE_URL, 'RT');
+    });
+  });
+
+  describe('getAccessToken', () => {
+    const stubToken: AuthToken = {
+      access_token: 'AT',
+      token_type: 'Bearer',
+      expires_in: 3600,
+      refresh_token: 'RT',
+    };
+    let result: AuthToken | null;
+    const refreshAccessTokenMock = jest.fn().mockResolvedValue(stubToken);
+
+    describe('when client is logged out (there is no token)', () => {
+      beforeEach(async () => {
+        result = await client.getAccessToken();
+      });
+
+      it('returns null', async () => {
+        expect(result).toBe(null);
+      });
+    });
+
+    describe('when client is logged in and token is valid', () => {
+      beforeEach(async () => {
+        await client.login(stubToken);
+        client.refreshAccessToken = refreshAccessTokenMock;
+        result = await client.getAccessToken();
+      });
+
+      it('returns token', async () => {
+        expect(result).toStrictEqual(stubToken);
+      });
+
+      it("doesn't call refreshAccessToken", async () => {
+        expect(refreshAccessTokenMock).toBeCalledTimes(0);
+      });
+    });
+
+    describe('when client is logged in but token is expired', () => {
+      beforeEach(async () => {
+        await client.login({ ...stubToken, expires_in: -1 });
+        client.refreshAccessToken = refreshAccessTokenMock;
+        result = await client.getAccessToken();
+      });
+
+      it('calls refreshAccessToken', async () => {
+        expect(refreshAccessTokenMock).toBeCalledTimes(1);
+      });
+
+      it('returns new token', async () => {
+        expect(result).toStrictEqual(stubToken);
+      });
     });
   });
 
@@ -845,7 +930,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -874,7 +959,7 @@ describe('client', () => {
           authenticate: false,
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         }
       );
@@ -902,7 +987,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -938,7 +1023,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -973,7 +1058,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -1000,7 +1085,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -1959,7 +2044,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/projects', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
       });
     });
   });
@@ -1997,7 +2082,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
       });
     });
 
@@ -2023,7 +2108,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -2213,7 +2298,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(
         `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        { method: 'GET', headers: { 'Accept': 'application/json' } }
       );
     });
 
@@ -2240,7 +2325,7 @@ describe('client', () => {
 
       expect(fetchMock).toBeCalledWith(
         `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        { method: 'GET', headers: { 'Accept': 'application/json' } }
       );
     });
   });
@@ -2320,7 +2405,7 @@ describe('client', () => {
         `/insights/perform_statistics?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2356,7 +2441,7 @@ describe('client', () => {
         `/insights/perform_statistics?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2429,7 +2514,7 @@ describe('client', () => {
         `/insights/provider_changes?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2455,7 +2540,7 @@ describe('client', () => {
         `/insights/provider_changes?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2490,7 +2575,7 @@ describe('client', () => {
         `/insights/provider_changes?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2759,7 +2844,7 @@ describe('client', () => {
       await client.getUserInfo();
 
       expect(fetchSpy).toBeCalledWith('/id/user', {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
         method: 'GET',
       });
     });
