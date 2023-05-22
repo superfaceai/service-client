@@ -1,6 +1,6 @@
 {
   "name": "@superfaceai/service-client",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "description": "Client to access Superface services. (If you are not from Superface Team, you probably don't need this library)",
   "main": "dist/index.js",
   "source": "src/index.ts",
