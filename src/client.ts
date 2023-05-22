@@ -302,7 +302,7 @@ export class ServiceClient {
       authenticate: false,
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
     await this.unwrap(response);
@@ -315,7 +315,7 @@ export class ServiceClient {
       authenticate: false,
       method: 'GET',
       headers: {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
     });
     await this.unwrap(response);
@@ -754,7 +754,7 @@ export class ServiceClient {
   public async getProjectsList(): Promise<ProjectsListResponse> {
     const response: Response = await this.fetch('/projects', {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -770,7 +770,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(projectUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -819,7 +819,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(configUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -851,7 +851,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(statisticsUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -881,7 +881,7 @@ export class ServiceClient {
 
     const response: Response = await this.fetch(providerChangesUrl, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -951,7 +951,7 @@ export class ServiceClient {
   public async getUserInfo(): Promise<UserResponse> {
     const response: Response = await this.fetch(`/id/user`, {
       method: 'GET',
-      headers: { 'Content-Type': MEDIA_TYPE_JSON },
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
 
     await this.unwrap(response);
@@ -975,6 +975,7 @@ export class ServiceClient {
   private async fetchVerifyLogin(verifyUrl: string): Promise<VerifyResponse> {
     const result = await fetch(verifyUrl, {
       method: 'GET',
+      headers: { 'Accept': MEDIA_TYPE_JSON },
     });
     if (result.status === 200) {
       const authToken = (await result.json()) as AuthToken;

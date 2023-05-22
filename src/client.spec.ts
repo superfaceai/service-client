@@ -930,7 +930,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -959,7 +959,7 @@ describe('client', () => {
           authenticate: false,
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
         }
       );
@@ -987,7 +987,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -1023,7 +1023,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -1058,7 +1058,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -1085,7 +1085,7 @@ describe('client', () => {
         authenticate: false,
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -2044,7 +2044,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith('/projects', {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
       });
     });
   });
@@ -2082,7 +2082,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
       });
     });
 
@@ -2108,7 +2108,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledWith(`/projects/${owner}/${name}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
       });
     });
@@ -2298,7 +2298,7 @@ describe('client', () => {
       expect(fetchMock).toBeCalledTimes(1);
       expect(fetchMock).toBeCalledWith(
         `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        { method: 'GET', headers: { 'Accept': 'application/json' } }
       );
     });
 
@@ -2325,7 +2325,7 @@ describe('client', () => {
 
       expect(fetchMock).toBeCalledWith(
         `/insights/sdk_config?account_handle=${accountHandle}&project_name=${projectName}`,
-        { method: 'GET', headers: { 'Content-Type': 'application/json' } }
+        { method: 'GET', headers: { 'Accept': 'application/json' } }
       );
     });
   });
@@ -2405,7 +2405,7 @@ describe('client', () => {
         `/insights/perform_statistics?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2441,7 +2441,7 @@ describe('client', () => {
         `/insights/perform_statistics?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2514,7 +2514,7 @@ describe('client', () => {
         `/insights/provider_changes?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2540,7 +2540,7 @@ describe('client', () => {
         `/insights/provider_changes?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2575,7 +2575,7 @@ describe('client', () => {
         `/insights/provider_changes?${expectedUrlQuery}`,
         {
           method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Accept': 'application/json' },
         }
       );
     });
@@ -2844,7 +2844,7 @@ describe('client', () => {
       await client.getUserInfo();
 
       expect(fetchSpy).toBeCalledWith('/id/user', {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Accept': 'application/json' },
         method: 'GET',
       });
     });
